@@ -1,18 +1,20 @@
 /* ========================================================
-   Archivir — teaser sombre, néon rose (inspiration Arcane)
-   Thème unique volontairement sombre : pas de variante claire.
+   Archivir — teaser sombre, gris charbon + rose doré / bleu
+   (inspiration Arcane). Thème unique volontairement sombre :
+   pas de variante claire.
    ======================================================== */
 
 :root{
-  --bg: #0A0A0D;
-  --bg-2: #150E17;
-  --ink: #EEEAF2;
-  --ink-soft: #948FA0;
-  --ink-faint: #5C5766;
-  --pink: #FF2E92;
-  --pink-deep: #B0176B;
-  --violet: #3A1440;
-  --line: #262130;
+  --bg: #1B1A18;
+  --bg-2: #242220;
+  --ink: #EDE9E2;
+  --ink-soft: #A39C93;
+  --ink-faint: #655F58;
+  --rose-gold: #D8A66C;
+  --rose-gold-deep: #A87A4B;
+  --blue: #5FC7E3;
+  --blue-deep: #2E8FAE;
+  --line: #332F2B;
 
   --display: 'Bebas Neue', 'Oswald', Impact, sans-serif;
   --mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
@@ -42,7 +44,7 @@ body::before{
 }
 
 a{ color: inherit; }
-a:focus-visible{ outline: 1px solid var(--pink); outline-offset: 4px; }
+a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 
 .placeholder{ opacity: 0.6; border-bottom: 1px dashed currentColor; padding-bottom: 1px; }
 
@@ -61,7 +63,7 @@ a:focus-visible{ outline: 1px solid var(--pink); outline-offset: 4px; }
   position: absolute; top: 50%; left: 50%;
   width: min(760px, 130vw); height: min(420px, 80vw);
   transform: translate(-50%, -58%);
-  background: radial-gradient(ellipse at center, color-mix(in srgb, var(--pink) 14%, transparent) 0%, transparent 70%);
+  background: radial-gradient(ellipse at center, color-mix(in srgb, var(--rose-gold) 14%, transparent) 0%, transparent 70%);
   filter: blur(4px);
   z-index: -1;
 }
@@ -72,7 +74,14 @@ a:focus-visible{ outline: 1px solid var(--pink); outline-offset: 4px; }
   color: var(--ink-soft); font-weight: 500;
 }
 .eyebrow::before{
-  content: ""; width: 7px; height: 7px; background: var(--pink); flex: none;
+  content: ""; width: 7px; height: 7px; background: var(--blue); flex: none;
+}
+
+.hero-model{
+  width: min(280px, 62vw);
+  height: min(280px, 62vw);
+  background: transparent;
+  --poster-color: transparent;
 }
 
 .wordmark{
@@ -80,13 +89,13 @@ a:focus-visible{ outline: 1px solid var(--pink); outline-offset: 4px; }
   font-size: clamp(3.4rem, 15vw, 11rem);
   line-height: 0.9;
   letter-spacing: 0.02em;
-  color: var(--pink);
+  color: var(--rose-gold);
   animation: reveal .5s ease-out 1;
 }
 
 .rule{
   width: clamp(64px, 10vw, 120px); height: 6px;
-  background: var(--pink);
+  background: linear-gradient(90deg, var(--rose-gold), var(--blue));
   animation: rule-in .5s ease-out .35s both;
 }
 
@@ -116,8 +125,8 @@ a:focus-visible{ outline: 1px solid var(--pink); outline-offset: 4px; }
   margin-top: 18px;
   font-size: 0.9rem;
   text-decoration: none;
-  color: var(--pink);
-  border-bottom: 1px dashed var(--pink);
+  color: var(--blue);
+  border-bottom: 1px dashed var(--blue);
   padding-bottom: 2px;
   transition: text-shadow .2s ease, color .2s ease;
 }

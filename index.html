@@ -9,11 +9,26 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/style.css">
+<script type="module" src="https://unpkg.com/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
 </head>
 <body>
 
 <main class="splash">
   <p class="eyebrow">Modélisation BIM &amp; 3D</p>
+  <model-viewer
+    class="hero-model"
+    src="pavillon.glb"
+    alt="Maquette 3D du pavillon modélisé par Archivir"
+    camera-controls
+    disable-pan
+    disable-zoom
+    auto-rotate
+    rotation-per-second="18deg"
+    interaction-prompt="none"
+    shadow-intensity="0"
+    exposure="1.1"
+    camera-orbit="25deg 75deg auto"
+  ></model-viewer>
   <h1 class="wordmark">ARCHIVIR</h1>
   <div class="rule"></div>
   <p class="tagline">L'existant, remodélisé en volume.</p>
