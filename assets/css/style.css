@@ -1,0 +1,140 @@
+/* ========================================================
+   Archivir — teaser sombre, néon rose (inspiration Arcane)
+   Thème unique volontairement sombre : pas de variante claire.
+   ======================================================== */
+
+:root{
+  --bg: #0A0A0D;
+  --bg-2: #150E17;
+  --ink: #EEEAF2;
+  --ink-soft: #948FA0;
+  --ink-faint: #5C5766;
+  --pink: #FF2E92;
+  --pink-deep: #B0176B;
+  --violet: #3A1440;
+  --line: #262130;
+
+  --display: 'Bebas Neue', 'Oswald', Impact, sans-serif;
+  --mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+}
+
+*{ box-sizing: border-box; }
+html, body{ height: 100%; }
+body{
+  margin:0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--mono);
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* film-grain texture, self-contained (no external asset) */
+body::before{
+  content: "";
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 1;
+}
+
+a{ color: inherit; }
+a:focus-visible{ outline: 1px solid var(--pink); outline-offset: 4px; }
+
+.placeholder{ opacity: 0.6; border-bottom: 1px dashed currentColor; padding-bottom: 1px; }
+
+/* ---------- splash ---------- */
+.splash{
+  position: relative; z-index: 2;
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center;
+  padding: 24px;
+  gap: clamp(14px, 2.4vw, 20px);
+}
+
+.splash::before{
+  content: "";
+  position: absolute; top: 50%; left: 50%;
+  width: min(760px, 130vw); height: min(420px, 80vw);
+  transform: translate(-50%, -58%);
+  background: radial-gradient(ellipse at center, color-mix(in srgb, var(--pink) 14%, transparent) 0%, transparent 70%);
+  filter: blur(4px);
+  z-index: -1;
+}
+
+.eyebrow{
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--ink-soft); font-weight: 500;
+}
+.eyebrow::before{
+  content: ""; width: 7px; height: 7px; background: var(--pink); flex: none;
+}
+
+.wordmark{
+  font-family: var(--display);
+  font-size: clamp(3.4rem, 15vw, 11rem);
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+  color: var(--pink);
+  animation: reveal .5s ease-out 1;
+}
+
+.rule{
+  width: clamp(64px, 10vw, 120px); height: 6px;
+  background: var(--pink);
+  animation: rule-in .5s ease-out .35s both;
+}
+
+@keyframes reveal{
+  0%{ opacity: 0; transform: translateY(10px); }
+  100%{ opacity: 1; transform: translateY(0); }
+}
+@keyframes rule-in{
+  0%{ transform: scaleX(0); }
+  100%{ transform: scaleX(1); }
+}
+
+.tagline{
+  font-size: clamp(0.95rem, 1.6vw, 1.1rem);
+  color: var(--ink-soft);
+  letter-spacing: 0.01em;
+}
+
+.status{
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+  letter-spacing: 0.04em;
+  margin-top: 6px;
+}
+
+.contact-link{
+  margin-top: 18px;
+  font-size: 0.9rem;
+  text-decoration: none;
+  color: var(--pink);
+  border-bottom: 1px dashed var(--pink);
+  padding-bottom: 2px;
+  transition: text-shadow .2s ease, color .2s ease;
+}
+.contact-link:hover{
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+
+footer{
+  position: relative; z-index: 2;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  padding: 18px 24px;
+  display: flex; justify-content: space-between;
+  font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+@media (prefers-reduced-motion: reduce){
+  .wordmark, .rule{ animation: none; transform: none; opacity: 1; }
+}
