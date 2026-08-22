@@ -43,6 +43,7 @@
   import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
   import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+  import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
   const container = document.getElementById('viewer-canvas');
 
@@ -96,6 +97,16 @@
   function buildSectionCap(meshes, plane, size, color) {
     const group = new THREE.Group();
 
+    // merge every piece into one solid (in world space) so the stencil
+    // count is continuous across seams instead of per separate part —
+    // that's what was showing up as visible joint lines on the cut
+    const geometries = meshes.map((mesh) => {
+      const g = mesh.geometry.clone();
+      g.applyMatrix4(mesh.matrixWorld);
+      return g;
+    });
+    const geometry = mergeGeometries(geometries, false);
+
     const baseMat = new THREE.MeshBasicMaterial();
     baseMat.depthWrite = false;
     baseMat.depthTest = false;
@@ -103,33 +114,25 @@
     baseMat.stencilWrite = true;
     baseMat.stencilFunc = THREE.AlwaysStencilFunc;
 
-    meshes.forEach((mesh, i) => {
-      const renderOrder = i + 1;
+    const backMat = baseMat.clone();
+    backMat.side = THREE.BackSide;
+    backMat.clippingPlanes = [plane];
+    backMat.stencilFail = THREE.IncrementWrapStencilOp;
+    backMat.stencilZFail = THREE.IncrementWrapStencilOp;
+    backMat.stencilZPass = THREE.IncrementWrapStencilOp;
+    const backMesh = new THREE.Mesh(geometry, backMat);
+    backMesh.renderOrder = 1;
+    group.add(backMesh);
 
-      const backMat = baseMat.clone();
-      backMat.side = THREE.BackSide;
-      backMat.clippingPlanes = [plane];
-      backMat.stencilFail = THREE.IncrementWrapStencilOp;
-      backMat.stencilZFail = THREE.IncrementWrapStencilOp;
-      backMat.stencilZPass = THREE.IncrementWrapStencilOp;
-      const backMesh = new THREE.Mesh(mesh.geometry, backMat);
-      backMesh.matrix.copy(mesh.matrixWorld);
-      backMesh.matrixAutoUpdate = false;
-      backMesh.renderOrder = renderOrder;
-      group.add(backMesh);
-
-      const frontMat = baseMat.clone();
-      frontMat.side = THREE.FrontSide;
-      frontMat.clippingPlanes = [plane];
-      frontMat.stencilFail = THREE.DecrementWrapStencilOp;
-      frontMat.stencilZFail = THREE.DecrementWrapStencilOp;
-      frontMat.stencilZPass = THREE.DecrementWrapStencilOp;
-      const frontMesh = new THREE.Mesh(mesh.geometry, frontMat);
-      frontMesh.matrix.copy(mesh.matrixWorld);
-      frontMesh.matrixAutoUpdate = false;
-      frontMesh.renderOrder = renderOrder;
-      group.add(frontMesh);
-    });
+    const frontMat = baseMat.clone();
+    frontMat.side = THREE.FrontSide;
+    frontMat.clippingPlanes = [plane];
+    frontMat.stencilFail = THREE.DecrementWrapStencilOp;
+    frontMat.stencilZFail = THREE.DecrementWrapStencilOp;
+    frontMat.stencilZPass = THREE.DecrementWrapStencilOp;
+    const frontMesh = new THREE.Mesh(geometry, frontMat);
+    frontMesh.renderOrder = 1;
+    group.add(frontMesh);
 
     const capMat = new THREE.MeshStandardMaterial({
       color,
@@ -144,7 +147,7 @@
       stencilZPass: THREE.ReplaceStencilOp,
     });
     const capPlane = new THREE.Mesh(new THREE.PlaneGeometry(size, size), capMat);
-    capPlane.renderOrder = meshes.length + 2;
+    capPlane.renderOrder = 2;
     plane.coplanarPoint(capPlane.position);
     capPlane.lookAt(
       capPlane.position.x - plane.normal.x,
