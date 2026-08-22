@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pavillon Cuneo — Archivir</title>
+<meta name="description" content="Maquette 3D du pavillon Cuneo, étude de modélisation d'après Aldo Rossi, par Archivir.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.169.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.169.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+
+<a class="back-link" href="index.html">← Retour</a>
+
+<main class="viewer-page">
+  <div id="viewer-canvas" class="full-model"></div>
+
+  <nav class="compass" aria-label="Vues préréglées">
+    <div class="compass-ring"></div>
+    <button class="compass-pt compass-n" data-view="north" aria-label="Vue nord">N</button>
+    <button class="compass-pt compass-e" data-view="east" aria-label="Vue est">E</button>
+    <button class="compass-pt compass-s" data-view="south" aria-label="Vue sud">S</button>
+    <button class="compass-pt compass-o" data-view="west" aria-label="Vue ouest">O</button>
+  </nav>
+
+  <button id="cut-toggle" class="cut-fab" aria-label="Vue en coupe">◐</button>
+
+  <p class="viewer-credit"><strong>Pavillon Cuneo</strong>Aldo Rossi</p>
+</main>
+
+<script type="module">
+  import * as THREE from 'three';
+  import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+  import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+  import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+  const container = document.getElementById('viewer-canvas');
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, stencil: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 0.95;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.localClippingEnabled = true;
+  container.appendChild(renderer.domElement);
+
+  const scene = new THREE.Scene();
+
+  const pmremGenerator = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
+
+  const camera = new THREE.PerspectiveCamera(52, container.clientWidth / container.clientHeight, 0.1, 100);
+  camera.position.set(4.5, 3, 6);
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.enablePan = false;
+  controls.minDistance = 2;
+  controls.maxDistance = 20;
+  controls.target.set(0, 0.6, 0);
+  controls.update();
+
+  const keyLight = new THREE.DirectionalLight(0xfff2e0, 3.4);
+  keyLight.position.set(5, 8, 3);
+  keyLight.castShadow = true;
+  keyLight.shadow.mapSize.set(2048, 2048);
+  keyLight.shadow.camera.left = -6;
+  keyLight.shadow.camera.right = 6;
+  keyLight.shadow.camera.top = 6;
+  keyLight.shadow.camera.bottom = -6;
+  keyLight.shadow.bias = -0.0005;
+  scene.add(keyLight);
+
+  const fillLight = new THREE.HemisphereLight(0x5fc7e3, 0x1b1a18, 0.28);
+  scene.add(fillLight);
+
+  // clip plane cuts front/back halves (normal along Z, 90° from a left/right cut)
+  const clipPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0);
+  let sectionView = false;
+  let sectionMeshes = [];
+  let sectionCap = null;
+
+  function buildSectionCap(meshes, plane, size, color) {
+    const group = new THREE.Group();
+
+    const baseMat = new THREE.MeshBasicMaterial();
+    baseMat.depthWrite = false;
+    baseMat.depthTest = false;
+    baseMat.colorWrite = false;
+    baseMat.stencilWrite = true;
+    baseMat.stencilFunc = THREE.AlwaysStencilFunc;
+
+    meshes.forEach((mesh, i) => {
+      const renderOrder = i + 1;
+
+      const backMat = baseMat.clone();
+      backMat.side = THREE.BackSide;
+      backMat.clippingPlanes = [plane];
+      backMat.stencilFail = THREE.IncrementWrapStencilOp;
+      backMat.stencilZFail = THREE.IncrementWrapStencilOp;
+      backMat.stencilZPass = THREE.IncrementWrapStencilOp;
+      const backMesh = new THREE.Mesh(mesh.geometry, backMat);
+      backMesh.matrix.copy(mesh.matrixWorld);
+      backMesh.matrixAutoUpdate = false;
+      backMesh.renderOrder = renderOrder;
+      group.add(backMesh);
+
+      const frontMat = baseMat.clone();
+      frontMat.side = THREE.FrontSide;
+      frontMat.clippingPlanes = [plane];
+      frontMat.stencilFail = THREE.DecrementWrapStencilOp;
+      frontMat.stencilZFail = THREE.DecrementWrapStencilOp;
+      frontMat.stencilZPass = THREE.DecrementWrapStencilOp;
+      const frontMesh = new THREE.Mesh(mesh.geometry, frontMat);
+      frontMesh.matrix.copy(mesh.matrixWorld);
+      frontMesh.matrixAutoUpdate = false;
+      frontMesh.renderOrder = renderOrder;
+      group.add(frontMesh);
+    });
+
+    const capMat = new THREE.MeshStandardMaterial({
+      color,
+      roughness: 0.85,
+      metalness: 0,
+      side: THREE.DoubleSide,
+      stencilWrite: true,
+      stencilRef: 0,
+      stencilFunc: THREE.NotEqualStencilFunc,
+      stencilFail: THREE.ReplaceStencilOp,
+      stencilZFail: THREE.ReplaceStencilOp,
+      stencilZPass: THREE.ReplaceStencilOp,
+    });
+    const capPlane = new THREE.Mesh(new THREE.PlaneGeometry(size, size), capMat);
+    capPlane.renderOrder = meshes.length + 2;
+    plane.coplanarPoint(capPlane.position);
+    capPlane.lookAt(
+      capPlane.position.x - plane.normal.x,
+      capPlane.position.y - plane.normal.y,
+      capPlane.position.z - plane.normal.z
+    );
+    capPlane.onAfterRender = function (r) { r.clearStencil(); };
+    group.add(capPlane);
+
+    return group;
+  }
+
+  // smooth camera transitions between preset views
+  let viewDistance = 8;
+  let viewEyeY = 1;
+  let flying = false;
+  let flightStart = 0;
+  const flightDuration = 700;
+  const flightFrom = new THREE.Vector3();
+  const flightFromTarget = new THREE.Vector3();
+  const flightTo = new THREE.Vector3();
+  const flightToTarget = new THREE.Vector3();
+
+  function easeInOutQuad(t){ return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+
+  function flyTo(position, target){
+    flightFrom.copy(camera.position);
+    flightFromTarget.copy(controls.target);
+    flightTo.copy(position);
+    flightToTarget.copy(target);
+    flightStart = performance.now();
+    flying = true;
+  }
+
+  // compass rotated 90° so the staircase facade (formerly "west") reads as "south"
+  const VIEW_PRESETS = {
+    north: () => flyTo(new THREE.Vector3(viewDistance, viewEyeY, 0), new THREE.Vector3(0, viewEyeY, 0)),
+    south: () => flyTo(new THREE.Vector3(-viewDistance, viewEyeY, 0), new THREE.Vector3(0, viewEyeY, 0)),
+    east:  () => flyTo(new THREE.Vector3(0, viewEyeY, viewDistance), new THREE.Vector3(0, viewEyeY, 0)),
+    west:  () => flyTo(new THREE.Vector3(0, viewEyeY, -viewDistance), new THREE.Vector3(0, viewEyeY, 0)),
+  };
+
+  document.querySelectorAll('[data-view]').forEach((btn) => {
+    btn.addEventListener('click', () => VIEW_PRESETS[btn.dataset.view]());
+  });
+
+  const cutToggle = document.getElementById('cut-toggle');
+  cutToggle.addEventListener('click', () => {
+    sectionView = !sectionView;
+    sectionMeshes.forEach((mesh) => {
+      mesh.material.clippingPlanes = sectionView ? [clipPlane] : [];
+    });
+    if (sectionCap) sectionCap.visible = sectionView;
+    cutToggle.classList.toggle('active', sectionView);
+  });
+
+  const ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(40, 40),
+    new THREE.ShadowMaterial({ opacity: 0.35 })
+  );
+  ground.rotation.x = -Math.PI / 2;
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  const loader = new GLTFLoader();
+  loader.load('pavillon.glb', (gltf) => {
+    const model = gltf.scene;
+
+    model.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+        child.material.color.setRGB(0.30, 0.29, 0.26);
+        child.material.roughness = 0.7;
+        child.material.metalness = 0;
+        child.material.envMapIntensity = 0.4;
+        child.material.clipShadows = true;
+        child.material.shadowSide = THREE.DoubleSide;
+      }
+    });
+
+    const box = new THREE.Box3().setFromObject(model);
+    const center = new THREE.Vector3();
+    box.getCenter(center);
+    model.position.x -= center.x;
+    model.position.z -= center.z;
+    model.position.y -= box.min.y;
+
+    scene.add(model);
+
+    // fit camera to the model's actual size
+    const fitBox = new THREE.Box3().setFromObject(model);
+    const fitSize = new THREE.Vector3();
+    fitBox.getSize(fitSize);
+    const maxDim = Math.max(fitSize.x, fitSize.y, fitSize.z);
+    const fov = camera.fov * (Math.PI / 180);
+    const distance = (maxDim / 2 / Math.tan(fov / 2)) * 2.6;
+
+    const dir = new THREE.Vector3(-1.5, 1.3, 0.55).normalize();
+    camera.position.copy(dir.multiplyScalar(distance));
+    camera.near = distance / 100;
+    camera.far = distance * 100;
+    camera.updateProjectionMatrix();
+
+    controls.target.set(0, fitSize.y * 0.4, 0);
+    controls.minDistance = distance * 0.25;
+    controls.maxDistance = distance * 3;
+    controls.update();
+
+    viewDistance = distance;
+    viewEyeY = fitSize.y * 0.4;
+
+    keyLight.position.set(maxDim * 0.8, maxDim * 1.4, maxDim * 0.5);
+    keyLight.shadow.camera.left = -maxDim;
+    keyLight.shadow.camera.right = maxDim;
+    keyLight.shadow.camera.top = maxDim;
+    keyLight.shadow.camera.bottom = -maxDim;
+    keyLight.shadow.camera.updateProjectionMatrix();
+
+    model.updateMatrixWorld(true);
+    sectionMeshes = [];
+    model.traverse((child) => { if (child.isMesh) sectionMeshes.push(child); });
+    sectionCap = buildSectionCap(sectionMeshes, clipPlane, maxDim * 2.2, 0xb4864f);
+    sectionCap.visible = false;
+    scene.add(sectionCap);
+  });
+
+  window.addEventListener('resize', () => {
+    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, container.clientHeight);
+  });
+
+  (function animate() {
+    requestAnimationFrame(animate);
+    if (flying) {
+      const t = Math.min((performance.now() - flightStart) / flightDuration, 1);
+      const e = easeInOutQuad(t);
+      camera.position.lerpVectors(flightFrom, flightTo, e);
+      controls.target.lerpVectors(flightFromTarget, flightToTarget, e);
+      if (t >= 1) flying = false;
+    }
+    controls.update();
+    renderer.render(scene, camera);
+  })();
+</script>
+
+</body>
+</html>

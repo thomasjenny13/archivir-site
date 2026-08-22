@@ -3,43 +3,132 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Archivir — modélisation BIM &amp; 3D</title>
-<meta name="description" content="Archivir modélise vos relevés, scans et plans existants en maquettes BIM 3D pour architectes. Site en préparation.">
+<title>Pavillon Cuneo — Archivir</title>
+<meta name="description" content="Maquette 3D du pavillon Cuneo, étude de modélisation d'après Aldo Rossi, par Archivir.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/style.css">
-<script type="module" src="https://unpkg.com/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.169.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.169.0/examples/jsm/"
+  }
+}
+</script>
 </head>
 <body>
 
 <main class="splash">
-  <p class="eyebrow">Modélisation BIM &amp; 3D</p>
-  <model-viewer
-    class="hero-model"
-    src="pavillon.glb"
-    alt="Maquette 3D du pavillon modélisé par Archivir"
-    camera-controls
-    disable-pan
-    disable-zoom
-    auto-rotate
-    rotation-per-second="18deg"
-    interaction-prompt="none"
-    shadow-intensity="0"
-    exposure="1.1"
-    camera-orbit="25deg 75deg auto"
-  ></model-viewer>
-  <h1 class="wordmark">ARCHIVIR</h1>
-  <div class="rule"></div>
-  <p class="tagline">L'existant, remodélisé en volume.</p>
-  <p class="status">Nouveau site en préparation.</p>
-  <a class="contact-link placeholder" href="#">votre-email@archivir.ch</a>
+  <a class="pavillon-card" href="pavillon.html" aria-label="Ouvrir la maquette 3D du pavillon Cuneo">
+    <div class="card-visual">
+      <div id="card-viewer" class="card-viewer"></div>
+    </div>
+    <div class="card-title-bar">
+      <h2>Pavillon Cuneo</h2>
+      <span class="card-subtitle">Aldo Rossi</span>
+    </div>
+  </a>
 </main>
 
-<footer>
-  <span>Archivir</span>
-  <span class="placeholder">En construction</span>
-</footer>
+<script type="module">
+  import * as THREE from 'three';
+  import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+  import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+  const container = document.getElementById('card-viewer');
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 0.95;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  container.appendChild(renderer.domElement);
+
+  const scene = new THREE.Scene();
+
+  const pmremGenerator = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
+
+  const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+
+  const keyLight = new THREE.DirectionalLight(0xfff2e0, 3.2);
+  keyLight.position.set(5, 8, 3);
+  keyLight.castShadow = true;
+  keyLight.shadow.mapSize.set(1024, 1024);
+  scene.add(keyLight);
+
+  const fillLight = new THREE.HemisphereLight(0x5fc7e3, 0x1b1a18, 0.28);
+  scene.add(fillLight);
+
+  const ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(40, 40),
+    new THREE.ShadowMaterial({ opacity: 0.3 })
+  );
+  ground.rotation.x = -Math.PI / 2;
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  function render(){ renderer.render(scene, camera); }
+
+  const loader = new GLTFLoader();
+  loader.load('pavillon.glb', (gltf) => {
+    const model = gltf.scene;
+
+    model.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+        child.material.color.setRGB(0.30, 0.29, 0.26);
+        child.material.roughness = 0.7;
+        child.material.metalness = 0;
+        child.material.envMapIntensity = 0.4;
+      }
+    });
+
+    const box = new THREE.Box3().setFromObject(model);
+    const center = new THREE.Vector3();
+    box.getCenter(center);
+    model.position.x -= center.x;
+    model.position.z -= center.z;
+    model.position.y -= box.min.y;
+    scene.add(model);
+
+    const fitBox = new THREE.Box3().setFromObject(model);
+    const fitSize = new THREE.Vector3();
+    fitBox.getSize(fitSize);
+    const maxDim = Math.max(fitSize.x, fitSize.y, fitSize.z);
+    const fov = camera.fov * (Math.PI / 180);
+    const distance = (maxDim / 2 / Math.tan(fov / 2)) * 2.4;
+
+    const dir = new THREE.Vector3(-1.5, 1.3, 0.55).normalize();
+    camera.position.copy(dir.multiplyScalar(distance));
+    camera.near = distance / 100;
+    camera.far = distance * 100;
+    camera.lookAt(0, fitSize.y * 0.4, 0);
+    camera.updateProjectionMatrix();
+
+    keyLight.position.set(maxDim * 0.8, maxDim * 1.4, maxDim * 0.5);
+    keyLight.shadow.camera.left = -maxDim;
+    keyLight.shadow.camera.right = maxDim;
+    keyLight.shadow.camera.top = maxDim;
+    keyLight.shadow.camera.bottom = -maxDim;
+    keyLight.shadow.camera.updateProjectionMatrix();
+
+    render();
+  });
+
+  window.addEventListener('resize', () => {
+    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    render();
+  });
+</script>
 
 </body>
 </html>
