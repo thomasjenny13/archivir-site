@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pavillon Cuneo — Archivir</title>
-<meta name="description" content="Maquette 3D du pavillon Cuneo, étude de modélisation d'après Aldo Rossi, par Archivir.">
+<script>document.documentElement.dataset.theme = localStorage.getItem('archivir-theme') || 'light';</script>
+<title>Projets — Archivir</title>
+<meta name="description" content="Archivir modélise vos relevés, scans et plans existants en maquettes BIM 3D pour architectes. Projets : Pavillon Cuneo, Tupi.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -20,114 +21,153 @@
 </head>
 <body>
 
+<button id="theme-toggle" class="theme-toggle" aria-label="Basculer le thème">☾</button>
+
 <main class="splash">
-  <a class="pavillon-card" href="pavillon.html" aria-label="Ouvrir la maquette 3D du pavillon Cuneo">
-    <div class="card-visual">
-      <div id="card-viewer" class="card-viewer"></div>
-    </div>
-    <div class="card-title-bar">
-      <h2>Pavillon Cuneo</h2>
-      <span class="card-subtitle">Aldo Rossi</span>
-    </div>
-  </a>
+  <div class="project-grid">
+    <a class="project-card" href="projets/pavillon.html" aria-label="Ouvrir la maquette 3D du pavillon Cuneo">
+      <div class="card-frame">
+        <div class="card-visual"><div class="card-viewer" data-glb="projets/pavillon.glb"></div></div>
+        <div class="card-badges">
+          <span class="badge badge-3d">3D</span>
+        </div>
+        <div class="card-banner">
+          <h2>Pavillon Cuneo</h2>
+          <span class="card-subtitle">Aldo Rossi</span>
+          <span class="card-meta">1962 · Cuneo · Mémoriel · Concours</span>
+        </div>
+      </div>
+    </a>
+    <a class="project-card" href="projets/tupi.html" aria-label="Ouvrir la maquette 3D du projet Tupi">
+      <div class="card-frame">
+        <div class="card-visual"><div class="card-viewer" data-glb="projets/tupi.glb"></div></div>
+        <div class="card-badges">
+          <span class="badge badge-3d">3D</span>
+        </div>
+        <div class="card-banner">
+          <h2>Tupi</h2>
+          <span class="card-subtitle">mijong architecture</span>
+          <span class="card-meta">2019 · Sion · Santé · Concours</span>
+        </div>
+      </div>
+    </a>
+  </div>
 </main>
+
+<script>
+  const themeToggle = document.getElementById('theme-toggle');
+  function applyThemeIcon(){
+    themeToggle.textContent = document.documentElement.dataset.theme === 'light' ? '☾' : '☀';
+  }
+  applyThemeIcon();
+  themeToggle.addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem('archivir-theme', next);
+    applyThemeIcon();
+  });
+</script>
 
 <script type="module">
   import * as THREE from 'three';
   import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
   import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-  const container = document.getElementById('card-viewer');
+  function initCardViewer(container){
+    const glbPath = container.dataset.glb;
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(container.clientWidth, container.clientHeight);
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 0.95;
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
-  container.appendChild(renderer.domElement);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 0.95;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    container.appendChild(renderer.domElement);
 
-  const scene = new THREE.Scene();
+    const scene = new THREE.Scene();
 
-  const pmremGenerator = new THREE.PMREMGenerator(renderer);
-  scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
 
-  const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
 
-  const keyLight = new THREE.DirectionalLight(0xfff2e0, 3.2);
-  keyLight.position.set(5, 8, 3);
-  keyLight.castShadow = true;
-  keyLight.shadow.mapSize.set(1024, 1024);
-  scene.add(keyLight);
+    const keyLight = new THREE.DirectionalLight(0xfff2e0, 3.2);
+    keyLight.position.set(5, 8, 3);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.set(1024, 1024);
+    scene.add(keyLight);
 
-  const fillLight = new THREE.HemisphereLight(0x5fc7e3, 0x1b1a18, 0.28);
-  scene.add(fillLight);
+    const fillLight = new THREE.HemisphereLight(0x5fc7e3, 0x1b1a18, 0.28);
+    scene.add(fillLight);
 
-  const ground = new THREE.Mesh(
-    new THREE.PlaneGeometry(40, 40),
-    new THREE.ShadowMaterial({ opacity: 0.3 })
-  );
-  ground.rotation.x = -Math.PI / 2;
-  ground.receiveShadow = true;
-  scene.add(ground);
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(400, 400),
+      new THREE.ShadowMaterial({ opacity: 0.3 })
+    );
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
 
-  function render(){ renderer.render(scene, camera); }
+    function render(){ renderer.render(scene, camera); }
 
-  const loader = new GLTFLoader();
-  loader.load('pavillon.glb', (gltf) => {
-    const model = gltf.scene;
+    const loader = new GLTFLoader();
+    loader.load(glbPath, (gltf) => {
+      const model = gltf.scene;
 
-    model.traverse((child) => {
-      if (child.isMesh) {
-        child.castShadow = true;
-        child.receiveShadow = true;
-        child.material.color.setRGB(0.30, 0.29, 0.26);
-        child.material.roughness = 0.7;
-        child.material.metalness = 0;
-        child.material.envMapIntensity = 0.4;
-      }
+      model.traverse((child) => {
+        if (child.isMesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+          child.material.color.setRGB(0.735, 0.72, 0.675);
+          child.material.roughness = 0.725;
+          child.material.metalness = 0;
+          child.material.envMapIntensity = 0.4;
+        }
+      });
+
+      const box = new THREE.Box3().setFromObject(model);
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+      model.position.x -= center.x;
+      model.position.z -= center.z;
+      model.position.y -= box.min.y;
+      scene.add(model);
+
+      const fitBox = new THREE.Box3().setFromObject(model);
+      const sphere = new THREE.Sphere();
+      fitBox.getBoundingSphere(sphere);
+      const fov = camera.fov * (Math.PI / 180);
+      const distance = (sphere.radius / Math.sin(fov / 2)) * 1.55;
+      const maxDim = sphere.radius * 2;
+
+      const dir = new THREE.Vector3(-1.5, 1.3, 0.55).normalize();
+      camera.position.copy(dir.multiplyScalar(distance)).add(sphere.center);
+      camera.near = distance / 100;
+      camera.far = distance * 100;
+      camera.lookAt(sphere.center);
+      camera.updateProjectionMatrix();
+
+      keyLight.position.set(maxDim * 0.8, maxDim * 1.4, maxDim * 0.5);
+      keyLight.shadow.camera.left = -maxDim;
+      keyLight.shadow.camera.right = maxDim;
+      keyLight.shadow.camera.top = maxDim;
+      keyLight.shadow.camera.bottom = -maxDim;
+      keyLight.shadow.camera.updateProjectionMatrix();
+
+      render();
     });
 
-    const box = new THREE.Box3().setFromObject(model);
-    const center = new THREE.Vector3();
-    box.getCenter(center);
-    model.position.x -= center.x;
-    model.position.z -= center.z;
-    model.position.y -= box.min.y;
-    scene.add(model);
+    window.addEventListener('resize', () => {
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      render();
+    });
+  }
 
-    const fitBox = new THREE.Box3().setFromObject(model);
-    const fitSize = new THREE.Vector3();
-    fitBox.getSize(fitSize);
-    const maxDim = Math.max(fitSize.x, fitSize.y, fitSize.z);
-    const fov = camera.fov * (Math.PI / 180);
-    const distance = (maxDim / 2 / Math.tan(fov / 2)) * 2.4;
-
-    const dir = new THREE.Vector3(-1.5, 1.3, 0.55).normalize();
-    camera.position.copy(dir.multiplyScalar(distance));
-    camera.near = distance / 100;
-    camera.far = distance * 100;
-    camera.lookAt(0, fitSize.y * 0.4, 0);
-    camera.updateProjectionMatrix();
-
-    keyLight.position.set(maxDim * 0.8, maxDim * 1.4, maxDim * 0.5);
-    keyLight.shadow.camera.left = -maxDim;
-    keyLight.shadow.camera.right = maxDim;
-    keyLight.shadow.camera.top = maxDim;
-    keyLight.shadow.camera.bottom = -maxDim;
-    keyLight.shadow.camera.updateProjectionMatrix();
-
-    render();
-  });
-
-  window.addEventListener('resize', () => {
-    camera.aspect = container.clientWidth / container.clientHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    render();
-  });
+  document.querySelectorAll('.card-viewer[data-glb]').forEach(initCardViewer);
 </script>
 
 </body>

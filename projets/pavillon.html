@@ -3,12 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>document.documentElement.dataset.theme = localStorage.getItem('archivir-theme') || 'light';</script>
 <title>Pavillon Cuneo — Archivir</title>
-<meta name="description" content="Maquette 3D du pavillon Cuneo, étude de modélisation d'après Aldo Rossi, par Archivir.">
+<meta name="description" content="Maquette 3D du Monument à la Résistance de Cuneo (1962), projet de concours non réalisé d'Aldo Rossi, Luca Meda et Gianugo Polesello.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/style.css">
 <script type="importmap">
 {
   "imports": {
@@ -20,7 +21,10 @@
 </head>
 <body>
 
-<a class="back-link" href="index.html">← Retour</a>
+<a class="back-link" href="../index.html">← Retour</a>
+<button id="theme-toggle" class="theme-toggle theme-toggle--viewer" aria-label="Basculer le thème">☾</button>
+<a id="nav-prev" class="nav-arrow nav-arrow-left" href="#" aria-label="Projet précédent">←</a>
+<a id="nav-next" class="nav-arrow nav-arrow-right" href="#" aria-label="Projet suivant">→</a>
 
 <main class="viewer-page">
   <div id="viewer-canvas" class="full-model"></div>
@@ -35,8 +39,39 @@
 
   <button id="cut-toggle" class="cut-fab" aria-label="Vue en coupe">◐</button>
 
-  <p class="viewer-credit"><strong>Pavillon Cuneo</strong>Aldo Rossi</p>
+  <div class="material-picker" aria-label="Matériaux">
+    <button class="swatch" data-preset="platre" style="background:#9E9689" aria-label="Plâtre"></button>
+    <button class="swatch" data-preset="beton" style="background:#6B6B68" aria-label="Béton"></button>
+    <button class="swatch" data-preset="blanc" style="background:#D9D7CE" aria-label="Blanc architecture"></button>
+    <button class="swatch" data-preset="terre" style="background:#8C6152" aria-label="Terre cuite"></button>
+    <button class="swatch" data-preset="bronze" style="background:#59492E" aria-label="Bronze"></button>
+  </div>
+
+  <p class="viewer-credit"><strong>Pavillon Cuneo</strong>Aldo Rossi<br><span class="credit-meta">1962 · Cuneo · Mémoriel · Concours (non réalisé)</span></p>
 </main>
+
+<script>
+  const themeToggle = document.getElementById('theme-toggle');
+  function applyThemeIcon(){
+    themeToggle.textContent = document.documentElement.dataset.theme === 'light' ? '☾' : '☀';
+  }
+  applyThemeIcon();
+  themeToggle.addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem('archivir-theme', next);
+    applyThemeIcon();
+  });
+
+  // project switcher — add new project pages here as they're built
+  const PROJECTS = ['pavillon.html', 'tupi.html'];
+  const currentFile = location.pathname.split('/').pop();
+  const idx = PROJECTS.indexOf(currentFile);
+  if (idx !== -1) {
+    document.getElementById('nav-prev').href = PROJECTS[(idx - 1 + PROJECTS.length) % PROJECTS.length];
+    document.getElementById('nav-next').href = PROJECTS[(idx + 1) % PROJECTS.length];
+  }
+</script>
 
 <script type="module">
   import * as THREE from 'three';
@@ -194,6 +229,31 @@
     btn.addEventListener('click', () => VIEW_PRESETS[btn.dataset.view]());
   });
 
+  // material presets to compare — click a swatch to preview live
+  const MATERIAL_PRESETS = {
+    platre: { color: [0.62, 0.60, 0.55], roughness: 0.85, metalness: 0 },
+    beton:  { color: [0.42, 0.42, 0.40], roughness: 0.75, metalness: 0 },
+    blanc:  { color: [0.85, 0.84, 0.80], roughness: 0.6,  metalness: 0 },
+    terre:  { color: [0.55, 0.38, 0.32], roughness: 0.7,  metalness: 0 },
+    bronze: { color: [0.35, 0.28, 0.18], roughness: 0.35, metalness: 0.5 },
+  };
+  function applyMaterialPreset(name){
+    const p = MATERIAL_PRESETS[name];
+    if (!p || !sectionMeshes.length) return;
+    sectionMeshes.forEach((mesh) => {
+      mesh.material.color.setRGB(p.color[0], p.color[1], p.color[2]);
+      mesh.material.roughness = p.roughness;
+      mesh.material.metalness = p.metalness;
+    });
+  }
+  document.querySelectorAll('.swatch').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      applyMaterialPreset(btn.dataset.preset);
+      document.querySelectorAll('.swatch').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
   const cutToggle = document.getElementById('cut-toggle');
   cutToggle.addEventListener('click', () => {
     sectionView = !sectionView;
@@ -220,12 +280,19 @@
       if (child.isMesh) {
         child.castShadow = true;
         child.receiveShadow = true;
-        child.material.color.setRGB(0.30, 0.29, 0.26);
-        child.material.roughness = 0.7;
+        child.material.color.setRGB(0.735, 0.72, 0.675);
+        child.material.roughness = 0.725;
         child.material.metalness = 0;
         child.material.envMapIntensity = 0.4;
         child.material.clipShadows = true;
         child.material.shadowSide = THREE.DoubleSide;
+
+        const edges = new THREE.EdgesGeometry(child.geometry, 20);
+        const outline = new THREE.LineSegments(
+          edges,
+          new THREE.LineBasicMaterial({ color: 0x1a1712, transparent: true, opacity: 0.4 })
+        );
+        child.add(outline);
       }
     });
 
@@ -238,27 +305,28 @@
 
     scene.add(model);
 
-    // fit camera to the model's actual size
+    // fit camera to the model's actual size (bounding sphere, so framing
+    // stays consistent regardless of each building's proportions)
     const fitBox = new THREE.Box3().setFromObject(model);
-    const fitSize = new THREE.Vector3();
-    fitBox.getSize(fitSize);
-    const maxDim = Math.max(fitSize.x, fitSize.y, fitSize.z);
+    const sphere = new THREE.Sphere();
+    fitBox.getBoundingSphere(sphere);
     const fov = camera.fov * (Math.PI / 180);
-    const distance = (maxDim / 2 / Math.tan(fov / 2)) * 2.6;
+    const distance = (sphere.radius / Math.sin(fov / 2)) * 1.5;
+    const maxDim = sphere.radius * 2;
 
     const dir = new THREE.Vector3(-1.5, 1.3, 0.55).normalize();
-    camera.position.copy(dir.multiplyScalar(distance));
+    camera.position.copy(dir.multiplyScalar(distance)).add(sphere.center);
     camera.near = distance / 100;
     camera.far = distance * 100;
     camera.updateProjectionMatrix();
 
-    controls.target.set(0, fitSize.y * 0.4, 0);
+    controls.target.copy(sphere.center);
     controls.minDistance = distance * 0.25;
     controls.maxDistance = distance * 3;
     controls.update();
 
     viewDistance = distance;
-    viewEyeY = fitSize.y * 0.4;
+    viewEyeY = sphere.center.y;
 
     keyLight.position.set(maxDim * 0.8, maxDim * 1.4, maxDim * 0.5);
     keyLight.shadow.camera.left = -maxDim;
