@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 8192 8192">
+  <defs>
+    <style>
+      .st0 {
+        fill: none;
+        stroke: #2A2620;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 0.6; vector-effect: non-scaling-stroke;
+      }
+    </style>
+  </defs>
+  <path class="st0" d="M3028.99,3028.99v2134.02"/>
+  <path class="st0" d="M3207.17,3207.17v1777.66"/>
+  <path class="st0" d="M3385.34,3385.34v1421.31"/>
+  <path class="st0" d="M3563.52,3563.52v1064.96"/>
+  <path class="st0" d="M655.36,7536.64h2908.16v-2908.69l-635.39,635.92v-2335.73l635.39,635.39V655.37H655.36v6881.28"/>
+  <path class="st0" d="M8192,0v8192H0V0h8192"/>
+  <path class="st0" d="M8192,0v8192H0V0h8192"/>
+  <path class="st0" d="M7536.64,7536.64V655.36H655.36v6881.28h6881.28"/>
+</svg>

@@ -1,0 +1,1072 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>document.documentElement.dataset.theme = localStorage.getItem('archivir-theme') || 'light';</script>
+<title>Projets — Archivir</title>
+<meta name="description" content="Maquettes 3D des projets Archivir.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.169.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.169.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+
+<header class="site-banner">
+  <a class="site-logo" id="site-logo" href="#">
+    <span class="logo-prefix">archi</span><span class="logo-mid"><span class="logo-mid-text">tecture&nbsp;</span></span><span class="logo-vir">vir</span><span class="logo-tail"><span class="logo-tail-text">tuelle</span></span>
+  </a>
+  <div class="site-banner-right">
+    <button id="theme-toggle" class="theme-toggle" aria-label="Basculer le thème">☾</button>
+  </div>
+</header>
+<a class="back-link" href="../index.html" target="_blank" rel="noopener noreferrer">Index</a>
+<a id="nav-prev" class="nav-arrow nav-arrow-left" href="#" aria-label="Projet précédent">←</a>
+<a id="nav-next" class="nav-arrow nav-arrow-right" href="#" aria-label="Projet suivant">→</a>
+
+<main class="viewer-page">
+  <div id="viewer-canvas" class="full-model"></div>
+
+  <nav class="compass" aria-label="Vues préréglées">
+    <div class="compass-ring"></div>
+    <button class="compass-pt compass-n" data-view="north" aria-label="Vue nord">N</button>
+    <button class="compass-pt compass-e" data-view="east" aria-label="Vue est">E</button>
+    <button class="compass-pt compass-s" data-view="south" aria-label="Vue sud">S</button>
+    <button class="compass-pt compass-o" data-view="west" aria-label="Vue ouest">O</button>
+  </nav>
+
+  <button id="cut-toggle" class="cut-fab" aria-label="Vue en coupe">◐</button>
+
+  <div class="material-picker" aria-label="Matériaux">
+    <button class="swatch" data-preset="platre" style="background:#9E9689" aria-label="Plâtre"></button>
+    <button class="swatch" data-preset="beton" style="background:#6B6B68" aria-label="Béton"></button>
+    <button class="swatch" data-preset="blanc" style="background:#D9D7CE" aria-label="Blanc architecture"></button>
+    <button class="swatch" data-preset="terre" style="background:#8C6152" aria-label="Terre cuite"></button>
+    <button class="swatch" data-preset="bronze" style="background:#59492E" aria-label="Bronze"></button>
+  </div>
+
+  <p id="viewer-credit" class="viewer-credit"></p>
+
+</main>
+  <div id="plans-menu" class="plans-menu">
+    <div id="plans-dropdown" class="plans-dropdown">
+      <p class="plans-dropdown-heading">Façades</p>
+      <button class="plans-dropdown-item" data-plan="nord"><span class="plans-dropdown-thumb"></span><span class="plans-dropdown-label">Façade nord</span></button>
+      <button class="plans-dropdown-item" data-plan="sud"><span class="plans-dropdown-thumb"></span><span class="plans-dropdown-label">Façade sud</span></button>
+      <p class="plans-dropdown-heading">Coupe</p>
+      <button class="plans-dropdown-item" data-plan="coupe"><span class="plans-dropdown-thumb"></span><span class="plans-dropdown-label">Coupe</span></button>
+      <p class="plans-dropdown-heading">Plans</p>
+      <button class="plans-dropdown-item" data-plan="etage"><span class="plans-dropdown-thumb"></span><span class="plans-dropdown-label">1er étage</span></button>
+      <button class="plans-dropdown-item" data-plan="toiture"><span class="plans-dropdown-thumb"></span><span class="plans-dropdown-label">Toiture</span></button>
+    </div>
+    <button id="plans-menu-toggle" class="plans-menu-toggle" aria-label="Plans" aria-expanded="false">☰</button>
+  </div>
+  <div id="plans-overlay" class="plans-overlay" hidden>
+    <button id="plans-close" class="plans-close" aria-label="Fermer">✕</button>
+    <div class="plans-sheet">
+      <div class="plan-page active" data-plan="etage"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 8192 8192">
+  <defs>
+    <style>
+      .st0 {
+        fill: none;
+      }
+
+      .st0, .st1 {
+        stroke: #2A2620;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 0.6; vector-effect: non-scaling-stroke;
+      }
+
+      .st1 {
+        fill: #000;
+        opacity: 1;
+      }
+    </style>
+  </defs>
+  <g>
+    <path class="st0" d="M178.18,178.18v7835.65"/>
+    <path class="st0" d="M356.35,356.35v7479.3"/>
+    <path class="st0" d="M0,0v8192"/>
+    <path class="st0" d="M534.53,534.53v7122.94"/>
+    <path class="st0" d="M712.7,712.7v6766.59"/>
+    <path class="st0" d="M890.88,890.88v6410.24"/>
+    <path class="st0" d="M1069.06,1069.06v6053.89"/>
+    <path class="st0" d="M1247.23,1247.23v5697.54"/>
+    <path class="st0" d="M1425.41,1425.41v5341.18"/>
+    <path class="st0" d="M1603.58,1603.58v4984.83"/>
+    <path class="st0" d="M1781.76,1781.76v4628.48"/>
+    <path class="st0" d="M1959.94,1959.94v4272.13"/>
+    <path class="st0" d="M2138.11,2138.11v3915.78"/>
+    <path class="st0" d="M2316.29,2316.29v3559.42"/>
+    <path class="st0" d="M2494.46,2494.46v3203.07"/>
+    <path class="st0" d="M2672.64,2672.64v2846.72"/>
+    <path class="st0" d="M2850.82,2850.82v2490.37"/>
+    <path class="st0" d="M3028.99,3028.99v2134.02"/>
+    <path class="st0" d="M3207.17,3207.17v1777.66"/>
+    <path class="st0" d="M3385.34,3385.34v1421.31"/>
+    <path class="st0" d="M3563.52,3563.52v1064.96"/>
+    <path class="st0" d="M7536.64,655.36L8192,0v8192l-655.36-655.36V655.36"/>
+  </g>
+  <g>
+    <path class="st1" d="M0,0h8192l-655.36,655.36h-3973.12v2908.16L0,0"/>
+    <path class="st1" d="M7536.64,7536.64l655.36,655.36H0l3563.52-3563.52v2908.16h3973.12"/>
+  </g>
+</svg></div>
+      <div class="plan-page" data-plan="toiture"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 8192 8192">
+  <defs>
+    <style>
+      .st0 {
+        fill: none;
+        stroke: #2A2620;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 0.6; vector-effect: non-scaling-stroke;
+      }
+    </style>
+  </defs>
+  <path class="st0" d="M3028.99,3028.99v2134.02"/>
+  <path class="st0" d="M3207.17,3207.17v1777.66"/>
+  <path class="st0" d="M3385.34,3385.34v1421.31"/>
+  <path class="st0" d="M3563.52,3563.52v1064.96"/>
+  <path class="st0" d="M655.36,7536.64h2908.16v-2908.69l-635.39,635.92v-2335.73l635.39,635.39V655.37H655.36v6881.28"/>
+  <path class="st0" d="M8192,0v8192H0V0h8192"/>
+  <path class="st0" d="M8192,0v8192H0V0h8192"/>
+  <path class="st0" d="M7536.64,7536.64V655.36H655.36v6881.28h6881.28"/>
+</svg></div>
+      <div class="plan-page" data-plan="coupe"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 8192 8192">
+  <defs>
+    <style>
+      .st0 {
+        fill: none;
+      }
+
+      .st0, .st1 {
+        stroke: #2A2620;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 0.6; vector-effect: non-scaling-stroke;
+      }
+
+      .st1 {
+        fill: #000;
+        opacity: 1;
+      }
+    </style>
+  </defs>
+  <g>
+    <path class="st0" d="M3563.52,4423.68l-635.39-966.5"/>
+    <path class="st0" d="M0,8012.55v-1638.4"/>
+    <path class="st0" d="M655.36,0h6881.28"/>
+    <path class="st0" d="M8192,3112.96v327.68"/>
+    <path class="st0" d="M7536.64,3440.64v-327.68"/>
+  </g>
+  <g>
+    <path class="st1" d="M0,0v6374.15h169.69l2758.44-2916.97L655.36,0H0"/>
+    <path class="st1" d="M8192,0h-655.36v3112.96h655.36V0"/>
+    <polygon class="st1" points="7536.64 3440.64 7536.64 4423.68 3563.52 4423.68 3563.52 4603.13 3385.34 4603.13 3385.34 4782.57 3207.17 4782.57 3207.17 4962.02 3028.99 4962.02 3028.99 5141.46 2850.82 5141.46 2850.82 5320.91 2672.64 5320.91 2672.64 5500.35 2494.46 5500.35 2494.46 5679.8 2316.29 5679.8 2316.29 5859.25 2138.11 5859.25 2138.11 6038.69 1959.94 6038.69 1959.94 6218.14 1781.76 6218.14 1781.76 6397.58 1603.58 6397.58 1603.58 6577.03 1425.41 6577.03 1425.41 6756.47 1247.23 6756.47 1247.23 6935.92 1069.06 6935.92 1069.06 7115.37 890.88 7115.37 890.88 7294.81 712.7 7294.81 712.7 7474.26 534.53 7474.26 534.53 7653.7 356.35 7653.7 356.35 7833.15 178.18 7833.15 178.18 8012.6 0 8012.6 0 8192 3563.52 8192 8192 8192 8192 4423.68 8192 3440.64 7536.64 3440.64"/>
+  </g>
+</svg></div>
+      <div class="plan-page" data-plan="nord"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 8192 8192">
+  <defs>
+    <style>
+      .st0 {
+        fill: none;
+        stroke: #2A2620;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 0.6; vector-effect: non-scaling-stroke;
+      }
+    </style>
+  </defs>
+  <path class="st0" d="M8192,8192H0V3440.75h8192v4751.25Z"/>
+  <path class="st0" d="M0,3112.99h8192V0H0v3112.99Z"/>
+  <path class="st0" d="M655.51,3440.57H.17v-327.76h655.34v327.76Z"/>
+  <path class="st0" d="M8192,3440.57h-655.34v-327.76h655.34v327.76Z"/>
+</svg></div>
+      <div class="plan-page" data-plan="sud"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 8192 8192">
+  <defs>
+    <style>
+      .st0 {
+        fill: none;
+        stroke: #2A2620;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 0.6; vector-effect: non-scaling-stroke;
+      }
+
+      .st1 {
+        fill: #2a2620;
+        fill-rule: evenodd;
+        opacity: .25;
+      }
+    </style>
+  </defs>
+  <path class="st1" d="M6410.24,6374.16H0l754.13,920.63h6683.74l754.13-920.63h-1781.76ZM1603.58,6397.55h178.18-178.18ZM1425.41,6577h178.18-178.18ZM1247.23,6756.44h178.18-178.18Z"/>
+  <path class="st0" d="M8192,8012.55v-1638.4"/>
+  <path class="st0" d="M0,8012.55v-1638.4"/>
+  <path class="st0" d="M0,0h8192"/>
+  <path class="st0" d="M0,4423.68V0"/>
+  <path class="st0" d="M0,4423.68v1950.47"/>
+  <path class="st0" d="M0,6374.15h8192"/>
+  <path class="st0" d="M8192,6374.15v-1950.47"/>
+  <path class="st0" d="M8192,4423.68V0"/>
+  <path class="st0" d="M178.18,7833.11v179.45"/>
+  <path class="st0" d="M356.35,7653.67v179.45"/>
+  <path class="st0" d="M534.53,7474.23v179.45"/>
+  <path class="st0" d="M712.7,7294.78v179.45"/>
+  <path class="st0" d="M890.88,7115.33v179.45"/>
+  <path class="st0" d="M1069.06,6935.9v179.45"/>
+  <path class="st0" d="M1247.23,6756.45v179.45"/>
+  <path class="st0" d="M1425.41,6577v179.45"/>
+  <path class="st0" d="M1603.58,6397.56v179.45"/>
+  <path class="st0" d="M1781.76,6374.15v23.4"/>
+  <path class="st0" d="M0,8192v-179.45"/>
+  <path class="st0" d="M6410.24,6397.56v-23.4"/>
+  <path class="st0" d="M6588.42,6577v-179.45"/>
+  <path class="st0" d="M6766.59,6756.45v-179.45"/>
+  <path class="st0" d="M6944.77,6935.9v-179.45"/>
+  <path class="st0" d="M7122.94,7115.33v-179.45"/>
+  <path class="st0" d="M7301.12,7294.78v-179.45"/>
+  <path class="st0" d="M7479.3,7474.23v-179.45"/>
+  <path class="st0" d="M7657.47,7653.67v-179.45"/>
+  <path class="st0" d="M7835.65,7833.11v-179.45"/>
+  <path class="st0" d="M8013.82,8012.55v-179.45"/>
+  <path class="st0" d="M8192,8192v-179.45"/>
+  <path class="st0" d="M0,8012.55h8192"/>
+  <path class="st0" d="M178.18,7833.11h7835.65"/>
+  <path class="st0" d="M356.35,7653.67h7479.3"/>
+  <path class="st0" d="M534.53,7474.23h7122.94"/>
+  <path class="st0" d="M712.7,7294.78h6766.59"/>
+  <path class="st0" d="M890.88,7115.33h6410.24"/>
+  <path class="st0" d="M1069.06,6935.9h6053.89"/>
+  <path class="st0" d="M1247.23,6756.45h5697.54"/>
+  <path class="st0" d="M1425.41,6577h5341.18"/>
+  <path class="st0" d="M1603.58,6397.56h4984.83"/>
+  <path class="st0" d="M0,8192h8192"/>
+</svg></div>
+    </div>
+  </div>
+
+<script>
+  const themeToggle = document.getElementById('theme-toggle');
+  function applyThemeIcon(){
+    themeToggle.textContent = document.documentElement.dataset.theme === 'light' ? '☾' : '☀';
+  }
+  applyThemeIcon();
+  themeToggle.addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem('archivir-theme', next);
+    applyThemeIcon();
+  });
+
+  const siteLogo = document.getElementById('site-logo');
+  const logoMid = siteLogo.querySelector('.logo-mid');
+  const logoTail = siteLogo.querySelector('.logo-tail');
+  const logoMidText = siteLogo.querySelector('.logo-mid-text');
+  const logoTailText = siteLogo.querySelector('.logo-tail-text');
+  const MS_PER_LETTER = 100;
+  function splitLetters(el){
+    const text = el.textContent;
+    el.textContent = '';
+    let maxDelay = 0;
+    text.split('').forEach((ch, i) => {
+      const span = document.createElement('span');
+      span.className = 'logo-letter';
+      span.textContent = ch === ' ' ? ' ' : ch;
+      const delay = i * MS_PER_LETTER;
+      span.style.transitionDelay = delay + 'ms';
+      maxDelay = Math.max(maxDelay, delay);
+      el.appendChild(span);
+    });
+    return maxDelay;
+  }
+  const midRevealMs = splitLetters(logoMidText);
+  const tailRevealMs = splitLetters(logoTailText);
+  const typeDuration = Math.max(midRevealMs, tailRevealMs) + 200; // + the letter's own transition
+  // dust-disintegration exit: each letter drifts off on its own random
+  // heading rather than the whole word fading uniformly
+  function decomposeText(el){
+    el.querySelectorAll('.logo-letter').forEach((letter) => {
+      const dx = (Math.random() - 0.5) * 50;
+      const dy = -18 - Math.random() * 34;
+      const drot = (Math.random() - 0.5) * 100;
+      letter.style.setProperty('--dx', dx.toFixed(1) + 'px');
+      letter.style.setProperty('--dy', dy.toFixed(1) + 'px');
+      letter.style.setProperty('--drot', drot.toFixed(1) + 'deg');
+      letter.style.transitionDelay = (Math.random() * 180).toFixed(0) + 'ms';
+      letter.classList.add('is-decomposing');
+    });
+  }
+  function resetLetters(el){
+    el.querySelectorAll('.logo-letter').forEach((letter, i) => {
+      letter.classList.remove('is-decomposing');
+      letter.style.transitionDelay = (i * MS_PER_LETTER) + 'ms';
+    });
+  }
+  const DECOMPOSE_MS = 900;
+  let logoAnimating = false;
+  siteLogo.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (logoAnimating) return;
+    logoAnimating = true;
+    // phase 1: open both gaps at once (text still invisible) — this is
+    // what pushes "vir" into its final position via real text reflow
+    logoMid.classList.add('is-open');
+    logoTail.classList.add('is-open');
+    setTimeout(() => {
+      // phase 2: "vir" has settled — type "tecture" and "tuelle" in together,
+      // letter by letter, left to right
+      logoMidText.classList.add('is-visible');
+      logoTailText.classList.add('is-visible');
+      setTimeout(() => {
+        // phase 3: hold, then let each letter disintegrate on its own.
+        // is-visible comes off in the same tick as is-decomposing goes on,
+        // so the higher-specificity ".is-visible .logo-letter{opacity:1}"
+        // rule never gets a chance to fight the decompose opacity/delay
+        decomposeText(logoMidText);
+        decomposeText(logoTailText);
+        logoMidText.classList.remove('is-visible');
+        logoTailText.classList.remove('is-visible');
+        setTimeout(() => {
+          resetLetters(logoMidText);
+          resetLetters(logoTailText);
+          setTimeout(() => {
+            logoMid.classList.remove('is-open');
+            logoTail.classList.remove('is-open');
+            setTimeout(() => {
+              siteLogo.classList.add('is-settling');
+              setTimeout(() => {
+                siteLogo.classList.remove('is-settling');
+                logoAnimating = false;
+              }, 400);
+            }, 350);
+          }, 200);
+        }, DECOMPOSE_MS);
+      }, typeDuration + 1400);
+    }, 1000);
+  });
+
+  // plans overlay
+  const plansOverlay = document.getElementById('plans-overlay');
+  const plansClose = document.getElementById('plans-close');
+  function showPlan(plan){
+    document.querySelectorAll('.plan-page').forEach((p) => p.classList.toggle('active', p.dataset.plan === plan));
+    plansOverlay.hidden = false;
+  }
+  // same order as the dropdown groups: façades, coupe, plans
+  const PLAN_ORDER = ['nord', 'sud', 'coupe', 'etage', 'toiture'];
+  function stepPlan(delta){
+    const current = document.querySelector('.plan-page.active').dataset.plan;
+    const idx = PLAN_ORDER.indexOf(current);
+    showPlan(PLAN_ORDER[(idx + delta + PLAN_ORDER.length) % PLAN_ORDER.length]);
+  }
+  const plansMenuToggle = document.getElementById('plans-menu-toggle');
+  const plansDropdown = document.getElementById('plans-dropdown');
+  function isDropdownOpen(){ return plansDropdown.classList.contains('visible'); }
+  function openPlansDropdown(){
+    plansDropdown.classList.add('visible');
+    plansMenuToggle.setAttribute('aria-expanded', 'true');
+  }
+  function closePlansDropdown(){
+    plansDropdown.classList.remove('visible');
+    plansMenuToggle.setAttribute('aria-expanded', 'false');
+  }
+  plansMenuToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (isDropdownOpen()) closePlansDropdown(); else openPlansDropdown();
+  });
+  document.addEventListener('click', (e) => {
+    // a click that lands on the plan overlay (closing the open drawing)
+    // shouldn't also dismiss the dropdown — it should stay open behind it
+    if (isDropdownOpen() && !plansDropdown.contains(e.target) && !plansOverlay.contains(e.target)) {
+      closePlansDropdown();
+    }
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closePlansDropdown();
+    if (!plansOverlay.hidden && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+      e.preventDefault();
+      stepPlan(e.key === 'ArrowUp' ? -1 : 1);
+    }
+  });
+
+  document.querySelectorAll('.plans-dropdown-item').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      showPlan(btn.dataset.plan);
+    });
+    const source = document.querySelector('.plan-page[data-plan="' + btn.dataset.plan + '"] svg');
+    if (source) {
+      const thumb = source.cloneNode(true);
+      thumb.removeAttribute('id');
+      thumb.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+      btn.querySelector('.plans-dropdown-thumb').appendChild(thumb);
+    }
+  });
+  plansClose.addEventListener('click', () => { plansOverlay.hidden = true; });
+  plansOverlay.addEventListener('click', (e) => { if (e.target === plansOverlay) plansOverlay.hidden = true; });
+</script>
+
+<script type="module">
+  import * as THREE from 'three';
+  import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+  import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+  import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+  import { mergeGeometries, mergeVertices, toCreasedNormals } from 'three/addons/utils/BufferGeometryUtils.js';
+  import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+  import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+  import { OutlinePass } from 'three/addons/postprocessing/OutlinePass.js';
+  import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+  import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
+  import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+  import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
+
+  // ---------- per-project config ----------
+  const PROJECTS = {
+    pavillon: {
+      glb: 'pavillon cueno_aldo rossi/pavillon.glb',
+      title: 'Monument de la Résistance — Archivir',
+      creditHtml: '<strong>Monument de la Résistance</strong>Aldo Rossi',
+      creditMeta: '1962 · Cuneo · Mémoriel · Concours',
+      hasPlans: true,
+    },
+    tupi: {
+      glb: 'tupi.glb',
+      title: 'Tupi — Archivir',
+      creditHtml: '<a class="credit-link" href="https://www.mijong.ch/projects/tupi-sion/" target="_blank" rel="noopener noreferrer"><strong>Tupi</strong></a><a class="credit-author" href="https://www.mijong.ch/" target="_blank" rel="noopener noreferrer">mijong architecture</a>',
+      creditMeta: '2019 · Sion (VS) · Santé · Concours',
+      hasPlans: false,
+    },
+    haus: {
+      glb: 'haus am see/has.glb',
+      title: 'Haus am See — Archivir',
+      creditHtml: '<strong>Haus am See</strong><a class="credit-author" href="https://jankinsbergen.ch/" target="_blank" rel="noopener noreferrer">Jan Kinsbergen</a>',
+      creditMeta: '2017 · Wollerau (SZ)',
+      hasPlans: false,
+    },
+  };
+  const ORDER = ['pavillon', 'tupi', 'haus'];
+
+  // ---------- shared renderer/scene, set up once ----------
+  const container = document.getElementById('viewer-canvas');
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, stencil: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 0.95;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.localClippingEnabled = true;
+  container.appendChild(renderer.domElement);
+
+  const scene = new THREE.Scene();
+
+  const pmremGenerator = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
+
+  const camera = new THREE.PerspectiveCamera(52, container.clientWidth / container.clientHeight, 0.1, 2000);
+  camera.position.set(4.5, 3, 6);
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.enablePan = false;
+  controls.minDistance = 2;
+  controls.maxDistance = 20;
+  controls.target.set(0, 0.6, 0);
+  controls.mouseButtons.MIDDLE = THREE.MOUSE.ROTATE;
+  controls.update();
+
+  // Archicad-style trackpad orbit: a two-finger trackpad swipe reaches
+  // the browser as a wheel event, so holding Shift during one rotates
+  // the camera around the target instead of zooming. Registered with
+  // capture:true so it runs before OrbitControls' own wheel listener,
+  // which we suppress for that event via stopPropagation.
+  const ORBIT_WHEEL_SPEED = 0.0025;
+  // a plain (no-Shift) two-finger left/right swipe switches projects,
+  // same as the ←/→ keys; guarded by a cooldown so one continuous
+  // swipe (many wheel events) only fires a single switch
+  let projectSwipeCooldown = false;
+  renderer.domElement.addEventListener('wheel', (e) => {
+    if (e.shiftKey) {
+      e.preventDefault();
+      e.stopPropagation();
+      const offset = camera.position.clone().sub(controls.target);
+      const spherical = new THREE.Spherical().setFromVector3(offset);
+      spherical.theta += e.deltaX * ORBIT_WHEEL_SPEED;
+      spherical.phi += e.deltaY * ORBIT_WHEEL_SPEED;
+      spherical.phi = Math.max(0.05, Math.min(Math.PI - 0.05, spherical.phi));
+      offset.setFromSpherical(spherical);
+      camera.position.copy(controls.target).add(offset);
+      camera.lookAt(controls.target);
+      return;
+    }
+    if (Math.abs(e.deltaX) > 8 && Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (projectSwipeCooldown) return;
+      projectSwipeCooldown = true;
+      setTimeout(() => { projectSwipeCooldown = false; }, 800);
+      // a harder/faster flick reports a larger deltaX on this first
+      // qualifying event than a gentle nudge — use that as a rough
+      // proxy for how many steps to roll through
+      const direction = e.deltaX > 0 ? 1 : -1;
+      const count = Math.min(Math.max(1, Math.round(Math.abs(e.deltaX) / 25)), ORDER.length - 1);
+      requestSteps(direction, count);
+      return;
+    }
+    // otherwise (plain vertical scroll/swipe) fall through to
+    // OrbitControls' own wheel handler — zoom, for both a real mouse
+    // wheel and a two-finger trackpad swipe forward/backward
+  }, { capture: true, passive: false });
+
+  const composerTarget = new THREE.WebGLRenderTarget(container.clientWidth, container.clientHeight, {
+    stencilBuffer: true,
+    samples: 4,
+  });
+  const composer = new EffectComposer(renderer, composerTarget);
+  composer.addPass(new RenderPass(scene, camera));
+  const outlinePass = new OutlinePass(
+    new THREE.Vector2(container.clientWidth, container.clientHeight),
+    scene, camera
+  );
+  outlinePass.edgeStrength = 5;
+  outlinePass.edgeGlow = 0;
+  outlinePass.edgeThickness = 1.3;
+  outlinePass.visibleEdgeColor.set(0x1a1712);
+  outlinePass.hiddenEdgeColor.set(0x1a1712);
+  outlinePass.overlayMaterial.blending = THREE.CustomBlending;
+  outlinePass.overlayMaterial.blendSrc = THREE.SrcAlphaFactor;
+  outlinePass.overlayMaterial.blendDst = THREE.OneMinusSrcAlphaFactor;
+  composer.addPass(outlinePass);
+  composer.addPass(new OutputPass());
+
+  const keyLight = new THREE.DirectionalLight(0xfff2e0, 3.4);
+  keyLight.position.set(5, 8, 3);
+  keyLight.castShadow = true;
+  keyLight.shadow.mapSize.set(2048, 2048);
+  keyLight.shadow.bias = -0.0005;
+  scene.add(keyLight);
+
+  const fillLight = new THREE.HemisphereLight(0x5fc7e3, 0x1b1a18, 0.28);
+  scene.add(fillLight);
+
+  const ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(4000, 4000),
+    new THREE.ShadowMaterial({ opacity: 0.35 })
+  );
+  ground.rotation.x = -Math.PI / 2;
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  // clip plane cuts front/back halves (normal along Z)
+  const clipPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0);
+
+  // ---------- helpers (unchanged from the per-project pages) ----------
+  function clipGeometryByPlane(geometry, plane) {
+    const pos = geometry.attributes.position;
+    const out = [];
+    const cutEdges = [];
+    const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3();
+    function side(v) { return plane.normal.dot(v) + plane.constant; }
+    function intersect(p, q, dp, dq) {
+      return new THREE.Vector3().lerpVectors(p, q, dp / (dp - dq));
+    }
+    for (let i = 0; i < pos.count; i += 3) {
+      a.fromBufferAttribute(pos, i);
+      b.fromBufferAttribute(pos, i + 1);
+      c.fromBufferAttribute(pos, i + 2);
+      const da = side(a), db = side(b), dc = side(c);
+      const ia = da >= 0, ib = db >= 0, ic = dc >= 0;
+      const n = (ia ? 1 : 0) + (ib ? 1 : 0) + (ic ? 1 : 0);
+      if (n === 3) {
+        out.push(a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z);
+      } else if (n === 1) {
+        let p, q, r, dp, dq, dr;
+        if (ia) { p = a; q = b; r = c; dp = da; dq = db; dr = dc; }
+        else if (ib) { p = b; q = c; r = a; dp = db; dq = dc; dr = da; }
+        else { p = c; q = a; r = b; dp = dc; dq = da; dr = db; }
+        const pq = intersect(p, q, dp, dq);
+        const pr = intersect(p, r, dp, dr);
+        out.push(p.x, p.y, p.z, pq.x, pq.y, pq.z, pr.x, pr.y, pr.z);
+        cutEdges.push(pq.x, pq.y, pq.z, pr.x, pr.y, pr.z);
+      } else if (n === 2) {
+        let p, q, r, dp, dq, dr;
+        if (!ia) { r = a; p = b; q = c; dr = da; dp = db; dq = dc; }
+        else if (!ib) { r = b; p = c; q = a; dr = db; dp = dc; dq = da; }
+        else { r = c; p = a; q = b; dr = dc; dp = da; dq = db; }
+        const pr = intersect(p, r, dp, dr);
+        const qr = intersect(q, r, dq, dr);
+        out.push(p.x, p.y, p.z, q.x, q.y, q.z, qr.x, qr.y, qr.z);
+        out.push(p.x, p.y, p.z, qr.x, qr.y, qr.z, pr.x, pr.y, pr.z);
+        cutEdges.push(qr.x, qr.y, qr.z, pr.x, pr.y, pr.z);
+      }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(out, 3));
+    return { geometry: g, cutEdges };
+  }
+
+  function buildSectionCap(meshes, plane, size, color) {
+    const group = new THREE.Group();
+    const geometries = meshes.map((mesh) => {
+      const g = mesh.geometry.clone();
+      g.applyMatrix4(mesh.matrixWorld);
+      return g;
+    });
+    const geometry = mergeGeometries(geometries, false);
+
+    const baseMat = new THREE.MeshBasicMaterial();
+    baseMat.depthWrite = false;
+    baseMat.depthTest = false;
+    baseMat.colorWrite = false;
+    baseMat.stencilWrite = true;
+    baseMat.stencilFunc = THREE.AlwaysStencilFunc;
+
+    const backMat = baseMat.clone();
+    backMat.side = THREE.BackSide;
+    backMat.clippingPlanes = [plane];
+    backMat.stencilFail = THREE.IncrementWrapStencilOp;
+    backMat.stencilZFail = THREE.IncrementWrapStencilOp;
+    backMat.stencilZPass = THREE.IncrementWrapStencilOp;
+    const backMesh = new THREE.Mesh(geometry, backMat);
+    backMesh.renderOrder = 1;
+    group.add(backMesh);
+
+    const frontMat = baseMat.clone();
+    frontMat.side = THREE.FrontSide;
+    frontMat.clippingPlanes = [plane];
+    frontMat.stencilFail = THREE.DecrementWrapStencilOp;
+    frontMat.stencilZFail = THREE.DecrementWrapStencilOp;
+    frontMat.stencilZPass = THREE.DecrementWrapStencilOp;
+    const frontMesh = new THREE.Mesh(geometry, frontMat);
+    frontMesh.renderOrder = 1;
+    group.add(frontMesh);
+
+    const capMat = new THREE.MeshStandardMaterial({
+      color, roughness: 0.85, metalness: 0, side: THREE.DoubleSide,
+      stencilWrite: true, stencilRef: 0, stencilFunc: THREE.NotEqualStencilFunc,
+      stencilFail: THREE.ReplaceStencilOp, stencilZFail: THREE.ReplaceStencilOp, stencilZPass: THREE.ReplaceStencilOp,
+    });
+    const capPlane = new THREE.Mesh(new THREE.PlaneGeometry(size, size), capMat);
+    capPlane.renderOrder = 2;
+    plane.coplanarPoint(capPlane.position);
+    capPlane.lookAt(
+      capPlane.position.x - plane.normal.x,
+      capPlane.position.y - plane.normal.y,
+      capPlane.position.z - plane.normal.z
+    );
+    capPlane.onAfterRender = function (r) { r.clearStencil(); };
+    group.add(capPlane);
+    return group;
+  }
+
+  function easeInOutQuad(t){ return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+
+  // ---------- camera fly (compass presets) ----------
+  let viewDistance = 8;
+  let viewEyeY = 1;
+  let flying = false;
+  let flightStart = 0;
+  const flightDuration = 750;
+  const flightFrom = new THREE.Vector3();
+  const flightFromTarget = new THREE.Vector3();
+  const flightTo = new THREE.Vector3();
+  const flightToTarget = new THREE.Vector3();
+  function flyTo(position, target){
+    flightFrom.copy(camera.position);
+    flightFromTarget.copy(controls.target);
+    flightTo.copy(position);
+    flightToTarget.copy(target);
+    flightStart = performance.now();
+    flying = true;
+  }
+  const VIEW_PRESETS = {
+    north: () => flyTo(new THREE.Vector3(viewDistance, viewEyeY, 0), new THREE.Vector3(0, viewEyeY, 0)),
+    south: () => flyTo(new THREE.Vector3(-viewDistance, viewEyeY, 0), new THREE.Vector3(0, viewEyeY, 0)),
+    east:  () => flyTo(new THREE.Vector3(0, viewEyeY, viewDistance), new THREE.Vector3(0, viewEyeY, 0)),
+    west:  () => flyTo(new THREE.Vector3(0, viewEyeY, -viewDistance), new THREE.Vector3(0, viewEyeY, 0)),
+  };
+  document.querySelectorAll('[data-view]').forEach((btn) => {
+    btn.addEventListener('click', () => VIEW_PRESETS[btn.dataset.view]());
+  });
+
+  // ---------- material presets ----------
+  const MATERIAL_PRESETS = {
+    platre: { color: [0.62, 0.60, 0.55], roughness: 0.85, metalness: 0 },
+    beton:  { color: [0.42, 0.42, 0.40], roughness: 0.75, metalness: 0 },
+    blanc:  { color: [0.85, 0.84, 0.80], roughness: 0.6,  metalness: 0 },
+    terre:  { color: [0.55, 0.38, 0.32], roughness: 0.7,  metalness: 0 },
+    bronze: { color: [0.35, 0.28, 0.18], roughness: 0.35, metalness: 0.5 },
+  };
+  function applyMaterialPreset(name){
+    const p = MATERIAL_PRESETS[name];
+    if (!p || !currentRig || !currentRig.sectionMeshes.length) return;
+    currentRig.sectionMeshes.forEach((mesh) => {
+      mesh.material.color.setRGB(p.color[0], p.color[1], p.color[2]);
+      mesh.material.roughness = p.roughness;
+      mesh.material.metalness = p.metalness;
+    });
+  }
+  document.querySelectorAll('.swatch').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      applyMaterialPreset(btn.dataset.preset);
+      document.querySelectorAll('.swatch').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  // ---------- section cut toggle ----------
+  let sectionView = false;
+  const cutToggle = document.getElementById('cut-toggle');
+  cutToggle.addEventListener('click', () => {
+    if (!currentRig) return;
+    sectionView = !sectionView;
+    const planes = sectionView ? [clipPlane] : [];
+    currentRig.sectionMeshes.forEach((mesh) => { mesh.material.clippingPlanes = planes; });
+    if (currentRig.innerEdges) currentRig.innerEdges.material.clippingPlanes = planes;
+    outlinePass.selectedObjects = sectionView ? [currentRig.clippedOutlineMesh] : [currentRig.model];
+    if (currentRig.cutBoundaryEdges) currentRig.cutBoundaryEdges.visible = sectionView;
+    if (currentRig.sectionCap) currentRig.sectionCap.visible = sectionView;
+    cutToggle.classList.toggle('active', sectionView);
+  });
+
+  // ---------- rig: everything belonging to one loaded project, grouped
+  // so it can be positioned/scaled/disposed as a unit ----------
+  const loader = new GLTFLoader();
+
+  function loadRig(glbPath) {
+    return new Promise((resolve, reject) => {
+      loader.load(glbPath, (gltf) => {
+        const model = gltf.scene;
+        const group = new THREE.Group();
+
+        model.traverse((child) => {
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+            child.material.color.setRGB(0.735, 0.72, 0.675);
+            child.material.roughness = 0.725;
+            child.material.metalness = 0;
+            child.material.envMapIntensity = 0.4;
+            child.material.clipShadows = true;
+            child.material.shadowSide = THREE.DoubleSide;
+          }
+        });
+
+        const box = new THREE.Box3().setFromObject(model);
+        const center = new THREE.Vector3();
+        box.getCenter(center);
+        model.position.x -= center.x;
+        model.position.z -= center.z;
+        model.position.y -= box.min.y;
+        group.add(model);
+
+        const fitBox = new THREE.Box3().setFromObject(model);
+        const sphere = new THREE.Sphere();
+        fitBox.getBoundingSphere(sphere);
+        const fov = camera.fov * (Math.PI / 180);
+        const fitDistance = (sphere.radius / Math.sin(fov / 2)) * 1.5;
+        const maxDim = sphere.radius * 2;
+
+        model.traverse((child) => {
+          if (child.isMesh) {
+            child.geometry.deleteAttribute('normal');
+            const welded = mergeVertices(child.geometry, maxDim * 0.001);
+            child.geometry = toCreasedNormals(welded, 22 * Math.PI / 180);
+          }
+        });
+
+        model.updateMatrixWorld(true);
+        const sectionMeshes = [];
+        model.traverse((child) => { if (child.isMesh) sectionMeshes.push(child); });
+
+        const sectionCap = buildSectionCap(sectionMeshes, clipPlane, maxDim * 2.2, 0xb4864f);
+        sectionCap.visible = false;
+        group.add(sectionCap);
+
+        const clipGeoms = sectionMeshes.map((mesh) => {
+          const g = mesh.geometry.clone();
+          g.applyMatrix4(mesh.matrixWorld);
+          return g;
+        });
+        const mergedForClip = mergeGeometries(clipGeoms, false).toNonIndexed();
+        const { geometry: clippedGeom, cutEdges } = clipGeometryByPlane(mergedForClip, clipPlane);
+        const clippedOutlineMesh = new THREE.Mesh(
+          clippedGeom,
+          new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false, depthTest: false })
+        );
+        group.add(clippedOutlineMesh);
+
+        const cutEdgeGeom = new LineSegmentsGeometry().setPositions(cutEdges);
+        const cutBoundaryEdges = new LineSegments2(
+          cutEdgeGeom,
+          new LineMaterial({ color: 0x1a1712, linewidth: 1.3, worldUnits: false })
+        );
+        cutBoundaryEdges.material.resolution.set(container.clientWidth, container.clientHeight);
+        cutBoundaryEdges.visible = false;
+        group.add(cutBoundaryEdges);
+
+        const edgeGeoms = sectionMeshes.map((mesh) => {
+          const g = mesh.geometry.clone();
+          g.deleteAttribute('normal');
+          g.applyMatrix4(mesh.matrixWorld);
+          return g;
+        });
+        const weldedForEdges = mergeVertices(mergeGeometries(edgeGeoms, false), maxDim * 0.001);
+        const edgesGeom = new THREE.EdgesGeometry(weldedForEdges, 22);
+        const fatEdgesGeom = new LineSegmentsGeometry().fromEdgesGeometry(edgesGeom);
+        const innerEdges = new LineSegments2(
+          fatEdgesGeom,
+          new LineMaterial({ color: 0x1a1712, linewidth: 1.3, worldUnits: false })
+        );
+        innerEdges.material.resolution.set(container.clientWidth, container.clientHeight);
+        group.add(innerEdges);
+
+        resolve({
+          group, model, sectionMeshes, sectionCap, clippedOutlineMesh,
+          cutBoundaryEdges, innerEdges,
+          fitDistance, fitCenter: sphere.center.clone(),
+          maxDim,
+          dispose() {
+            scene.remove(group);
+            group.traverse((obj) => {
+              if (obj.geometry) obj.geometry.dispose();
+              if (obj.material) {
+                (Array.isArray(obj.material) ? obj.material : [obj.material]).forEach((m) => m.dispose());
+              }
+            });
+          },
+        });
+      }, undefined, reject);
+    });
+  }
+
+  // ---------- UI updates per project ----------
+  function applyProjectUI(slug) {
+    const cfg = PROJECTS[slug];
+    document.title = cfg.title;
+    document.getElementById('viewer-credit').innerHTML =
+      cfg.creditHtml + (cfg.creditMeta ? '<br><span class="credit-meta">' + cfg.creditMeta + '</span>' : '');
+    document.getElementById('plans-menu').style.display = cfg.hasPlans ? '' : 'none';
+    if (!cfg.hasPlans) plansOverlay.hidden = true;
+    // reset section-cut + material picker UI state for the new project
+    sectionView = false;
+    cutToggle.classList.remove('active');
+    document.querySelectorAll('.swatch').forEach((b) => b.classList.remove('active'));
+  }
+
+  function frameCamera(rig, instant) {
+    viewDistance = rig.fitDistance;
+    viewEyeY = rig.fitCenter.y;
+    const dir = new THREE.Vector3(-1.5, 1.3, 0.55).normalize();
+    const pos = dir.clone().multiplyScalar(rig.fitDistance).add(rig.fitCenter);
+    camera.near = rig.fitDistance / 100;
+    camera.far = rig.fitDistance * 100;
+    camera.updateProjectionMatrix();
+    controls.minDistance = rig.fitDistance * 0.25;
+    controls.maxDistance = rig.fitDistance * 3;
+    if (instant) {
+      camera.position.copy(pos);
+      controls.target.copy(rig.fitCenter);
+      controls.update();
+    } else {
+      flyTo(pos, rig.fitCenter);
+    }
+    keyLight.position.set(rig.maxDim * 0.8, rig.maxDim * 1.4, rig.maxDim * 0.5);
+    keyLight.shadow.camera.left = -rig.maxDim;
+    keyLight.shadow.camera.right = rig.maxDim;
+    keyLight.shadow.camera.top = rig.maxDim;
+    keyLight.shadow.camera.bottom = -rig.maxDim;
+    keyLight.shadow.camera.updateProjectionMatrix();
+  }
+
+  // ---------- project switching, with the character-select slide ----------
+  let currentRig = null;
+  let currentSlug = null;
+  let switching = false;
+  // rigs are kept resident once loaded (never disposed) so revisiting a
+  // project — inevitable once a roll cycles past it — is instant instead
+  // of re-parsing and re-processing the GLTF from scratch every time
+  const rigCache = new Map();
+  async function getRig(slug){
+    if (rigCache.has(slug)) return rigCache.get(slug);
+    const rig = await loadRig(PROJECTS[slug].glb);
+    rigCache.set(slug, rig);
+    return rig;
+  }
+
+  async function switchProject(slug, { direction = 1, animate = true, duration = 750 } = {}) {
+    if (switching || slug === currentSlug && currentRig) return;
+    switching = true;
+
+    const newRig = await getRig(slug);
+    const oldRig = currentRig;
+
+    if (animate && oldRig) {
+      // Keep the camera exactly where it currently is — including any
+      // manual orbit/zoom the visitor has done — for the whole slide AND
+      // after the incoming model has arrived: it stays at that same
+      // viewpoint permanently (no auto-reframe), matching the outgoing
+      // model's behavior. The incoming rig is scale-corrected so it
+      // reads at a consistent size under that untouched view.
+      const currentDistance = camera.position.distanceTo(controls.target);
+      const rightAxis = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
+      const offsetVec = rightAxis.multiplyScalar(currentDistance * 2.2 * direction);
+      const scaleCorrection = currentDistance / newRig.fitDistance;
+
+      // oldRig may already be resting at a non-1 scale left over from
+      // when it was itself an incoming rig in a previous switch (its
+      // scale is never reset to 1 since the camera never auto-reframes
+      // any more) — animate its exit from that actual current scale,
+      // not an assumed 1, or it pops the instant the slide starts.
+      const oldStartScale = oldRig.group.scale.x;
+
+      scene.add(newRig.group);
+      newRig.group.visible = true;
+      newRig.group.position.copy(offsetVec);
+      newRig.group.scale.setScalar(scaleCorrection * 0.25);
+
+      await new Promise((resolve) => {
+        const start = performance.now();
+        function step(now) {
+          const t = Math.min((now - start) / duration, 1);
+          const e = easeInOutQuad(t);
+          oldRig.group.position.copy(offsetVec).multiplyScalar(-e);
+          oldRig.group.scale.setScalar(oldStartScale * (1 - 0.75 * e));
+          newRig.group.position.copy(offsetVec).multiplyScalar(1 - e);
+          newRig.group.scale.setScalar(scaleCorrection * (0.25 + 0.75 * e));
+          if (t < 1) requestAnimationFrame(step);
+          else resolve();
+        }
+        requestAnimationFrame(step);
+      });
+
+      oldRig.group.visible = false;
+      newRig.group.position.set(0, 0, 0);
+
+      // camera stays put — just keep the compass presets, zoom limits
+      // and shadow framing consistent with the model's current
+      // apparent size (currentDistance === newRig.fitDistance *
+      // scaleCorrection, i.e. exactly where the camera already is)
+      viewDistance = currentDistance;
+      viewEyeY = newRig.fitCenter.y * scaleCorrection;
+      camera.near = currentDistance / 100;
+      camera.far = currentDistance * 100;
+      camera.updateProjectionMatrix();
+      controls.minDistance = currentDistance * 0.25;
+      controls.maxDistance = currentDistance * 3;
+      const effMaxDim = newRig.maxDim * scaleCorrection;
+      keyLight.position.set(effMaxDim * 0.8, effMaxDim * 1.4, effMaxDim * 0.5);
+      keyLight.shadow.camera.left = -effMaxDim;
+      keyLight.shadow.camera.right = effMaxDim;
+      keyLight.shadow.camera.top = effMaxDim;
+      keyLight.shadow.camera.bottom = -effMaxDim;
+      keyLight.shadow.camera.updateProjectionMatrix();
+    } else {
+      scene.add(newRig.group);
+      newRig.group.visible = true;
+      newRig.group.position.set(0, 0, 0);
+      newRig.group.scale.setScalar(1);
+      if (oldRig) oldRig.group.visible = false;
+      frameCamera(newRig, true);
+    }
+
+    currentRig = newRig;
+    currentSlug = slug;
+    outlinePass.selectedObjects = [currentRig.model];
+    applyProjectUI(slug);
+    switching = false;
+  }
+
+  // ---------- nav arrows: cycle through ORDER, no page reload ----------
+  function stepSlug(direction){
+    const idx = ORDER.indexOf(currentSlug);
+    return ORDER[(idx + direction + ORDER.length) % ORDER.length];
+  }
+  // Casino-roll navigation: each request just queues one step in a
+  // direction. If nothing else is pending, that step plays out at full
+  // (settle) duration exactly like before. But if more requests land
+  // while a step is still animating — someone mashing the arrow key, a
+  // hard swipe worth several steps — they queue up and get consumed as
+  // fast, short steps, with only the very last one settling normally.
+  // A single, unhurried request is therefore unchanged; only rapid or
+  // multi-step input turns into the fast reel.
+  let pendingSteps = 0;
+  let rollDirection = 1;
+  let rolling = false;
+  const ROLL_STEP_MS = 130;
+  const SETTLE_MS = 750;
+  function requestSteps(direction, count){
+    pendingSteps = Math.min(pendingSteps + count, ORDER.length - 1);
+    rollDirection = direction;
+    if (rolling) return;
+    rolling = true;
+    (async () => {
+      while (pendingSteps > 0) {
+        pendingSteps--;
+        const isLast = pendingSteps === 0;
+        const slug = stepSlug(rollDirection);
+        if (isLast) history.pushState({}, '', '?p=' + slug);
+        await switchProject(slug, { direction: rollDirection, duration: isLast ? SETTLE_MS : ROLL_STEP_MS });
+      }
+      rolling = false;
+    })();
+  }
+  document.querySelectorAll('.nav-arrow').forEach((link, i) => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      requestSteps(link.id === 'nav-next' ? 1 : -1, 1);
+    });
+  });
+  window.addEventListener('popstate', () => {
+    const slug = new URLSearchParams(location.search).get('p') || ORDER[0];
+    if (PROJECTS[slug]) switchProject(slug, { direction: 1 });
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    requestSteps(e.key === 'ArrowRight' ? 1 : -1, 1);
+  });
+
+  // ---------- initial load ----------
+  const initialSlug = new URLSearchParams(location.search).get('p');
+  switchProject(PROJECTS[initialSlug] ? initialSlug : ORDER[0], { animate: false });
+
+  window.addEventListener('resize', () => {
+    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    composer.setSize(container.clientWidth, container.clientHeight);
+    if (currentRig) {
+      currentRig.cutBoundaryEdges.material.resolution.set(container.clientWidth, container.clientHeight);
+      currentRig.innerEdges.material.resolution.set(container.clientWidth, container.clientHeight);
+    }
+  });
+
+  (function animate() {
+    requestAnimationFrame(animate);
+    if (flying) {
+      const t = Math.min((performance.now() - flightStart) / flightDuration, 1);
+      const e = easeInOutQuad(t);
+      camera.position.lerpVectors(flightFrom, flightTo, e);
+      controls.target.lerpVectors(flightFromTarget, flightToTarget, e);
+      if (t >= 1) flying = false;
+    }
+    controls.update();
+    composer.render();
+  })();
+</script>
+
+</body>
+</html>

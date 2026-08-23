@@ -19,6 +19,15 @@
 
   --display: 'Bebas Neue', 'Oswald', Impact, sans-serif;
   --mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  --logo: 'Arcane Nine', 'Bebas Neue', Impact, sans-serif;
+}
+
+@font-face{
+  font-family: 'Arcane Nine';
+  src: url('../fonts/ArcaneNine.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
 }
 
 :root[data-theme="light"]{
@@ -46,6 +55,18 @@ body{
   -webkit-font-smoothing: antialiased;
   position: relative;
   overflow-x: hidden;
+}
+
+/* 3D model: character-select-style slide — pushed off-screen to the
+   left (no fade, purely a slide+shrink), grows in from the right */
+.full-model{
+  transition: transform .8s cubic-bezier(.4,0,.2,1);
+}
+.full-model.model-transition-out{
+  transform: translateX(-110vw) scale(0.25);
+}
+.full-model.model-transition-in{
+  transform: translateX(110vw) scale(0.25);
 }
 
 /* grunge texture, self-contained (no external asset) — low-contrast
@@ -166,15 +187,231 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   color: var(--ink-faint);
 }
 
-/* ---------- dedicated 3D viewer page ---------- */
+/* ---------- project index ---------- */
+.index-page{
+  position: relative; z-index: 2;
+  min-height: 100vh;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 100px 24px 60px;
+}
+.index-header{
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 40px;
+}
+.index-reset{
+  position: fixed; top: 72px; right: 24px; z-index: 10;
+  width: 48px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg-2) 75%, transparent);
+  backdrop-filter: blur(6px);
+  color: var(--ink-soft);
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: border-color .2s ease, color .2s ease, transform .3s ease;
+}
+.index-reset:hover{ border-color: var(--rose-gold-deep); color: var(--rose-gold); }
+.index-reset.spin{ transform: rotate(-360deg); }
+.index-sub{
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.index-table-scroll{
+  overflow-x: auto;
+}
+.index-table{
+  width: 100%;
+  min-width: 780px;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+.index-table th{
+  text-align: left;
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+  padding: 0 12px 10px 0;
+  border-bottom: 2px solid var(--ink);
+  white-space: nowrap;
+}
+.index-table th.sortable{
+  cursor: pointer;
+  user-select: none;
+}
+.index-table th.sortable:hover{ color: var(--rose-gold); }
+.index-table th.sortable .sort-arrow{
+  display: inline-block;
+  margin-left: 4px;
+  font-size: 0.6rem;
+  color: var(--rose-gold);
+  opacity: 0;
+}
+.index-table th.sortable.active .sort-arrow{ opacity: 1; }
+.filter-header{ position: relative; }
+.filter-header.filtered{ color: var(--rose-gold); }
+.filter-dropdown{
+  position: absolute;
+  top: 100%; left: 0;
+  margin-top: 8px;
+  display: none;
+  flex-direction: column;
+  min-width: 160px;
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+  z-index: 10;
+}
+.filter-dropdown.open{ display: flex; }
+.filter-dropdown button{
+  text-align: left;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.filter-dropdown button:hover{ background: color-mix(in srgb, var(--rose-gold) 14%, transparent); color: var(--rose-gold); }
+.filter-dropdown button.active{ color: var(--rose-gold); }
+.index-table td{
+  padding: 14px 12px 14px 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-soft);
+  vertical-align: top;
+  white-space: nowrap;
+}
+.index-table tr:last-child td{ border-bottom: none; }
+.index-table td:first-child{ color: var(--ink); }
+.index-cta td{ color: var(--ink-faint); }
+.index-cta td:first-child a{ color: var(--rose-gold); font-style: italic; border-bottom-color: var(--rose-gold-deep); }
+.index-cta td:first-child a:hover{ color: var(--ink); border-bottom-color: var(--ink); }
+.index-table a{
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--ink-faint);
+  padding-bottom: 1px;
+}
+.index-table a:hover{ color: var(--rose-gold); border-bottom-color: var(--rose-gold); }
+
+.index-thumb{
+  position: fixed;
+  top: 0; left: 0;
+  width: 220px; height: 220px;
+  border-radius: 8px;
+  border: 1.5px solid var(--rose-gold-deep);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rose-gold) 22%, transparent), 0 20px 50px rgba(0,0,0,0.35);
+  background: var(--bg-2);
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s ease;
+  z-index: 6;
+}
+.index-thumb.visible{ opacity: 1; }
+.index-thumb canvas{ display: block; width: 100%; height: 100%; }
+@media (max-width: 900px){
+  .index-thumb{ display: none; }
+}
+
+/* ---------- site banner ---------- */
+.site-banner{
+  position: fixed; top: 0; left: 0; right: 0; z-index: 8;
+  height: 52px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px;
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--line);
+}
+.site-logo{
+  display: inline-block;
+  font-family: var(--logo);
+  font-weight: 400;
+  font-size: 1.3rem;
+  letter-spacing: 0.03em;
+  text-transform: lowercase;
+  color: var(--ink);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.site-logo:hover{ color: var(--rose-gold); }
+.logo-prefix, .logo-vir{ display: inline-block; }
+/* "archi" + "vir" is literally "archivir"; revealing "tecture " between
+   them (real inline content, not an overlay) pushes "vir" rightward via
+   ordinary text reflow, and "tuelle" appends the same way after it —
+   together they spell out "architecture virtuelle" with no faked motion */
+.logo-mid, .logo-tail{
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  vertical-align: bottom;
+  max-width: 0;
+  transition: max-width .35s cubic-bezier(.5,0,.75,0);
+}
+.logo-mid.is-open{
+  max-width: 8em;
+  transition: max-width 1s ease-in-out;
+}
+.logo-tail.is-open{
+  max-width: 6em;
+  transition: max-width 1s ease-in-out;
+}
+/* the width grow above only opens space (pushing "vir" into position);
+   the actual letters stay invisible until explicitly revealed, so
+   "tecture" and "tuelle" can be timed to appear together afterward */
+.logo-mid-text, .logo-tail-text{ display: inline-block; }
+.logo-letter{
+  display: inline-block;
+  opacity: 0;
+  transition: opacity .12s ease;
+}
+.logo-mid-text.is-visible .logo-letter, .logo-tail-text.is-visible .logo-letter{
+  opacity: 1;
+}
+/* dust-disintegration exit: each letter drifts off on its own randomised
+   heading (set per-letter as --dx/--dy/--drot inline) instead of the
+   whole word fading uniformly — like ash scattering, Thanos-snap style */
+.logo-letter.is-decomposing{
+  opacity: 0;
+  transform: translate(var(--dx, 0px), var(--dy, -14px)) rotate(var(--drot, 20deg)) scale(.3);
+  transition: opacity .55s ease-in, transform .65s cubic-bezier(.3,0,.8,.15);
+}
+.site-logo.is-settling{
+  animation: logo-settle .4s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes logo-settle{
+  0%{ transform: translateX(-6px); }
+  60%{ transform: translateX(2px); }
+  100%{ transform: translateX(0); }
+}
+.site-banner-right{
+  display: flex; align-items: center; gap: 18px;
+}
 .back-link{
-  position: fixed; top: 20px; left: 20px; z-index: 5;
-  font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase;
+  position: fixed; top: 72px; left: 24px; z-index: 5;
+  font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase;
   color: var(--ink-soft); text-decoration: none;
   border-bottom: 1px dashed var(--ink-faint); padding-bottom: 2px;
 }
-.back-link:hover{ color: var(--blue); border-bottom-color: var(--blue); }
+.back-link:hover{ color: var(--rose-gold); border-bottom-color: var(--rose-gold); }
 
+/* ---------- dedicated 3D viewer page ---------- */
 .viewer-page{
   position: relative; z-index: 2;
   width: 100vw; height: 100vh;
@@ -188,7 +425,7 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 
 /* ---------- floating nav widgets ---------- */
 .compass{
-  position: fixed; top: 24px; right: 24px; z-index: 5;
+  position: fixed; top: 72px; right: 24px; z-index: 5;
   width: 100px; height: 100px;
 }
 .compass-ring{
@@ -243,20 +480,23 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 .viewer-credit{
   position: fixed; bottom: 24px; left: 24px; z-index: 5;
   font-family: var(--mono);
-  font-size: 0.66rem; letter-spacing: 0.06em;
+  font-size: 0.82rem; letter-spacing: 0.06em;
   color: var(--ink-faint);
   line-height: 1.4;
   pointer-events: none;
 }
-.viewer-credit strong{ display: block; color: var(--ink-soft); font-weight: 500; }
+.viewer-credit strong{ display: block; font-size: 1.05em; color: var(--ink-soft); font-weight: 500; }
 .credit-link{ pointer-events: auto; text-decoration: none; }
 .credit-link:hover strong{ color: var(--rose-gold); }
-.credit-meta{ display: block; margin-top: 2px; color: var(--ink-faint); font-size: 0.6rem; }
+.credit-author{ pointer-events: auto; color: inherit; text-decoration: none; }
+.credit-author:hover{ color: var(--rose-gold); }
+.credit-meta{ display: block; margin-top: 2px; color: var(--ink-faint); font-size: 0.72rem; }
 
 /* ---------- material picker ---------- */
 .material-picker{
+  display: none; /* hidden for now */
   position: fixed; bottom: 80px; left: 24px; z-index: 5;
-  display: flex; gap: 8px;
+  gap: 8px;
 }
 .swatch{
   width: 22px; height: 22px;
@@ -268,9 +508,145 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 .swatch:hover{ transform: scale(1.15); }
 .swatch.active{ border-color: var(--rose-gold); border-width: 2px; }
 
+/* ---------- plans overlay ---------- */
+.plans-menu{
+  position: fixed; bottom: 16px; right: 76px; z-index: 35;
+  padding: 12px;
+}
+.plans-menu-toggle{
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg-2) 75%, transparent);
+  backdrop-filter: blur(6px);
+  color: var(--ink-soft);
+  font-size: 1.15rem;
+  cursor: pointer;
+  transition: border-color .2s ease, color .2s ease;
+}
+.plans-menu-toggle:hover{ border-color: var(--rose-gold-deep); color: var(--rose-gold); }
+.plans-menu-toggle[aria-expanded="true"]{ border-color: var(--rose-gold); color: var(--rose-gold); }
+
+.plans-dropdown{
+  position: absolute; bottom: 72px; right: 12px;
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg-2) 92%, transparent);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(4px);
+  transition: opacity .18s ease, transform .18s ease;
+}
+.plans-dropdown.visible{
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+.plans-dropdown-heading{
+  margin: 10px 0 2px 6px;
+  font-family: var(--mono);
+  font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.plans-dropdown-heading:first-child{ margin-top: 4px; }
+.plans-dropdown-item{
+  display: flex; align-items: center; gap: 10px;
+  width: 190px;
+  padding: 6px;
+  border: none; border-radius: 5px;
+  background: transparent;
+  cursor: pointer;
+  transition: background .15s ease;
+}
+.plans-dropdown-item:hover{ background: color-mix(in srgb, var(--rose-gold) 14%, transparent); }
+.plans-dropdown-thumb{
+  flex: none;
+  width: 36px; height: 36px;
+  background: #0A0908;
+  overflow: hidden;
+}
+[data-theme="light"] .plans-dropdown-thumb{ background: #FDFCFA; }
+.plans-dropdown-thumb svg{
+  display: block;
+  width: 100%; height: 100%;
+  filter: invert(1);
+}
+[data-theme="light"] .plans-dropdown-thumb svg{ filter: none; }
+.plans-dropdown-label{
+  font-family: var(--mono);
+  font-size: 0.72rem; letter-spacing: 0.02em;
+  color: var(--ink-soft);
+}
+.plans-dropdown-item:hover .plans-dropdown-label{ color: var(--rose-gold); }
+
+.plans-overlay{
+  position: fixed; inset: 0; z-index: 30;
+  background: #0A0908;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 40px 24px;
+}
+.plans-overlay[hidden]{ display: none; }
+[data-theme="light"] .plans-overlay{ background: #FDFCFA; }
+
+.plans-close{
+  position: absolute; top: 24px; right: 24px;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: transparent;
+  color: #EDE9E2;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.plans-close:hover{ border-color: #EDE9E2; }
+[data-theme="light"] .plans-close{ border-color: rgba(0,0,0,0.25); color: #2A2620; }
+[data-theme="light"] .plans-close:hover{ border-color: #2A2620; }
+
+.plans-sheet{
+  width: min(900px, 92vw);
+  height: min(640px, 80vh);
+  padding: 12px;
+  display: flex; align-items: center; justify-content: center;
+}
+.plan-page{ display: none; width: 100%; height: 100%; align-items: center; justify-content: center; }
+.plan-page.active{ display: flex; }
+.plan-page svg{
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  /* the outer frame path sits exactly on the viewBox edge, so its
+     stroke is half-clipped by the SVG's default overflow:hidden —
+     letting it overflow keeps the full stroke width visible */
+  overflow: visible;
+  /* the drawings are inked dark-on-light; invert lines and poché
+     fills together so they read as light-on-dark on the dark backdrop */
+  filter: invert(1);
+}
+[data-theme="light"] .plan-page svg{ filter: none; }
+/* the south facade's ground shadow inverts into a bright smudge on
+   the dark backdrop instead of reading as a shadow, so drop it there */
+[data-theme="dark"] .plan-page[data-plan="sud"] .st1{ display: none; }
+/* force the étage/coupe poché to solid black regardless of whatever
+   fill the source SVG carries — combined with the invert filter above,
+   this guarantees solid black in light theme and solid white in dark.
+   Also covers the dropdown thumbnails, which are separate cloned SVGs
+   living under .plans-dropdown-thumb, not inside .plan-page. */
+.plan-page[data-plan="etage"] .st1,
+.plan-page[data-plan="coupe"] .st1,
+.plans-dropdown-item[data-plan="etage"] .st1,
+.plans-dropdown-item[data-plan="coupe"] .st1{
+  fill: #000 !important;
+  opacity: 1 !important;
+}
+
 /* ---------- theme toggle ---------- */
 .theme-toggle{
-  position: fixed; top: 20px; right: 20px; z-index: 6;
   width: 34px; height: 34px;
   display: flex; align-items: center; justify-content: center;
   border-radius: 50%;
@@ -282,7 +658,6 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   transition: border-color .2s ease, color .2s ease;
 }
 .theme-toggle:hover{ border-color: var(--rose-gold-deep); color: var(--rose-gold); }
-.theme-toggle--viewer{ right: 136px; }
 
 /* ---------- project prev/next arrows ---------- */
 .nav-arrow{

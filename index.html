@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script>document.documentElement.dataset.theme = localStorage.getItem('archivir-theme') || 'light';</script>
-<title>Projets — Archivir</title>
-<meta name="description" content="Archivir modélise vos relevés, scans et plans existants en maquettes BIM 3D pour architectes. Projets : Pavillon Cuneo, Tupi.">
+<title>Archivir — Index des projets</title>
+<meta name="description" content="Archivir modélise vos relevés, scans et plans existants en maquettes BIM 3D pour architectes. Index des projets.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -21,38 +21,72 @@
 </head>
 <body>
 
-<button id="theme-toggle" class="theme-toggle" aria-label="Basculer le thème">☾</button>
+<header class="site-banner">
+  <a class="site-logo" id="site-logo" href="index.html">
+    <span class="logo-prefix">archi</span><span class="logo-mid"><span class="logo-mid-text">tecture&nbsp;</span></span><span class="logo-vir">vir</span><span class="logo-tail"><span class="logo-tail-text">tuelle</span></span>
+  </a>
+  <div class="site-banner-right">
+    <button id="theme-toggle" class="theme-toggle" aria-label="Basculer le thème">☾</button>
+  </div>
+</header>
 
-<main class="splash">
-  <div class="project-grid">
-    <a class="project-card" href="projets/pavillon.html" aria-label="Ouvrir la maquette 3D du pavillon Cuneo">
-      <div class="card-frame">
-        <div class="card-visual"><div class="card-viewer" data-glb="projets/pavillon.glb"></div></div>
-        <div class="card-badges">
-          <span class="badge badge-3d">3D</span>
-        </div>
-        <div class="card-banner">
-          <h2>Pavillon Cuneo</h2>
-          <span class="card-subtitle">Aldo Rossi</span>
-          <span class="card-meta">1962 · Cuneo · Mémoriel · Concours</span>
-        </div>
-      </div>
-    </a>
-    <a class="project-card" href="projets/tupi.html" aria-label="Ouvrir la maquette 3D du projet Tupi">
-      <div class="card-frame">
-        <div class="card-visual"><div class="card-viewer" data-glb="projets/tupi.glb"></div></div>
-        <div class="card-badges">
-          <span class="badge badge-3d">3D</span>
-        </div>
-        <div class="card-banner">
-          <h2>Tupi</h2>
-          <span class="card-subtitle">mijong architecture</span>
-          <span class="card-meta">2019 · Sion · Santé · Concours</span>
-        </div>
-      </div>
-    </a>
+<main class="index-page">
+  <header class="index-header">
+    <p class="index-sub">Index des projets</p>
+    <button class="index-reset" id="index-reset" aria-label="Réinitialiser le tri et les filtres" title="Réinitialiser">↻</button>
+  </header>
+
+  <div class="index-table-scroll">
+  <table class="index-table">
+    <thead>
+      <tr>
+        <th data-col="0">Projet</th>
+        <th class="sortable filter-header" data-col="1" id="auteur-header">Auteur</th>
+        <th class="sortable filter-header" data-col="2" id="lieu-header">Lieu</th>
+        <th class="sortable" data-col="3">Année</th>
+        <th class="sortable filter-header" data-col="4" id="typologie-header">Catégorie d'ouvrage</th>
+        <th class="sortable filter-header" data-col="5" id="type-header">Type de mandat</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a href="projets/viewer.html?p=pavillon" data-glb="projets/pavillon cueno_aldo rossi/pavillon.glb">Monument de la Résistance</a></td>
+        <td>Aldo Rossi</td>
+        <td data-country="Italie">Cuneo</td>
+        <td>1962</td>
+        <td>Mémoriel</td>
+        <td>Concours</td>
+      </tr>
+      <tr>
+        <td><a href="projets/viewer.html?p=tupi" data-glb="projets/tupi.glb">Tupi</a></td>
+        <td>mijong architecture</td>
+        <td data-country="Suisse">Sion (VS)</td>
+        <td>2019</td>
+        <td>Santé</td>
+        <td>Concours</td>
+      </tr>
+      <tr>
+        <td><a href="projets/viewer.html?p=haus" data-glb="projets/haus am see/has.glb">Haus am See</a></td>
+        <td>Jan Kinsbergen</td>
+        <td data-country="Suisse">Wollerau (SZ)</td>
+        <td>2017</td>
+        <td>Habitation</td>
+        <td>Nouvelle construction</td>
+      </tr>
+      <tr class="index-cta">
+        <td><a href="mailto:info@archivir.ch">Votre projet ici ?</a></td>
+        <td>—</td>
+        <td>—</td>
+        <td>—</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+    </tbody>
+  </table>
   </div>
 </main>
+
+<div id="index-thumb" class="index-thumb"></div>
 
 <script>
   const themeToggle = document.getElementById('theme-toggle');
@@ -66,6 +100,241 @@
     localStorage.setItem('archivir-theme', next);
     applyThemeIcon();
   });
+
+  const siteLogo = document.getElementById('site-logo');
+  const logoMid = siteLogo.querySelector('.logo-mid');
+  const logoTail = siteLogo.querySelector('.logo-tail');
+  const logoMidText = siteLogo.querySelector('.logo-mid-text');
+  const logoTailText = siteLogo.querySelector('.logo-tail-text');
+  const MS_PER_LETTER = 100;
+  function splitLetters(el){
+    const text = el.textContent;
+    el.textContent = '';
+    let maxDelay = 0;
+    text.split('').forEach((ch, i) => {
+      const span = document.createElement('span');
+      span.className = 'logo-letter';
+      span.textContent = ch === ' ' ? ' ' : ch;
+      const delay = i * MS_PER_LETTER;
+      span.style.transitionDelay = delay + 'ms';
+      maxDelay = Math.max(maxDelay, delay);
+      el.appendChild(span);
+    });
+    return maxDelay;
+  }
+  const midRevealMs = splitLetters(logoMidText);
+  const tailRevealMs = splitLetters(logoTailText);
+  const typeDuration = Math.max(midRevealMs, tailRevealMs) + 200; // + the letter's own transition
+  // dust-disintegration exit: each letter drifts off on its own random
+  // heading rather than the whole word fading uniformly
+  function decomposeText(el){
+    el.querySelectorAll('.logo-letter').forEach((letter) => {
+      const dx = (Math.random() - 0.5) * 50;
+      const dy = -18 - Math.random() * 34;
+      const drot = (Math.random() - 0.5) * 100;
+      letter.style.setProperty('--dx', dx.toFixed(1) + 'px');
+      letter.style.setProperty('--dy', dy.toFixed(1) + 'px');
+      letter.style.setProperty('--drot', drot.toFixed(1) + 'deg');
+      letter.style.transitionDelay = (Math.random() * 180).toFixed(0) + 'ms';
+      letter.classList.add('is-decomposing');
+    });
+  }
+  function resetLetters(el){
+    el.querySelectorAll('.logo-letter').forEach((letter, i) => {
+      letter.classList.remove('is-decomposing');
+      letter.style.transitionDelay = (i * MS_PER_LETTER) + 'ms';
+    });
+  }
+  const DECOMPOSE_MS = 900;
+  let logoAnimating = false;
+  siteLogo.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (logoAnimating) return;
+    logoAnimating = true;
+    // phase 1: open both gaps at once (text still invisible) — this is
+    // what pushes "vir" into its final position via real text reflow
+    logoMid.classList.add('is-open');
+    logoTail.classList.add('is-open');
+    setTimeout(() => {
+      // phase 2: "vir" has settled — type "tecture" and "tuelle" in together,
+      // letter by letter, left to right
+      logoMidText.classList.add('is-visible');
+      logoTailText.classList.add('is-visible');
+      setTimeout(() => {
+        // phase 3: hold, then let each letter disintegrate on its own.
+        // is-visible comes off in the same tick as is-decomposing goes on,
+        // so the higher-specificity ".is-visible .logo-letter{opacity:1}"
+        // rule never gets a chance to fight the decompose opacity/delay
+        decomposeText(logoMidText);
+        decomposeText(logoTailText);
+        logoMidText.classList.remove('is-visible');
+        logoTailText.classList.remove('is-visible');
+        setTimeout(() => {
+          resetLetters(logoMidText);
+          resetLetters(logoTailText);
+          setTimeout(() => {
+            logoMid.classList.remove('is-open');
+            logoTail.classList.remove('is-open');
+            setTimeout(() => {
+              siteLogo.classList.add('is-settling');
+              setTimeout(() => {
+                siteLogo.classList.remove('is-settling');
+                logoAnimating = false;
+              }, 400);
+            }, 350);
+          }, 200);
+        }, DECOMPOSE_MS);
+      }, typeDuration + 1400);
+    }, 1000);
+  });
+
+  // ---------- sortable / filterable index table ----------
+  (function(){
+    const table = document.querySelector('.index-table');
+    const tbody = table.querySelector('tbody');
+    const allRows = () => Array.from(tbody.querySelectorAll('tr'));
+    const originalOrder = allRows();
+
+    // alphabetical sort — every sortable header except the filter ones
+    // (Lieu, Catégorie d'ouvrage, Type de mandat), which open a picker
+    // menu instead (below)
+    const sortHeaders = Array.from(table.querySelectorAll('th.sortable:not(.filter-header)'));
+    sortHeaders.forEach((th) => {
+      const arrow = document.createElement('span');
+      arrow.className = 'sort-arrow';
+      arrow.textContent = '↑';
+      th.appendChild(arrow);
+    });
+    let activeCol = null;
+    let ascending = true;
+    sortHeaders.forEach((th) => {
+      th.addEventListener('click', () => {
+        const col = Number(th.dataset.col);
+        ascending = activeCol === col ? !ascending : true;
+        activeCol = col;
+        sortHeaders.forEach((h) => h.classList.remove('active'));
+        th.classList.add('active');
+        th.querySelector('.sort-arrow').textContent = ascending ? '↑' : '↓';
+        const rows = allRows();
+        rows.sort((a, b) => {
+          const ka = a.children[col].textContent.trim();
+          const kb = b.children[col].textContent.trim();
+          return ascending ? ka.localeCompare(kb, 'fr') : kb.localeCompare(ka, 'fr');
+        });
+        rows.forEach((row) => tbody.appendChild(row));
+      });
+    });
+
+    // filter headers: clicking opens a small menu listing the distinct
+    // values in that column; picking one filters the table. Filters on
+    // different columns combine (AND). Each dropdown's own option list
+    // is faceted: it only offers values that still exist among rows
+    // matching the OTHER active filters, so picking a Type de mandat
+    // narrows what Lieu/Catégorie d'ouvrage can still offer, and so on —
+    // never a choice that would lead to zero results.
+    const activeFilters = {}; // col -> value, or '' for "Tous"
+    const colAttr = {}; // col -> useAttr, so any column can be checked generically
+    const filterConfigs = []; // { header, col, useAttr, dropdown }
+
+    function cellValue(row, col){
+      const cell = row.children[col];
+      const useAttr = colAttr[col];
+      return useAttr ? cell.dataset[useAttr] : cell.textContent.trim();
+    }
+    function matchesFilters(row, excludeCol){
+      return Object.entries(activeFilters).every(([col, value]) => {
+        if (!value || Number(col) === excludeCol) return true;
+        return cellValue(row, Number(col)) === value;
+      });
+    }
+    function availableValues(col){
+      return Array.from(new Set(
+        allRows().filter((row) => matchesFilters(row, col)).map((row) => cellValue(row, col)).filter(Boolean)
+      )).sort((a, b) => a.localeCompare(b, 'fr'));
+    }
+    function applyFilters(){
+      allRows().forEach((row) => {
+        row.style.display = matchesFilters(row, null) ? '' : 'none';
+      });
+      filterConfigs.forEach(rebuildDropdown);
+    }
+    function rebuildDropdown(config){
+      const { header, col, dropdown } = config;
+      const available = availableValues(col);
+      if (activeFilters[col] && !available.includes(activeFilters[col])) {
+        // the current pick no longer exists given the other filters
+        activeFilters[col] = '';
+      }
+      const selected = activeFilters[col] || '';
+      header.classList.toggle('filtered', !!selected);
+      dropdown.innerHTML = '';
+      const allBtn = document.createElement('button');
+      allBtn.textContent = 'Tous';
+      allBtn.dataset.value = '';
+      allBtn.classList.toggle('active', selected === '');
+      dropdown.appendChild(allBtn);
+      available.forEach((value) => {
+        const btn = document.createElement('button');
+        btn.textContent = value;
+        btn.dataset.value = value;
+        btn.classList.toggle('active', value === selected);
+        dropdown.appendChild(btn);
+      });
+      dropdown.querySelectorAll('button').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          activeFilters[col] = btn.dataset.value;
+          applyFilters();
+          dropdown.classList.remove('open');
+        });
+      });
+    }
+    function setupFilterHeader(headerId, { useAttr } = {}){
+      const header = document.getElementById(headerId);
+      const col = Number(header.dataset.col);
+      colAttr[col] = useAttr;
+      const dropdown = document.createElement('div');
+      dropdown.className = 'filter-dropdown';
+      header.appendChild(dropdown);
+      const config = { header, col, dropdown };
+      filterConfigs.push(config);
+      header.addEventListener('click', () => {
+        document.querySelectorAll('.filter-dropdown.open').forEach((d) => { if (d !== dropdown) d.classList.remove('open'); });
+        dropdown.classList.toggle('open');
+      });
+      document.addEventListener('click', (e) => {
+        if (!header.contains(e.target)) dropdown.classList.remove('open');
+      });
+      rebuildDropdown(config);
+    }
+
+    // if a column's own text is already the right label to filter by
+    // (Catégorie d'ouvrage, Type de mandat), no data attribute needed —
+    // Lieu is the exception, since it filters by country, not city text
+    setupFilterHeader('auteur-header');
+    setupFilterHeader('lieu-header', { useAttr: 'country' });
+    setupFilterHeader('typologie-header');
+    setupFilterHeader('type-header');
+
+    // reset button: restore the original row order and clear every
+    // sort/filter back to their defaults
+    document.getElementById('index-reset').addEventListener('click', (e) => {
+      e.currentTarget.classList.remove('spin');
+      void e.currentTarget.offsetWidth; // restart the animation on repeated clicks
+      e.currentTarget.classList.add('spin');
+
+      activeCol = null;
+      ascending = true;
+      sortHeaders.forEach((h) => {
+        h.classList.remove('active');
+        h.querySelector('.sort-arrow').textContent = '↑';
+      });
+      originalOrder.forEach((row) => tbody.appendChild(row));
+
+      Object.keys(activeFilters).forEach((col) => { activeFilters[col] = ''; });
+      applyFilters();
+    });
+  })();
 </script>
 
 <script type="module">
@@ -73,34 +342,36 @@
   import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
   import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-  function initCardViewer(container){
-    const glbPath = container.dataset.glb;
+  const thumb = document.getElementById('index-thumb');
+  const loader = new GLTFLoader();
+  const cache = new Map();
+  let renderer, scene, camera, keyLight, currentModel;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  function ensureViewer(){
+    if (renderer) return;
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setSize(thumb.clientWidth, thumb.clientHeight);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 0.95;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-    container.appendChild(renderer.domElement);
+    thumb.appendChild(renderer.domElement);
 
-    const scene = new THREE.Scene();
-
+    scene = new THREE.Scene();
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
 
-    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+    camera = new THREE.PerspectiveCamera(45, thumb.clientWidth / thumb.clientHeight, 0.1, 1000);
 
-    const keyLight = new THREE.DirectionalLight(0xfff2e0, 3.2);
+    keyLight = new THREE.DirectionalLight(0xfff2e0, 3.2);
     keyLight.position.set(5, 8, 3);
     keyLight.castShadow = true;
     keyLight.shadow.mapSize.set(1024, 1024);
     scene.add(keyLight);
 
-    const fillLight = new THREE.HemisphereLight(0x5fc7e3, 0x1b1a18, 0.28);
-    scene.add(fillLight);
+    scene.add(new THREE.HemisphereLight(0x5fc7e3, 0x1b1a18, 0.28));
 
     const ground = new THREE.Mesh(
       new THREE.PlaneGeometry(400, 400),
@@ -109,13 +380,42 @@
     ground.rotation.x = -Math.PI / 2;
     ground.receiveShadow = true;
     scene.add(ground);
+  }
 
-    function render(){ renderer.render(scene, camera); }
+  function applyModel(entry){
+    currentModel = entry.model;
+    scene.add(currentModel);
 
-    const loader = new GLTFLoader();
+    const fov = camera.fov * (Math.PI / 180);
+    const distance = (entry.sphere.radius / Math.sin(fov / 2)) * 1.55;
+    const dir = new THREE.Vector3(-1.5, 1.3, 0.55).normalize();
+    camera.position.copy(dir.multiplyScalar(distance)).add(entry.sphere.center);
+    camera.near = distance / 100;
+    camera.far = distance * 100;
+    camera.lookAt(entry.sphere.center);
+    camera.updateProjectionMatrix();
+
+    keyLight.position.set(entry.maxDim * 0.8, entry.maxDim * 1.4, entry.maxDim * 0.5);
+    keyLight.shadow.camera.left = -entry.maxDim;
+    keyLight.shadow.camera.right = entry.maxDim;
+    keyLight.shadow.camera.top = entry.maxDim;
+    keyLight.shadow.camera.bottom = -entry.maxDim;
+    keyLight.shadow.camera.updateProjectionMatrix();
+
+    renderer.render(scene, camera);
+  }
+
+  function showModel(glbPath){
+    ensureViewer();
+    if (currentModel) { scene.remove(currentModel); currentModel = null; }
+
+    if (cache.has(glbPath)) {
+      applyModel(cache.get(glbPath));
+      return;
+    }
+
     loader.load(glbPath, (gltf) => {
       const model = gltf.scene;
-
       model.traverse((child) => {
         if (child.isMesh) {
           child.castShadow = true;
@@ -133,41 +433,41 @@
       model.position.x -= center.x;
       model.position.z -= center.z;
       model.position.y -= box.min.y;
-      scene.add(model);
 
       const fitBox = new THREE.Box3().setFromObject(model);
       const sphere = new THREE.Sphere();
       fitBox.getBoundingSphere(sphere);
-      const fov = camera.fov * (Math.PI / 180);
-      const distance = (sphere.radius / Math.sin(fov / 2)) * 1.55;
       const maxDim = sphere.radius * 2;
 
-      const dir = new THREE.Vector3(-1.5, 1.3, 0.55).normalize();
-      camera.position.copy(dir.multiplyScalar(distance)).add(sphere.center);
-      camera.near = distance / 100;
-      camera.far = distance * 100;
-      camera.lookAt(sphere.center);
-      camera.updateProjectionMatrix();
-
-      keyLight.position.set(maxDim * 0.8, maxDim * 1.4, maxDim * 0.5);
-      keyLight.shadow.camera.left = -maxDim;
-      keyLight.shadow.camera.right = maxDim;
-      keyLight.shadow.camera.top = maxDim;
-      keyLight.shadow.camera.bottom = -maxDim;
-      keyLight.shadow.camera.updateProjectionMatrix();
-
-      render();
-    });
-
-    window.addEventListener('resize', () => {
-      camera.aspect = container.clientWidth / container.clientHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(container.clientWidth, container.clientHeight);
-      render();
+      const entry = { model, sphere, maxDim };
+      cache.set(glbPath, entry);
+      if (thumb.dataset.active === glbPath) applyModel(entry);
     });
   }
 
-  document.querySelectorAll('.card-viewer[data-glb]').forEach(initCardViewer);
+  function positionThumb(x, y){
+    const size = 220, margin = 16, offset = 24;
+    let left = x + offset;
+    let top = y - size / 2;
+    if (left + size + margin > window.innerWidth) left = x - size - offset;
+    top = Math.max(margin, Math.min(top, window.innerHeight - size - margin));
+    thumb.style.left = left + 'px';
+    thumb.style.top = top + 'px';
+  }
+
+  document.querySelectorAll('.index-table a[data-glb]').forEach((link) => {
+    link.addEventListener('mouseenter', (e) => {
+      const glbPath = link.dataset.glb;
+      thumb.dataset.active = glbPath;
+      positionThumb(e.clientX, e.clientY);
+      thumb.classList.add('visible');
+      showModel(glbPath);
+    });
+    link.addEventListener('mousemove', (e) => positionThumb(e.clientX, e.clientY));
+    link.addEventListener('mouseleave', () => {
+      thumb.classList.remove('visible');
+    });
+  });
 </script>
 
 </body>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Calque_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 8192 8192">
+  <!-- Generator: Adobe Illustrator 30.4.0, SVG Export Plug-In . SVG Version: 2.1.4 Build 226)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: none;
+        stroke: #2A2620;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 0.6; vector-effect: non-scaling-stroke;
+      }
+
+      .st1 {
+        fill: #2a2620;
+        fill-rule: evenodd;
+        opacity: .25;
+      }
+    </style>
+  </defs>
+  <path class="st1" d="M6410.24,6374.16H0l754.13,920.63h6683.74l754.13-920.63h-1781.76ZM1603.58,6397.55h178.18-178.18ZM1425.41,6577h178.18-178.18ZM1247.23,6756.44h178.18-178.18Z"/>
+  <path class="st0" d="M8192,8012.55v-1638.4"/>
+  <path class="st0" d="M0,8012.55v-1638.4"/>
+  <path class="st0" d="M0,0h8192"/>
+  <path class="st0" d="M0,4423.68V0"/>
+  <path class="st0" d="M0,4423.68v1950.47"/>
+  <path class="st0" d="M0,6374.15h8192"/>
+  <path class="st0" d="M8192,6374.15v-1950.47"/>
+  <path class="st0" d="M8192,4423.68V0"/>
+  <path class="st0" d="M178.18,7833.11v179.45"/>
+  <path class="st0" d="M356.35,7653.67v179.45"/>
+  <path class="st0" d="M534.53,7474.23v179.45"/>
+  <path class="st0" d="M712.7,7294.78v179.45"/>
+  <path class="st0" d="M890.88,7115.33v179.45"/>
+  <path class="st0" d="M1069.06,6935.9v179.45"/>
+  <path class="st0" d="M1247.23,6756.45v179.45"/>
+  <path class="st0" d="M1425.41,6577v179.45"/>
+  <path class="st0" d="M1603.58,6397.56v179.45"/>
+  <path class="st0" d="M1781.76,6374.15v23.4"/>
+  <path class="st0" d="M0,8192v-179.45"/>
+  <path class="st0" d="M6410.24,6397.56v-23.4"/>
+  <path class="st0" d="M6588.42,6577v-179.45"/>
+  <path class="st0" d="M6766.59,6756.45v-179.45"/>
+  <path class="st0" d="M6944.77,6935.9v-179.45"/>
+  <path class="st0" d="M7122.94,7115.33v-179.45"/>
+  <path class="st0" d="M7301.12,7294.78v-179.45"/>
+  <path class="st0" d="M7479.3,7474.23v-179.45"/>
+  <path class="st0" d="M7657.47,7653.67v-179.45"/>
+  <path class="st0" d="M7835.65,7833.11v-179.45"/>
+  <path class="st0" d="M8013.82,8012.55v-179.45"/>
+  <path class="st0" d="M8192,8192v-179.45"/>
+  <path class="st0" d="M0,8012.55h8192"/>
+  <path class="st0" d="M178.18,7833.11h7835.65"/>
+  <path class="st0" d="M356.35,7653.67h7479.3"/>
+  <path class="st0" d="M534.53,7474.23h7122.94"/>
+  <path class="st0" d="M712.7,7294.78h6766.59"/>
+  <path class="st0" d="M890.88,7115.33h6410.24"/>
+  <path class="st0" d="M1069.06,6935.9h6053.89"/>
+  <path class="st0" d="M1247.23,6756.45h5697.54"/>
+  <path class="st0" d="M1425.41,6577h5341.18"/>
+  <path class="st0" d="M1603.58,6397.56h4984.83"/>
+  <path class="st0" d="M0,8192h8192"/>
+</svg>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 8192 8192">
+  <defs>
+    <style>
+      .st0 {
+        fill: none;
+      }
+
+      .st0, .st1 {
+        stroke: #2A2620;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 0.6; vector-effect: non-scaling-stroke;
+      }
+
+      .st1 {
+        fill: #000;
+        opacity: 1;
+      }
+    </style>
+  </defs>
+  <g>
+    <path class="st0" d="M178.18,178.18v7835.65"/>
+    <path class="st0" d="M356.35,356.35v7479.3"/>
+    <path class="st0" d="M0,0v8192"/>
+    <path class="st0" d="M534.53,534.53v7122.94"/>
+    <path class="st0" d="M712.7,712.7v6766.59"/>
+    <path class="st0" d="M890.88,890.88v6410.24"/>
+    <path class="st0" d="M1069.06,1069.06v6053.89"/>
+    <path class="st0" d="M1247.23,1247.23v5697.54"/>
+    <path class="st0" d="M1425.41,1425.41v5341.18"/>
+    <path class="st0" d="M1603.58,1603.58v4984.83"/>
+    <path class="st0" d="M1781.76,1781.76v4628.48"/>
+    <path class="st0" d="M1959.94,1959.94v4272.13"/>
+    <path class="st0" d="M2138.11,2138.11v3915.78"/>
+    <path class="st0" d="M2316.29,2316.29v3559.42"/>
+    <path class="st0" d="M2494.46,2494.46v3203.07"/>
+    <path class="st0" d="M2672.64,2672.64v2846.72"/>
+    <path class="st0" d="M2850.82,2850.82v2490.37"/>
+    <path class="st0" d="M3028.99,3028.99v2134.02"/>
+    <path class="st0" d="M3207.17,3207.17v1777.66"/>
+    <path class="st0" d="M3385.34,3385.34v1421.31"/>
+    <path class="st0" d="M3563.52,3563.52v1064.96"/>
+    <path class="st0" d="M7536.64,655.36L8192,0v8192l-655.36-655.36V655.36"/>
+  </g>
+  <g>
+    <path class="st1" d="M0,0h8192l-655.36,655.36h-3973.12v2908.16L0,0"/>
+    <path class="st1" d="M7536.64,7536.64l655.36,655.36H0l3563.52-3563.52v2908.16h3973.12"/>
+  </g>
+</svg>
