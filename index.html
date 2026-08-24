@@ -369,7 +369,7 @@
   // theme — defaults to white/stone
   const TINT_STYLE = {
     white: { color: [0.735, 0.72, 0.675], roughness: 0.725, envMapIntensity: 0.4 },
-    dark:  { color: [0.02, 0.02, 0.02],   roughness: 0.35,  envMapIntensity: 0.5 },
+    dark:  { color: [0.02, 0.02, 0.02],   roughness: 0.725, envMapIntensity: 0.4 },
   };
   function tintStyle(){
     return TINT_STYLE[(localStorage.getItem('archivir-model-tint') || 'white') === 'dark' ? 'dark' : 'white'];
