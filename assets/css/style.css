@@ -431,7 +431,7 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 /* ---------- floating nav widgets ---------- */
 .compass{
   position: fixed; top: 72px; right: 24px; z-index: 5;
-  width: 100px; height: 100px;
+  width: 68px; height: 68px;
 }
 .compass-ring{
   position: absolute; inset: 0;
@@ -443,13 +443,13 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 .compass-pt{
   position: absolute;
   display: flex; align-items: center; justify-content: center;
-  width: 30px; height: 30px;
+  width: 22px; height: 22px;
   border-radius: 50%;
   border: 1px solid var(--pink-deep);
   background: var(--bg-2);
   color: var(--pink);
   font-family: var(--mono);
-  font-size: 0.68rem; letter-spacing: 0.02em;
+  font-size: 0.6rem; letter-spacing: 0.02em;
   cursor: pointer;
   transition: background .2s ease, color .2s ease, border-color .2s ease;
 }
