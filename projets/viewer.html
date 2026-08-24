@@ -1075,6 +1075,14 @@
       // scaleCorrection, i.e. exactly where the camera already is)
       viewDistance = currentDistance;
       viewEyeY = newRig.fitCenter.y * scaleCorrection;
+      // each project has its own height, so its vertical center sits at a
+      // different world-space Y once scale-corrected — shift the camera
+      // and target together by that difference (same distance, same
+      // angle, just re-aimed) so the incoming model lands centered
+      // instead of drifting up or down out of frame
+      const targetDeltaY = viewEyeY - controls.target.y;
+      camera.position.y += targetDeltaY;
+      controls.target.y = viewEyeY;
       camera.near = currentDistance / 100;
       camera.far = currentDistance * 100;
       camera.updateProjectionMatrix();
