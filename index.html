@@ -26,6 +26,7 @@
     <span class="logo-prefix">archi</span><span class="logo-mid"><span class="logo-mid-text">tecture&nbsp;</span></span><span class="logo-vir">vir</span><span class="logo-tail"><span class="logo-tail-text">tuelle</span></span>
   </a>
   <div class="site-banner-right">
+    <button id="tint-toggle" class="theme-toggle" aria-label="Couleur du modèle">●</button>
     <button id="theme-toggle" class="theme-toggle" aria-label="Basculer le thème">☾</button>
   </div>
 </header>
@@ -93,6 +94,20 @@
     document.documentElement.dataset.theme = next;
     localStorage.setItem('archivir-theme', next);
     applyThemeIcon();
+  });
+
+  // model tint (satin black vs. warm stone) is a separate, independent
+  // choice from the light/dark site theme — defaults to white/stone so
+  // it never clashes with either background
+  const tintToggle = document.getElementById('tint-toggle');
+  function applyTintIcon(){
+    tintToggle.textContent = (localStorage.getItem('archivir-model-tint') || 'white') === 'white' ? '●' : '○';
+  }
+  applyTintIcon();
+  tintToggle.addEventListener('click', () => {
+    const next = (localStorage.getItem('archivir-model-tint') || 'white') === 'white' ? 'dark' : 'white';
+    localStorage.setItem('archivir-model-tint', next);
+    applyTintIcon();
   });
 
   const siteLogo = document.getElementById('site-logo');
@@ -350,18 +365,18 @@
   const cache = new Map();
   let renderer, scene, camera, keyLight, currentModel;
 
-  // warm stone in dark mode, satin black in light mode — keeps the
-  // model readable against the light background
-  const THEME_STYLE = {
-    dark:  { color: [0.735, 0.72, 0.675], roughness: 0.725, envMapIntensity: 0.4 },
-    light: { color: [0.02, 0.02, 0.02],   roughness: 0.35,  envMapIntensity: 0.5 },
+  // model tint is a user choice, independent of the light/dark site
+  // theme — defaults to white/stone
+  const TINT_STYLE = {
+    white: { color: [0.735, 0.72, 0.675], roughness: 0.725, envMapIntensity: 0.4 },
+    dark:  { color: [0.02, 0.02, 0.02],   roughness: 0.35,  envMapIntensity: 0.5 },
   };
-  function themeStyle(){
-    return THEME_STYLE[document.documentElement.dataset.theme === 'light' ? 'light' : 'dark'];
+  function tintStyle(){
+    return TINT_STYLE[(localStorage.getItem('archivir-model-tint') || 'white') === 'dark' ? 'dark' : 'white'];
   }
   function recolorMesh(child){
     if (!child.isMesh) return;
-    const style = themeStyle();
+    const style = tintStyle();
     child.material.color.setRGB(style.color[0], style.color[1], style.color[2]);
     child.material.roughness = style.roughness;
     child.material.envMapIntensity = style.envMapIntensity;
@@ -481,7 +496,7 @@
     thumb.style.top = top + 'px';
   }
 
-  document.getElementById('theme-toggle').addEventListener('click', () => {
+  document.getElementById('tint-toggle').addEventListener('click', () => {
     cache.forEach((entry) => entry.model.traverse(recolorMesh));
     if (renderer) renderer.render(scene, camera);
   });
