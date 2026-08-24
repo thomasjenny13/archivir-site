@@ -888,6 +888,14 @@
           if (child.isMesh) {
             child.castShadow = true;
             child.receiveShadow = true;
+            // some exports carry a KHR_materials_specular extension, which makes
+            // GLTFLoader build a MeshPhysicalMaterial instead of a plain
+            // MeshStandardMaterial — physical material's extra energy-conserving
+            // specular lobe reads as glossy/"brillant" next to the other meshes
+            // even with identical roughness, so swap it back to Standard
+            if (child.material.isMeshPhysicalMaterial) {
+              child.material = new THREE.MeshStandardMaterial({ name: child.material.name });
+            }
             const style = tintStyle();
             child.material.color.setRGB(style.color[0], style.color[1], style.color[2]);
             child.material.roughness = style.roughness;
