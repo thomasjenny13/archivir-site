@@ -371,11 +371,11 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 }
 .logo-mid.is-open{
   max-width: 8em;
-  transition: max-width 1s ease-in-out;
+  transition: max-width .6s cubic-bezier(.16,1,.3,1);
 }
 .logo-tail.is-open{
   max-width: 6em;
-  transition: max-width 1s ease-in-out;
+  transition: max-width .6s cubic-bezier(.16,1,.3,1);
 }
 /* the width grow above only opens space (pushing "vir" into position);
    the actual letters stay invisible until explicitly revealed, so

@@ -332,8 +332,8 @@
       letter.style.transitionDelay = (i * MS_PER_LETTER) + 'ms';
     });
   }
-  const OPEN_BEATS = 10;      // matches .logo-mid/.logo-tail.is-open 1s transition
-  const HOLD_BEATS = 14;      // pause once the words are fully typed out
+  const OPEN_BEATS = 6;       // matches .logo-mid/.logo-tail.is-open .6s transition
+  const HOLD_BEATS = 5;       // brief beat to register the full word, not a dead pause
   const DECOMPOSE_BEATS = 9;  // covers the longest decompose transition + its random delay, +1 beat margin
   const REST_BEATS = 2;       // short rest before the space collapses
   const CLOSE_BEATS = 3;      // matches .logo-mid/.logo-tail's base .3s transition
