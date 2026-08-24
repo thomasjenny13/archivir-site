@@ -367,7 +367,7 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   white-space: nowrap;
   vertical-align: bottom;
   max-width: 0;
-  transition: max-width .35s cubic-bezier(.5,0,.75,0);
+  transition: max-width .3s cubic-bezier(.5,0,.75,0);
 }
 .logo-mid.is-open{
   max-width: 8em;
@@ -384,7 +384,7 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 .logo-letter{
   display: inline-block;
   opacity: 0;
-  transition: opacity .12s ease;
+  transition: opacity .1s ease;
 }
 .logo-mid-text.is-visible .logo-letter, .logo-tail-text.is-visible .logo-letter{
   opacity: 1;
@@ -395,7 +395,7 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 .logo-letter.is-decomposing{
   opacity: 0;
   transform: translate(var(--dx, 0px), var(--dy, -14px)) rotate(var(--drot, 20deg)) scale(.3);
-  transition: opacity .55s ease-in, transform .65s cubic-bezier(.3,0,.8,.15);
+  transition: opacity .5s ease-in, transform .6s cubic-bezier(.3,0,.8,.15);
 }
 .site-logo.is-settling{
   animation: logo-settle .4s cubic-bezier(.34,1.56,.64,1);

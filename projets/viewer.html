@@ -275,7 +275,11 @@
   const logoTail = siteLogo.querySelector('.logo-tail');
   const logoMidText = siteLogo.querySelector('.logo-mid-text');
   const logoTailText = siteLogo.querySelector('.logo-tail-text');
-  const MS_PER_LETTER = 100;
+  // every wait and CSS transition in this animation is a multiple of one
+  // base beat, so open -> type -> hold -> decompose -> close -> settle
+  // reads as a single tempo instead of separately-tuned durations.
+  const BEAT = 100; // ms
+  const MS_PER_LETTER = BEAT;
   function splitLetters(el){
     const text = el.textContent;
     el.textContent = '';
@@ -293,7 +297,7 @@
   }
   const midRevealMs = splitLetters(logoMidText);
   const tailRevealMs = splitLetters(logoTailText);
-  const typeDuration = Math.max(midRevealMs, tailRevealMs) + 200; // + the letter's own transition
+  const typeDuration = Math.max(midRevealMs, tailRevealMs) + BEAT; // + the last letter's own fade-in beat
   // dust-disintegration exit: each letter drifts off on its own random
   // heading rather than the whole word fading uniformly
   function decomposeText(el){
@@ -304,7 +308,7 @@
       letter.style.setProperty('--dx', dx.toFixed(1) + 'px');
       letter.style.setProperty('--dy', dy.toFixed(1) + 'px');
       letter.style.setProperty('--drot', drot.toFixed(1) + 'deg');
-      letter.style.transitionDelay = (Math.random() * 180).toFixed(0) + 'ms';
+      letter.style.transitionDelay = (Math.random() * 2 * BEAT).toFixed(0) + 'ms';
       letter.classList.add('is-decomposing');
     });
   }
@@ -314,7 +318,12 @@
       letter.style.transitionDelay = (i * MS_PER_LETTER) + 'ms';
     });
   }
-  const DECOMPOSE_MS = 900;
+  const OPEN_BEATS = 10;      // matches .logo-mid/.logo-tail.is-open 1s transition
+  const HOLD_BEATS = 14;      // pause once the words are fully typed out
+  const DECOMPOSE_BEATS = 9;  // covers the longest decompose transition + its random delay, +1 beat margin
+  const REST_BEATS = 2;       // short rest before the space collapses
+  const CLOSE_BEATS = 3;      // matches .logo-mid/.logo-tail's base .3s transition
+  const SETTLE_BEATS = 4;     // matches .is-settling's .4s bounce
   let logoAnimating = false;
   siteLogo.addEventListener('click', (e) => {
     e.preventDefault();
@@ -349,12 +358,12 @@
               setTimeout(() => {
                 siteLogo.classList.remove('is-settling');
                 logoAnimating = false;
-              }, 400);
-            }, 350);
-          }, 200);
-        }, DECOMPOSE_MS);
-      }, typeDuration + 1400);
-    }, 1000);
+              }, SETTLE_BEATS * BEAT);
+            }, CLOSE_BEATS * BEAT);
+          }, REST_BEATS * BEAT);
+        }, DECOMPOSE_BEATS * BEAT);
+      }, typeDuration + HOLD_BEATS * BEAT);
+    }, OPEN_BEATS * BEAT);
   });
 
   // plans overlay
@@ -702,6 +711,12 @@
     btn.addEventListener('click', () => VIEW_PRESETS[btn.dataset.view]());
   });
 
+  // stone tone in dark mode, dark charcoal in light mode — keeps the
+  // model readable against the light background
+  function baseModelColor(){
+    return document.documentElement.dataset.theme === 'light' ? [0.11, 0.11, 0.11] : [0.735, 0.72, 0.675];
+  }
+
   // ---------- material presets ----------
   const MATERIAL_PRESETS = {
     platre: { color: [0.62, 0.60, 0.55], roughness: 0.85, metalness: 0 },
@@ -725,6 +740,14 @@
       document.querySelectorAll('.swatch').forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
     });
+  });
+
+  // re-tint the loaded model when the theme changes, unless a material
+  // swatch was explicitly chosen — that choice should stick
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    if (!currentRig || document.querySelector('.swatch.active')) return;
+    const c = baseModelColor();
+    currentRig.sectionMeshes.forEach((mesh) => mesh.material.color.setRGB(c[0], c[1], c[2]));
   });
 
   // ---------- section cut toggle ----------
@@ -756,7 +779,8 @@
           if (child.isMesh) {
             child.castShadow = true;
             child.receiveShadow = true;
-            child.material.color.setRGB(0.735, 0.72, 0.675);
+            const c = baseModelColor();
+            child.material.color.setRGB(c[0], c[1], c[2]);
             child.material.roughness = 0.725;
             child.material.metalness = 0;
             child.material.envMapIntensity = 0.4;
