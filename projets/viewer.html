@@ -509,6 +509,7 @@
   function tintStyle(){
     return TINT_STYLE[(localStorage.getItem('archivir-model-tint') || 'white') === 'dark' ? 'dark' : 'white'];
   }
+  const GLASS_EDGE_SCALE = 0.4;
 
   // ---------- shared renderer/scene, set up once ----------
   const container = document.getElementById('viewer-canvas');
@@ -643,6 +644,7 @@
     if (currentRig) {
       currentRig.cutBoundaryEdges.material.resolution.set(w * dpr, h * dpr);
       currentRig.innerEdges.material.resolution.set(w * dpr, h * dpr);
+      if (currentRig.glassEdges) currentRig.glassEdges.material.resolution.set(w * dpr, h * dpr);
     }
   }
 
@@ -843,6 +845,10 @@
     currentRig.cutBoundaryEdges.material.linewidth = style.lineWidth;
     currentRig.innerEdges.material.color.set(style.edgeColor);
     currentRig.innerEdges.material.linewidth = style.lineWidth;
+    if (currentRig.glassEdges) {
+      currentRig.glassEdges.material.color.set(style.edgeColor);
+      currentRig.glassEdges.material.linewidth = style.lineWidth * GLASS_EDGE_SCALE;
+    }
     if (document.querySelector('.swatch.active')) return;
     currentRig.sectionMeshes.forEach((mesh) => {
       mesh.material.color.setRGB(style.color[0], style.color[1], style.color[2]);
@@ -860,6 +866,7 @@
     const planes = sectionView ? [clipPlane] : [];
     currentRig.sectionMeshes.forEach((mesh) => { mesh.material.clippingPlanes = planes; });
     if (currentRig.innerEdges) currentRig.innerEdges.material.clippingPlanes = planes;
+    if (currentRig.glassEdges) currentRig.glassEdges.material.clippingPlanes = planes;
     outlinePass.selectedObjects = sectionView ? [currentRig.clippedOutlineMesh] : [currentRig.model];
     if (currentRig.cutBoundaryEdges) currentRig.cutBoundaryEdges.visible = sectionView;
     if (currentRig.sectionCap) currentRig.sectionCap.visible = sectionView;
@@ -950,20 +957,32 @@
         cutBoundaryEdges.visible = false;
         group.add(cutBoundaryEdges);
 
-        const edgeGeoms = sectionMeshes.map((mesh) => positionOnlyGeometry(mesh));
-        const weldedForEdges = mergeVertices(mergeGeometries(edgeGeoms, false), maxDim * 0.001);
-        const edgesGeom = new THREE.EdgesGeometry(weldedForEdges, 22);
-        const fatEdgesGeom = new LineSegmentsGeometry().fromEdgesGeometry(edgesGeom);
-        const innerEdges = new LineSegments2(
-          fatEdgesGeom,
-          new LineMaterial({ color: tintStyle().edgeColor, linewidth: tintStyle().lineWidth, worldUnits: false })
-        );
-        innerEdges.material.resolution.set(container.clientWidth * renderer.getPixelRatio(), container.clientHeight * renderer.getPixelRatio());
-        group.add(innerEdges);
+        // "Transparent plastic" meshes get their own thinner edge lines,
+        // separate from the regular maquette edges
+        const glassMeshes = sectionMeshes.filter((mesh) => mesh.material.name === 'Transparent plastic');
+        const solidMeshes = sectionMeshes.filter((mesh) => mesh.material.name !== 'Transparent plastic');
+
+        function buildEdges(meshes, widthScale) {
+          if (!meshes.length) return null;
+          const geoms = meshes.map((mesh) => positionOnlyGeometry(mesh));
+          const welded = mergeVertices(mergeGeometries(geoms, false), maxDim * 0.001);
+          const edgesGeom = new THREE.EdgesGeometry(welded, 22);
+          const fatEdgesGeom = new LineSegmentsGeometry().fromEdgesGeometry(edgesGeom);
+          const lines = new LineSegments2(
+            fatEdgesGeom,
+            new LineMaterial({ color: tintStyle().edgeColor, linewidth: tintStyle().lineWidth * widthScale, worldUnits: false })
+          );
+          lines.material.resolution.set(container.clientWidth * renderer.getPixelRatio(), container.clientHeight * renderer.getPixelRatio());
+          group.add(lines);
+          return lines;
+        }
+
+        const innerEdges = buildEdges(solidMeshes, 1);
+        const glassEdges = buildEdges(glassMeshes, GLASS_EDGE_SCALE);
 
         resolve({
           group, model, sectionMeshes, sectionCap, clippedOutlineMesh,
-          cutBoundaryEdges, innerEdges,
+          cutBoundaryEdges, innerEdges, glassEdges,
           fitDistance, fitCenter: sphere.center.clone(),
           maxDim,
           dispose() {
