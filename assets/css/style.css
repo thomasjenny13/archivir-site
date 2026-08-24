@@ -558,6 +558,8 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   pointer-events: auto;
   transform: translateY(0);
 }
+.plans-dropdown-group{ display: flex; flex-direction: column; gap: 4px; }
+.plans-dropdown-group[hidden]{ display: none; }
 .plans-dropdown-heading{
   margin: 10px 0 2px 6px;
   font-family: var(--mono);
