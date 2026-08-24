@@ -527,6 +527,27 @@
   controls.mouseButtons.MIDDLE = THREE.MOUSE.ROTATE;
   controls.update();
 
+  // on-demand rendering: this is a mostly-static scene, so redrawing
+  // every frame at 60fps+ regardless of whether anything moved burns
+  // GPU for no reason. Render only when something actually changed —
+  // an orbit/zoom, a fly-to, a project switch, a toggle — and let the
+  // loop go idle the rest of the time.
+  let needsRender = true;
+  function requestRender(){ needsRender = true; }
+
+  // damping never mathematically reaches exactly zero (it's a x *= 0.95
+  // decay every frame), so OrbitControls keeps firing 'change' — forever,
+  // in practice — after every drag/zoom. Rendering for as long as
+  // 'change' keeps firing would mean never actually going idle, so we
+  // don't gate on it at all: render continuously while actively
+  // interacting (between OrbitControls' own 'start'/'end' events), then
+  // for one bounded settle window after release to let the last bit of
+  // visible deceleration play out, then stop for good.
+  let dampingSettleUntil = 0;
+  const DAMPING_SETTLE_MS = 1200;
+  controls.addEventListener('start', () => { dampingSettleUntil = Infinity; requestRender(); });
+  controls.addEventListener('end', () => { dampingSettleUntil = performance.now() + DAMPING_SETTLE_MS; });
+
   // Archicad-style trackpad orbit: a two-finger trackpad swipe reaches
   // the browser as a wheel event, so holding Shift during one rotates
   // the camera around the target instead of zooming. Registered with
@@ -549,6 +570,7 @@
       offset.setFromSpherical(spherical);
       camera.position.copy(controls.target).add(offset);
       camera.lookAt(controls.target);
+      requestRender();
       return;
     }
     if (Math.abs(e.deltaX) > 8 && Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
@@ -613,7 +635,7 @@
   const keyLight = new THREE.DirectionalLight(0xfff2e0, 3.4);
   keyLight.position.set(5, 8, 3);
   keyLight.castShadow = true;
-  keyLight.shadow.mapSize.set(2048, 2048);
+  keyLight.shadow.mapSize.set(1024, 1024);
   keyLight.shadow.bias = -0.0005;
   scene.add(keyLight);
 
@@ -776,6 +798,7 @@
       mesh.material.roughness = p.roughness;
       mesh.material.metalness = p.metalness;
     });
+    requestRender();
   }
   document.querySelectorAll('.swatch').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -788,6 +811,7 @@
   // re-tint the model and its edge lines when the tint choice changes,
   // unless a material swatch was explicitly chosen — that choice should stick
   document.getElementById('tint-toggle').addEventListener('click', () => {
+    requestRender();
     const style = tintStyle();
     outlinePass.edgeStrength = style.outlineStrength;
     outlinePass.edgeThickness = style.outlineThickness;
@@ -819,6 +843,7 @@
     if (currentRig.cutBoundaryEdges) currentRig.cutBoundaryEdges.visible = sectionView;
     if (currentRig.sectionCap) currentRig.sectionCap.visible = sectionView;
     cutToggle.classList.toggle('active', sectionView);
+    requestRender();
   });
 
   // ---------- rig: everything belonging to one loaded project, grouped
@@ -1034,6 +1059,7 @@
           oldRig.group.scale.setScalar(oldStartScale * (1 - 0.75 * e));
           newRig.group.position.copy(offsetVec).multiplyScalar(1 - e);
           newRig.group.scale.setScalar(scaleCorrection * (0.25 + 0.75 * e));
+          requestRender();
           if (t < 1) requestAnimationFrame(step);
           else resolve();
         }
@@ -1075,6 +1101,7 @@
     outlinePass.selectedObjects = [currentRig.model];
     applyProjectUI(slug);
     switching = false;
+    requestRender();
   }
 
   // ---------- nav arrows: cycle through ORDER, no page reload ----------
@@ -1135,6 +1162,7 @@
     camera.aspect = container.clientWidth / container.clientHeight;
     camera.updateProjectionMatrix();
     syncRendererSize();
+    requestRender();
   });
 
   (function animate() {
@@ -1145,9 +1173,13 @@
       camera.position.lerpVectors(flightFrom, flightTo, e);
       controls.target.lerpVectors(flightFromTarget, flightToTarget, e);
       if (t >= 1) flying = false;
+      needsRender = true;
     }
     controls.update();
-    composer.render();
+    if (needsRender || performance.now() < dampingSettleUntil) {
+      composer.render();
+      needsRender = false;
+    }
   })();
 </script>
 
