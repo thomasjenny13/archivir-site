@@ -64,14 +64,14 @@
         <button class="plans-dropdown-item" data-plan="nord"><span class="plans-dropdown-thumb"></span><span class="plans-dropdown-label">Façade nord</span></button>
         <button class="plans-dropdown-item" data-plan="sud"><span class="plans-dropdown-thumb"></span><span class="plans-dropdown-label">Façade sud</span></button>
         <p class="plans-dropdown-heading">Coupe</p>
-        <button class="plans-dropdown-item" data-plan="coupe"><span class="plans-dropdown-thumb"></span><span class="plans-dropdown-label">Coupe</span></button>
+        <button class="plans-dropdown-item" data-plan="coupe" data-kind="coupe"><span class="plans-dropdown-thumb"></span><span class="plans-dropdown-label">Coupe</span></button>
         <p class="plans-dropdown-heading">Plans</p>
-        <button class="plans-dropdown-item" data-plan="etage"><span class="plans-dropdown-thumb"></span><span class="plans-dropdown-label">1er étage</span></button>
+        <button class="plans-dropdown-item" data-plan="etage" data-kind="main"><span class="plans-dropdown-thumb"></span><span class="plans-dropdown-label">1er étage</span></button>
         <button class="plans-dropdown-item" data-plan="toiture"><span class="plans-dropdown-thumb"></span><span class="plans-dropdown-label">Toiture</span></button>
       </div>
       <div class="plans-dropdown-group" data-project="haus">
         <p class="plans-dropdown-heading">Coupe</p>
-        <button class="plans-dropdown-item" data-plan="haus-coupe"><span class="plans-dropdown-thumb"></span><span class="plans-dropdown-label">Coupe</span></button>
+        <button class="plans-dropdown-item" data-plan="haus-coupe" data-kind="coupe"><span class="plans-dropdown-thumb"></span><span class="plans-dropdown-label">Coupe</span></button>
       </div>
     </div>
     <button id="plans-menu-toggle" class="plans-menu-toggle" aria-label="Plans" aria-expanded="false">☰</button>
@@ -79,7 +79,7 @@
   <div id="plans-overlay" class="plans-overlay" hidden>
     <button id="plans-close" class="plans-close" aria-label="Fermer">✕</button>
     <div class="plans-sheet">
-      <div class="plan-page active" data-plan="etage"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 8192 8192">
+      <div class="plan-page active" data-plan="etage" data-kind="main"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 8192 8192">
   <defs>
     <style>
       .st0 {
@@ -149,7 +149,7 @@
   <path class="st0" d="M8192,0v8192H0V0h8192"/>
   <path class="st0" d="M7536.64,7536.64V655.36H655.36v6881.28h6881.28"/>
 </svg></div>
-      <div class="plan-page" data-plan="coupe"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 8192 8192">
+      <div class="plan-page" data-plan="coupe" data-kind="coupe"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 8192 8192">
   <defs>
     <style>
       .st0 {
@@ -260,7 +260,164 @@
   <path class="st0" d="M1603.58,6397.56h4984.83"/>
   <path class="st0" d="M0,8192h8192"/>
 </svg></div>
-      <div class="plan-page" data-plan="haus-coupe"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1000000 946642"><defs><style>.st0{fill:none;stroke:#2A2620;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.6;vector-effect:non-scaling-stroke;}</style></defs><g><path d="M 355248 378416 l 0 28923 72309 0 0 126540 8745 -0 29383 -155464 -110436 0 Z" class="st0" /><path d="M 472749 192824 l -117502 0 0 28923 72309 0 0 126540 43822 0 1371 -7255 0 -148208 Z" class="st0" /><path d="M 355248 564008 l 0 28923 11188 0 -5467 -28923 -5722 -0 Z" class="st0" /><path d="M 355248 1 l 0 72309 117502 0 0 -72309 -117502 0 Z" class="st0" /><path d="M 387696 749600 l -32448 0 0 40372 19368 0 13079 -40372 Z" class="st0" /><path d="M 376301 564008 l 5467 28923 43373 0 5467 -28923 -54306 0 Z" class="st0" /><path d="M 403531 749600 l -13079 40372 26158 0 -13079 -40372 Z" class="st0" /><path d="M 472749 749600 l -53384 0 53384 164783 0 -164783 Z" class="st0" /><path d="M 427557 719472 l 45193 0 0 -155464 -26812 -0 -18381 97255 0 58208 Z" class="st0" /><path d="M 457604 916513 l -30048 -92750 0 92750 30048 0 Z" class="st0" /><path d="M 472749 422148 l -21117 111731 21117 0 0 -111731 Z" class="st0" /><path d="M 472749 914384 l 0 -164783" class="st0" /><path d="M 472749 719472 l 0 -155464" class="st0" /><path d="M 472749 533880 l 0 -111731" class="st0" /><path d="M 472749 341032 l 0 -148208" class="st0" /><path d="M 472749 72309 l 0 -72309" class="st0" /><path d="M 472749 1 l -117502 0" class="st0" /><path d="M 44923 564008 l -15064 0 0 352505 15064 0 0 -352505 Z" class="st0" /><path d="M 334158 341032 l 1371 7255 19719 0 0 -155464 -21090 0 0 148208 Z" class="st0" /><path d="M 334158 749600 l 0 165258 21090 -65100 0 -100158 -21090 0 Z" class="st0" /><path d="M 334158 1 l 0 72309 21090 0 0 -72309 -21090 0 Z" class="st0" /><path d="M 334158 422148 l 0 111731 21090 0 0 -144 -21090 -111587 Z" class="st0" /><path d="M 334158 564008 l 0 155464 21090 0 -0 -155464 -21090 0 Z" class="st0" /><path d="M 341224 378416 l 14024 74203 0 -74203 -14024 0 Z" class="st0" /><path d="M 355248 898638 l -5791 17875 5791 0 0 -17875 Z" class="st0" /><path d="M 44923 749600 l 954889 0 0 -30129 -954889 0 0 30129 Z" class="st0" /><path d="M 1000000 162695 l -979180 0 0 30129 979180 0 0 -30129 Z" class="st0" /><path d="M 1000000 916513 l -970141 0 0 30129 970141 0 0 -30129 Z" class="st0" /><path d="M 20820 533880 l 0 30129 979180 0 0 -30129 -979180 0 Z" class="st0" /><path d="M 20820 348287 l 0 30129 979180 0 0 -30129 -979180 0 Z" class="st0" /><path d="M 355248 533880 l 27 0 -27 -144 0 144 Z" class="st0" /><path d="M 355248 348287 l 72309 0 0 -126540 -72309 0 -0 126540 Z" class="st0" /><path d="M 355248 452619 l 15358 81260 56950 0 0 -126540 -72309 0 -0 45280 Z" class="st0" /><path d="M 355248 719472 l 35104 0 -23916 -126540 -11188 0 0 126540 Z" class="st0" /><path d="M 355248 849758 l 19368 -59786 -19368 0 0 59786 Z" class="st0" /><path d="M 355248 916513 l 72309 0 0 -92750 -10947 -33790 -26158 0 -35204 108665 0 17875 Z" class="st0" /><path d="M 381767 592932 l 21687 114744 21687 -114744 -43373 0 Z" class="st0" /><path d="M 416555 719472 l 11001 0 0 -58208 -11001 58208 Z" class="st0" /><path d="M 1538 162695 l 899640 0 0 -90386 -899640 0 0 90386 Z" class="st0" /><path d="M 387696 749600 l -54074 166912 15835 0 54074 -166912 -15835 0 Z" class="st0" /><path d="M 403531 749600 l 54074 166912 15835 0 -54074 -166912 -15835 0 Z" class="st0" /><path d="M 306147 192824 l -15331 0 29383 155464 15331 0 -29383 -155464 Z" class="st0" /><path d="M 325893 378416 l 29383 155464 15331 0 -29383 -155464 -15331 0 Z" class="st0" /><path d="M 360970 564008 l 29383 155464 10872 0 2230 -11796 -27153 -143667 -15331 0 Z" class="st0" /><path d="M 430607 564008 l -29383 155464 15331 0 29383 -155464 -15331 0 Z" class="st0" /><path d="M 465684 378416 l -29383 155464 15331 0 29383 -155464 -15331 0 Z" class="st0" /><path d="M 500761 192824 l -29383 155464 15331 0 29383 -155464 -15331 0 Z" class="st0" /><path d="M 889879 192824 l 0 155464 183 0 0 -155464 -183 0 Z" class="st0" /><path d="M 889356 192824 l 0 155464 522 0 0 -155464 -522 0 Z" class="st0" /><path d="M 888574 192824 l 0 155464 782 0 0 -155464 -782 0 Z" class="st0" /><path d="M 887652 192824 l 0 155464 922 0 0 -155464 -922 0 Z" class="st0" /><path d="M 886730 192824 l 0 155464 922 0 0 -155464 -922 0 Z" class="st0" /><path d="M 885948 192824 l 0 155464 782 0 0 -155464 -782 0 Z" class="st0" /><path d="M 885425 192824 l 0 155464 522 0 0 -155464 -522 0 Z" class="st0" /><path d="M 885242 192824 l 0 155464 183 0 0 -155464 -183 0 Z" class="st0" /><path d="M 12837 162695 l 0 556777 522 0 0 -556777 -522 0 Z" class="st0" /><path d="M 12654 162695 l 0 556777 183 0 0 -556777 -183 0 Z" class="st0" /><path d="M 13360 162695 l 0 556777 782 0 0 -556777 -782 0 Z" class="st0" /><path d="M 17291 162695 l 0 556777 183 0 0 -556777 -183 0 Z" class="st0" /><path d="M 16769 162695 l 0 556777 522 0 0 -556777 -522 0 Z" class="st0" /><path d="M 15987 162695 l 0 556777 782 0 0 -556777 -782 0 Z" class="st0" /><path d="M 15064 162695 l 0 556777 922 0 0 -556777 -922 0 Z" class="st0" /><path d="M 14142 162695 l 0 556777 922 0 0 -556777 -922 0 Z" class="st0" /><path d="M 0 946641 l 29859 0 0 -30129 -0 -197041 -29859 0 0 227170 Z" class="st0" /><path d="M 29859 564008 l 0 352505" class="st0" /><path d="M 44923 749600 l 0 166912" class="st0" /><path d="M 44923 564008 l -0 155464" class="st0" /><path d="M 334158 914858 l 0 -165258" class="st0" /><path d="M 334158 719472 l 0 -155464" class="st0" /><path d="M 334158 533880 l 0 -111731" class="st0" /><path d="M 334158 341032 l 0 -148208" class="st0" /><path d="M 334158 72309 l 0 -72309" class="st0" /><path d="M 334158 1 l 21090 0" class="st0" /><path d="M 355248 221747 l 0 126540" class="st0" /><path d="M 355248 407339 l 0 45280" class="st0" /><path d="M 355248 533735 l 0 144" class="st0" /><path d="M 355248 592932 l 0 126540" class="st0" /><path d="M 355248 789973 l 0 59786" class="st0" /><path d="M 355248 898638 l 0 17875" class="st0" /><path d="M 819228 719472 l -774305 0" class="st0" /><path d="M 999813 749600 l -954889 0" class="st0" /><path d="M 999813 719472 l -180584 0" class="st0" /><path d="M 20820 162695 l 0 30129" class="st0" /><path d="M 1000000 162695 l -979180 0" class="st0" /><path d="M 1000000 192824 l -979180 0" class="st0" /><path d="M 1000000 162695 l 0 30129" class="st0" /><path d="M 29859 916513 l 0 30129" class="st0" /><path d="M 999813 916513 l -954889 0" class="st0" /><path d="M 999813 946641 l -969954 0" class="st0" /><path d="M 20820 533880 l 0 30129" class="st0" /><path d="M 29859 564008 l -9039 0" class="st0" /><path d="M 819228 564008 l -774305 0" class="st0" /><path d="M 1000000 533880 l -979180 0" class="st0" /><path d="M 1000000 564008 l -180772 0" class="st0" /><path d="M 1000000 533880 l 0 30129" class="st0" /><path d="M 20820 348287 l 0 30129" class="st0" /><path d="M 1000000 348287 l -979180 0" class="st0" /><path d="M 1000000 378416 l -979180 0" class="st0" /><path d="M 1000000 348287 l 0 30129" class="st0" /><path d="M 355248 789973 l 19368 0" class="st0" /><path d="M 390451 789973 l 26158 0" class="st0" /><path d="M 427557 823763 l 0 92750" class="st0" /><path d="M 355248 592932 l 11188 0" class="st0" /><path d="M 381767 592932 l 43373 0" class="st0" /><path d="M 427557 661263 l 0 58208" class="st0" /><path d="M 355248 407339 l 72309 0" class="st0" /><path d="M 427557 407339 l 0 126540" class="st0" /><path d="M 355248 221747 l 72309 0" class="st0" /><path d="M 427557 221747 l 0 126540" class="st0" /><path d="M 1538 162695 l 19282 0" class="st0" /><path d="M 1538 72309 l 0 90386" class="st0" /><path d="M 901178 72309 l 0 90386" class="st0" /><path d="M 1538 72309 l 899640 0" class="st0" /><path d="M 349457 916513 l 54074 -166912" class="st0" /><path d="M 333622 916513 l 54074 -166912" class="st0" /><path d="M 473439 916513 l -54074 -166912" class="st0" /><path d="M 457604 916513 l -54074 -166912" class="st0" /><path d="M 403454 707675 l -27153 -143667" class="st0" /><path d="M 370606 533880 l -29383 -155464" class="st0" /><path d="M 335529 348287 l -29383 -155464" class="st0" /><path d="M 405683 719472 l -2230 -11796" class="st0" /><path d="M 390352 719472 l -29383 -155464" class="st0" /><path d="M 355275 533880 l -29383 -155464" class="st0" /><path d="M 320198 348287 l -29383 -155464" class="st0" /><path d="M 416555 719472 l 29383 -155464" class="st0" /><path d="M 451632 533880 l 29383 -155464" class="st0" /><path d="M 486709 348287 l 29383 -155464" class="st0" /><path d="M 403454 707675 l 27153 -143667" class="st0" /><path d="M 436301 533880 l 29383 -155464" class="st0" /><path d="M 471378 348287 l 29383 -155464" class="st0" /><path d="M 401224 719472 l 2230 -11796" class="st0" /><path d="M 890062 348287 l 0 -155464" class="st0" /><path d="M 885242 348287 l 0 -155464" class="st0" /><path d="M 12654 719472 l 0 -556777" class="st0" /><path d="M 17475 719472 l 0 -556777" class="st0" /><path d="M 0 946641 l 29859 0" class="st0" /><path d="M 0 719472 l 29859 0" class="st0" /><path d="M 0 946641 l 0 -227170" class="st0" /><path d="M 1000000 719472 l 0 30129" class="st0" /><path d="M 1000000 916513 l 0 30129" class="st0" /></g></svg></div>
+      <div class="plan-page" data-plan="haus-coupe" data-kind="coupe"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 8192 7754.89">
+  <defs>
+    <style>
+      .st0 {
+        fill: none;
+      }
+
+      .st0, .st1 {
+        stroke: #2A2620;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 0.6; vector-effect: non-scaling-stroke;
+      }
+
+      .st1 {
+        fill: #000;
+        opacity: 1;
+      }
+    </style>
+  </defs>
+  <g>
+    <path class="st0" d="M2910.19,3099.98v236.94h592.36v1036.62h71.64l240.71-1273.56h-904.7Z"/>
+    <path class="st0" d="M3872.76,1579.61h-962.58v236.94h592.36v1036.62h358.99l11.23-59.43v-1214.12Z"/>
+    <path class="st0" d="M2910.19,4620.35v236.94h91.65l-44.79-236.94h-46.87,0Z"/>
+    <path class="st0" d="M2910.19,0v592.36h962.58V0h-962.58Z"/>
+    <path class="st0" d="M3176.01,6140.72h-265.81v330.73h158.66l107.14-330.73h0Z"/>
+    <path class="st0" d="M3082.66,4620.35l44.79,236.94h355.31l44.79-236.94h-444.88Z"/>
+    <path class="st0" d="M3305.73,6140.72l-107.14,330.73h214.29l-107.14-330.73Z"/>
+    <path class="st0" d="M3872.76,6140.72h-437.32l437.32,1349.9v-1349.9Z"/>
+    <path class="st0" d="M3502.55,5893.91h370.22v-1273.56h-219.64l-150.58,796.71v476.84h0Z"/>
+    <path class="st0" d="M3748.69,7508.07l-246.15-759.81v759.81h246.15Z"/>
+    <path class="st0" d="M3872.76,3458.24l-172.99,915.3h172.99v-915.3Z"/>
+    <path class="st0" d="M3872.76,7490.63v-1349.9"/>
+    <path class="st0" d="M3872.76,5893.91v-1273.56"/>
+    <path class="st0" d="M3872.76,4373.54v-915.3"/>
+    <path class="st0" d="M3872.76,2793.73v-1214.12"/>
+    <path class="st0" d="M3872.76,592.36V0"/>
+    <path class="st0" d="M3872.76,0h-962.58"/>
+    <path class="st0" d="M368.01,4620.35h-123.4v2887.72h123.4v-2887.72Z"/>
+    <path class="st0" d="M2737.42,2793.73l11.23,59.43h161.54v-1273.56h-172.77v1214.12h0Z"/>
+    <path class="st0" d="M2737.42,6140.72v1353.79l172.77-533.3v-820.49h-172.77Z"/>
+    <path class="st0" d="M2737.42,0v592.36h172.77V0h-172.77Z"/>
+    <path class="st0" d="M2737.42,3458.24v915.3h172.77v-1.18l-172.77-914.12Z"/>
+    <path class="st0" d="M2737.42,4620.35v1273.56h172.77v-1273.56h-172.77Z"/>
+    <path class="st0" d="M2795.31,3099.98l114.88,607.87v-607.87h-114.88Z"/>
+    <path class="st0" d="M2910.19,7361.64l-47.44,146.43h47.44v-146.43Z"/>
+    <path class="st0" d="M368.01,6140.72h7822.45v-246.82H368.01v246.82Z"/>
+    <path class="st0" d="M8192,1332.8H170.56v246.82h8021.44v-246.82Z"/>
+    <path class="st0" d="M8192,7508.07H244.6v246.82h7947.4v-246.82Z"/>
+    <path class="st0" d="M170.56,4373.54v246.82h8021.44v-246.82H170.56Z"/>
+    <path class="st0" d="M170.56,2853.17v246.82h8021.44v-246.82H170.56Z"/>
+    <path class="st0" d="M2910.19,4373.54h.22l-.22-1.18v1.18Z"/>
+    <path class="st0" d="M2910.19,2853.17h592.36v-1036.62h-592.36v1036.62Z"/>
+    <path class="st0" d="M2910.19,3707.85l125.81,665.68h466.53v-1036.62h-592.36v370.93h0Z"/>
+    <path class="st0" d="M2910.19,5893.91h287.57l-195.92-1036.62h-91.65v1036.62Z"/>
+    <path class="st0" d="M2910.19,6961.22l158.66-489.77h-158.66v489.77Z"/>
+    <path class="st0" d="M2910.19,7508.07h592.36v-759.81l-89.68-276.81h-214.29l-288.39,890.18v146.43Z"/>
+    <path class="st0" d="M3127.44,4857.3l177.66,939.98,177.66-939.98h-355.32Z"/>
+    <path class="st0" d="M3412.42,5893.91h90.12v-476.84l-90.12,476.84Z"/>
+    <path class="st0" d="M12.6,1332.8h7369.85v-740.44H12.6v740.44Z"/>
+    <path class="st0" d="M3176.01,6140.72l-442.97,1367.34h129.72l442.97-1367.34h-129.72Z"/>
+    <path class="st0" d="M3305.73,6140.72l442.97,1367.34h129.72l-442.97-1367.34h-129.72Z"/>
+    <path class="st0" d="M2507.96,1579.61h-125.59l240.71,1273.56h125.59l-240.71-1273.56Z"/>
+    <path class="st0" d="M2669.72,3099.98l240.71,1273.56h125.59l-240.71-1273.56h-125.59Z"/>
+    <path class="st0" d="M2957.07,4620.35l240.71,1273.56h89.06l18.27-96.63-222.44-1176.92h-125.6Z"/>
+    <path class="st0" d="M3527.53,4620.35l-240.71,1273.56h125.59l240.71-1273.56h-125.59Z"/>
+    <path class="st0" d="M3814.88,3099.98l-240.71,1273.56h125.59l240.71-1273.56h-125.59Z"/>
+    <path class="st0" d="M4102.23,1579.61l-240.71,1273.56h125.59l240.71-1273.56h-125.59Z"/>
+    <path class="st0" d="M105.16,1332.8h-1.5v4561.12h1.5"/>
+    <path class="st0" d="M141.65,5893.91h1.5V1332.8h-1.5"/>
+    <path class="st0" d="M137.37,5893.91h4.28"/>
+    <path class="st0" d="M141.65,1332.8h-4.28"/>
+    <path class="st0" d="M137.37,1332.8h-6.41"/>
+    <path class="st0" d="M130.97,5893.91h6.41"/>
+    <path class="st0" d="M130.96,1332.8h-7.55"/>
+    <path class="st0" d="M123.4,5893.91h7.55"/>
+    <path class="st0" d="M123.4,1332.8h-7.55"/>
+    <path class="st0" d="M115.85,5893.91h7.55"/>
+    <path class="st0" d="M0,7754.88h244.6v-1860.98H0v1860.98Z"/>
+    <path class="st0" d="M244.6,4620.35v2887.72"/>
+    <path class="st0" d="M368.01,6140.72v1367.34"/>
+    <path class="st0" d="M368.01,4620.35v1273.56"/>
+    <path class="st0" d="M2737.42,7494.52v-1353.79"/>
+    <path class="st0" d="M2737.42,5893.91v-1273.56"/>
+    <path class="st0" d="M2737.42,4373.54v-915.3"/>
+    <path class="st0" d="M2737.42,2793.73v-1214.12"/>
+    <path class="st0" d="M2737.42,592.36V0"/>
+    <path class="st0" d="M2737.42,0h172.77"/>
+    <path class="st0" d="M2910.19,1816.55v1036.62"/>
+    <path class="st0" d="M2910.19,3336.92v370.93"/>
+    <path class="st0" d="M2910.19,4372.36v1.18"/>
+    <path class="st0" d="M2910.19,4857.3v1036.62"/>
+    <path class="st0" d="M2910.19,6471.46v489.77"/>
+    <path class="st0" d="M2910.19,7361.64v146.43"/>
+    <path class="st0" d="M8190.47,6140.72H368.02"/>
+    <path class="st0" d="M8190.47,5893.91h-1479.34"/>
+    <path class="st0" d="M170.56,1332.8v246.82"/>
+    <path class="st0" d="M8192,1332.8H170.56"/>
+    <path class="st0" d="M8192,1579.61H170.56"/>
+    <path class="st0" d="M8192,1332.8v246.82"/>
+    <path class="st0" d="M244.6,7508.07v246.82"/>
+    <path class="st0" d="M8190.47,7508.07H368.02"/>
+    <path class="st0" d="M8190.47,7754.88H244.6"/>
+    <path class="st0" d="M170.56,4373.54v246.82"/>
+    <path class="st0" d="M6711.12,5893.91H368.01v-1273.56h6343.11"/>
+    <path class="st0" d="M8192,4373.54H170.56"/>
+    <path class="st0" d="M8192,4620.35h-1480.88"/>
+    <path class="st0" d="M8192,4373.54v246.82"/>
+    <path class="st0" d="M170.56,2853.17v246.82"/>
+    <path class="st0" d="M8192,2853.17H170.56"/>
+    <path class="st0" d="M8192,3099.98H170.56"/>
+    <path class="st0" d="M8192,2853.17v246.82"/>
+    <path class="st0" d="M2910.19,6471.46h158.66"/>
+    <path class="st0" d="M3198.57,6471.46h214.29"/>
+    <path class="st0" d="M3502.55,6748.27v759.81"/>
+    <path class="st0" d="M2910.19,4857.3h91.65"/>
+    <path class="st0" d="M3127.44,4857.3h355.31"/>
+    <path class="st0" d="M3502.55,5417.07v476.84"/>
+    <path class="st0" d="M2910.19,3336.92h592.36"/>
+    <path class="st0" d="M3502.55,3336.92v1036.62"/>
+    <path class="st0" d="M2910.19,1816.55h592.36"/>
+    <path class="st0" d="M3502.55,1816.55v1036.62"/>
+    <path class="st0" d="M12.6,1332.8h157.96"/>
+    <path class="st0" d="M12.6,592.36v740.44"/>
+    <path class="st0" d="M7382.45,592.36v740.44"/>
+    <path class="st0" d="M12.6,592.36h7369.85"/>
+    <path class="st0" d="M2862.75,7508.07l442.97-1367.34"/>
+    <path class="st0" d="M2733.03,7508.07l442.97-1367.34"/>
+    <path class="st0" d="M3878.41,7508.07l-442.97-1367.34"/>
+    <path class="st0" d="M3748.69,7508.07l-442.97-1367.34"/>
+    <path class="st0" d="M3305.1,5797.27l-222.44-1176.92"/>
+    <path class="st0" d="M3036,4373.54l-240.71-1273.56"/>
+    <path class="st0" d="M2748.65,2853.17l-240.71-1273.56"/>
+    <path class="st0" d="M3323.36,5893.91l-18.27-96.63"/>
+    <path class="st0" d="M3197.76,5893.91l-240.71-1273.56"/>
+    <path class="st0" d="M2910.41,4373.54l-240.71-1273.56"/>
+    <path class="st0" d="M2623.06,2853.17l-240.71-1273.56"/>
+    <path class="st0" d="M3412.42,5893.91l240.71-1273.56"/>
+    <path class="st0" d="M3699.77,4373.54l240.71-1273.56"/>
+    <path class="st0" d="M3987.12,2853.17l240.71-1273.56"/>
+    <path class="st0" d="M3305.1,5797.27l222.44-1176.92"/>
+    <path class="st0" d="M3574.18,4373.54l240.71-1273.56"/>
+    <path class="st0" d="M3861.53,2853.17l240.71-1273.56"/>
+    <path class="st0" d="M3286.83,5893.91l18.27-96.63"/>
+    <path class="st0" d="M7291.39,2853.17v-1273.56"/>
+    <path class="st0" d="M7251.9,2853.17v-1273.56"/>
+    <path class="st0" d="M103.66,5893.91V1332.8"/>
+    <path class="st0" d="M143.16,5893.91V1332.8"/>
+    <path class="st0" d="M0,7754.88h244.6"/>
+    <path class="st0" d="M0,5893.91h244.6"/>
+    <path class="st0" d="M0,7754.88v-1860.98"/>
+    <path class="st0" d="M8192,5893.91v246.82-246.82Z"/>
+    <path class="st0" d="M8192,7508.07v246.82"/>
+  </g>
+  <rect class="st1" x="170.56" y="1332.8" width="8021.44" height="246.82"/>
+  <rect class="st1" x="170.56" y="2853.17" width="8021.44" height="246.82"/>
+  <polygon class="st1" points="8192 4620.36 8192 4373.54 170.56 4373.54 170.56 4620.36 244.6 4620.36 244.6 7754.88 306.31 7754.88 306.31 7754.89 8192 7754.89 8192 7508.07 368.01 7508.07 368.01 6140.73 8190.46 6140.73 8190.46 5893.91 368.01 5893.91 368.01 4620.35 8192 4620.36"/>
+</svg></div>
     </div>
   </div>
 
@@ -986,12 +1143,24 @@
     document.getElementById('viewer-credit').innerHTML =
       cfg.creditHtml + (cfg.creditMeta ? '<br><span class="credit-meta">' + cfg.creditMeta + '</span>' : '');
     document.getElementById('plans-menu').style.display = cfg.hasPlans ? '' : 'none';
-    if (!cfg.hasPlans) plansOverlay.hidden = true;
     // each project only shows its own plans in the dropdown — the group
     // key matches the project slug directly
     document.querySelectorAll('.plans-dropdown-group').forEach((g) => {
       g.hidden = g.dataset.project !== slug;
     });
+    // if a section (coupe) was open, follow it straight to the new
+    // project's own coupe, or its main/ground-floor plan if it has no
+    // coupe — any other open plan type (façade, toiture…) doesn't carry
+    // over, since it's specific to the project being left
+    if (!plansOverlay.hidden) {
+      const wasCoupe = document.querySelector('.plan-page.active')?.dataset.kind === 'coupe';
+      const group = document.querySelector('.plans-dropdown-group[data-project="' + slug + '"]');
+      const coupeBtn = wasCoupe && group?.querySelector('.plans-dropdown-item[data-kind="coupe"]');
+      const mainBtn = wasCoupe && group?.querySelector('.plans-dropdown-item[data-kind="main"]');
+      if (coupeBtn) showPlan(coupeBtn.dataset.plan);
+      else if (mainBtn) showPlan(mainBtn.dataset.plan);
+      else plansOverlay.hidden = true;
+    }
     // reset section-cut + material picker UI state for the new project
     sectionView = false;
     cutToggle.classList.remove('active');

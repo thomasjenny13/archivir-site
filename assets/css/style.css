@@ -651,10 +651,10 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
    this guarantees solid black in light theme and solid white in dark.
    Also covers the dropdown thumbnails, which are separate cloned SVGs
    living under .plans-dropdown-thumb, not inside .plan-page. */
-.plan-page[data-plan="etage"] .st1,
-.plan-page[data-plan="coupe"] .st1,
-.plans-dropdown-item[data-plan="etage"] .st1,
-.plans-dropdown-item[data-plan="coupe"] .st1{
+.plan-page[data-kind="main"] .st1,
+.plan-page[data-kind="coupe"] .st1,
+.plans-dropdown-item[data-kind="main"] .st1,
+.plans-dropdown-item[data-kind="coupe"] .st1{
   fill: #000 !important;
   opacity: 1 !important;
 }
