@@ -502,12 +502,23 @@
   // regardless of what the page background is doing
   const TINT_STYLE = {
     white: { color: [0.735, 0.72, 0.675], roughness: 0.725, envMapIntensity: 0.4,
-             edgeColor: 0x1a1712, outlineThickness: 1.3, outlineStrength: 5, lineWidth: 1.3 },
+             edgeColor: 0x1a1712, outlineThickness: 0.8, outlineStrength: 3.5, lineWidth: 0.9 },
     dark:  { color: [0.02, 0.02, 0.02],   roughness: 0.725, envMapIntensity: 0.4,
-             edgeColor: 0xffffff,         outlineThickness: 0.55, outlineStrength: 2.5, lineWidth: 0.35 },
+             edgeColor: 0xffffff,         outlineThickness: 0.35, outlineStrength: 1.8, lineWidth: 0.22 },
   };
+  // on a small screen the model renders much smaller on-screen, so the
+  // same CSS-pixel line width reads disproportionately thick — thin it
+  // down further below the phone breakpoint used elsewhere in the CSS
+  function isMobileViewport(){ return window.innerWidth <= 640; }
+  const MOBILE_EDGE_SCALE = 0.5;
   function tintStyle(){
-    return TINT_STYLE[(localStorage.getItem('archivir-model-tint') || 'white') === 'dark' ? 'dark' : 'white'];
+    const base = TINT_STYLE[(localStorage.getItem('archivir-model-tint') || 'white') === 'dark' ? 'dark' : 'white'];
+    if (!isMobileViewport()) return base;
+    return Object.assign({}, base, {
+      outlineThickness: base.outlineThickness * MOBILE_EDGE_SCALE,
+      outlineStrength: base.outlineStrength * MOBILE_EDGE_SCALE,
+      lineWidth: base.lineWidth * MOBILE_EDGE_SCALE,
+    });
   }
   const GLASS_EDGE_SCALE = 0.4;
 
@@ -617,11 +628,7 @@
     new THREE.Vector2(container.clientWidth, container.clientHeight),
     scene, camera
   );
-  outlinePass.edgeStrength = tintStyle().outlineStrength;
   outlinePass.edgeGlow = 0;
-  outlinePass.edgeThickness = tintStyle().outlineThickness;
-  outlinePass.visibleEdgeColor.set(tintStyle().edgeColor);
-  outlinePass.hiddenEdgeColor.set(tintStyle().edgeColor);
   outlinePass.overlayMaterial.blending = THREE.CustomBlending;
   outlinePass.overlayMaterial.blendSrc = THREE.SrcAlphaFactor;
   outlinePass.overlayMaterial.blendDst = THREE.OneMinusSrcAlphaFactor;
@@ -645,6 +652,30 @@
       currentRig.cutBoundaryEdges.material.resolution.set(w * dpr, h * dpr);
       currentRig.innerEdges.material.resolution.set(w * dpr, h * dpr);
       if (currentRig.glassEdges) currentRig.glassEdges.material.resolution.set(w * dpr, h * dpr);
+    }
+    // the mobile breakpoint in tintStyle() depends on window width, so
+    // a resize can cross it (rotation, resizing the browser) — refresh
+    // the actual thicknesses here too, not just the line resolutions
+    applyEdgeStyle();
+  }
+
+  // re-tint the outline pass and every edge-line material from the
+  // current tint style — shared by the tint toggle, the initial setup,
+  // and any resize that might cross the mobile line-thickness breakpoint
+  function applyEdgeStyle(){
+    const style = tintStyle();
+    outlinePass.edgeStrength = style.outlineStrength;
+    outlinePass.edgeThickness = style.outlineThickness;
+    outlinePass.visibleEdgeColor.set(style.edgeColor);
+    outlinePass.hiddenEdgeColor.set(style.edgeColor);
+    if (!currentRig) return;
+    currentRig.cutBoundaryEdges.material.color.set(style.edgeColor);
+    currentRig.cutBoundaryEdges.material.linewidth = style.lineWidth;
+    currentRig.innerEdges.material.color.set(style.edgeColor);
+    currentRig.innerEdges.material.linewidth = style.lineWidth;
+    if (currentRig.glassEdges) {
+      currentRig.glassEdges.material.color.set(style.edgeColor);
+      currentRig.glassEdges.material.linewidth = style.lineWidth * GLASS_EDGE_SCALE;
     }
   }
 
@@ -835,21 +866,9 @@
   // unless a material swatch was explicitly chosen — that choice should stick
   document.getElementById('tint-toggle').addEventListener('click', () => {
     requestRender();
+    applyEdgeStyle();
+    if (!currentRig || document.querySelector('.swatch.active')) return;
     const style = tintStyle();
-    outlinePass.edgeStrength = style.outlineStrength;
-    outlinePass.edgeThickness = style.outlineThickness;
-    outlinePass.visibleEdgeColor.set(style.edgeColor);
-    outlinePass.hiddenEdgeColor.set(style.edgeColor);
-    if (!currentRig) return;
-    currentRig.cutBoundaryEdges.material.color.set(style.edgeColor);
-    currentRig.cutBoundaryEdges.material.linewidth = style.lineWidth;
-    currentRig.innerEdges.material.color.set(style.edgeColor);
-    currentRig.innerEdges.material.linewidth = style.lineWidth;
-    if (currentRig.glassEdges) {
-      currentRig.glassEdges.material.color.set(style.edgeColor);
-      currentRig.glassEdges.material.linewidth = style.lineWidth * GLASS_EDGE_SCALE;
-    }
-    if (document.querySelector('.swatch.active')) return;
     currentRig.sectionMeshes.forEach((mesh) => {
       mesh.material.color.setRGB(style.color[0], style.color[1], style.color[2]);
       mesh.material.roughness = style.roughness;
