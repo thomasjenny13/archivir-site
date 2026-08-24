@@ -26,11 +26,11 @@
     <span class="logo-prefix">archi</span><span class="logo-mid"><span class="logo-mid-text">tecture&nbsp;</span></span><span class="logo-vir">vir</span><span class="logo-tail"><span class="logo-tail-text">tuelle</span></span>
   </a>
   <div class="site-banner-right">
-    <button id="tint-toggle" class="theme-toggle" aria-label="Couleur du modèle">●</button>
+    <button id="tint-toggle" class="theme-toggle" aria-label="Couleur du modèle">⌂</button>
     <button id="theme-toggle" class="theme-toggle" aria-label="Basculer le thème">☾</button>
   </div>
 </header>
-<a class="back-link" href="../index.html" target="_blank" rel="noopener noreferrer">Index</a>
+<a class="back-link" href="../index.html">Index</a>
 <a id="nav-prev" class="nav-arrow nav-arrow-left" href="#" aria-label="Projet précédent">←</a>
 <a id="nav-next" class="nav-arrow nav-arrow-right" href="#" aria-label="Projet suivant">→</a>
 
@@ -275,7 +275,7 @@
   // it never clashes with either background
   const tintToggle = document.getElementById('tint-toggle');
   function applyTintIcon(){
-    tintToggle.textContent = (localStorage.getItem('archivir-model-tint') || 'white') === 'white' ? '●' : '○';
+    tintToggle.classList.toggle('active', (localStorage.getItem('archivir-model-tint') || 'white') === 'dark');
   }
   applyTintIcon();
   tintToggle.addEventListener('click', () => {
@@ -462,7 +462,7 @@
       glb: 'pavillon cueno_aldo rossi/pavillon.glb',
       title: 'Monument de la Résistance — Archivir',
       creditHtml: '<strong>Monument de la Résistance</strong>Aldo Rossi',
-      creditMeta: '1962 · Cuneo · Mémoriel · Concours',
+      creditMeta: '1962 · Coni · Mémoriel · Concours',
       hasPlans: true,
     },
     tupi: {

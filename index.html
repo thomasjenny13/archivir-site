@@ -26,7 +26,7 @@
     <span class="logo-prefix">archi</span><span class="logo-mid"><span class="logo-mid-text">tecture&nbsp;</span></span><span class="logo-vir">vir</span><span class="logo-tail"><span class="logo-tail-text">tuelle</span></span>
   </a>
   <div class="site-banner-right">
-    <button id="tint-toggle" class="theme-toggle" aria-label="Couleur du modèle">●</button>
+    <button id="tint-toggle" class="theme-toggle" aria-label="Couleur du modèle">⌂</button>
     <button id="theme-toggle" class="theme-toggle" aria-label="Basculer le thème">☾</button>
   </div>
 </header>
@@ -53,7 +53,7 @@
       <tr>
         <td><a href="projets/viewer.html?p=pavillon" data-glb="projets/pavillon cueno_aldo rossi/pavillon.glb">Monument de la Résistance</a></td>
         <td>Aldo Rossi</td>
-        <td data-country="Italie">Cuneo</td>
+        <td data-country="Italie">Coni</td>
         <td>1962</td>
         <td>Mémoriel</td>
         <td>Concours</td>
@@ -101,7 +101,7 @@
   // it never clashes with either background
   const tintToggle = document.getElementById('tint-toggle');
   function applyTintIcon(){
-    tintToggle.textContent = (localStorage.getItem('archivir-model-tint') || 'white') === 'white' ? '●' : '○';
+    tintToggle.classList.toggle('active', (localStorage.getItem('archivir-model-tint') || 'white') === 'dark');
   }
   applyTintIcon();
   tintToggle.addEventListener('click', () => {

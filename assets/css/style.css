@@ -670,6 +670,14 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   transition: border-color .2s ease, color .2s ease;
 }
 .theme-toggle:hover{ border-color: var(--rose-gold-deep); color: var(--rose-gold); }
+/* #tint-toggle only: filled dark house = satin-black model tint active,
+   plain outline house = the white/stone default */
+#tint-toggle.active{
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
+}
+#tint-toggle.active:hover{ border-color: var(--rose-gold); color: var(--rose-gold); }
 
 /* ---------- project prev/next arrows ---------- */
 .nav-arrow{
