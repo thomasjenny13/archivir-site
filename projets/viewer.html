@@ -38,10 +38,10 @@
   <div id="viewer-canvas" class="full-model"></div>
 
   <nav class="compass" aria-label="Vues préréglées">
-    <button class="compass-pt compass-n" data-view="north" aria-label="Vue nord">N</button>
-    <button class="compass-pt compass-e" data-view="east" aria-label="Vue est">E</button>
-    <button class="compass-pt compass-s" data-view="south" aria-label="Vue sud">S</button>
-    <button class="compass-pt compass-o" data-view="west" aria-label="Vue ouest">O</button>
+    <button class="compass-pt compass-n" data-view="north" aria-label="Vue de face">F</button>
+    <button class="compass-pt compass-e" data-view="east" aria-label="Vue de droite">R</button>
+    <button class="compass-pt compass-s" data-view="south" aria-label="Vue arrière">B</button>
+    <button class="compass-pt compass-o" data-view="west" aria-label="Vue de gauche">L</button>
   </nav>
 
   <button id="cut-toggle" class="cut-fab" aria-label="Vue en coupe">◐</button>
@@ -712,13 +712,20 @@
     return { geometry: g, cutEdges };
   }
 
+  // clip caps and edge extraction only ever read vertex positions, but
+  // meshes can carry mismatched attribute sets (e.g. an extra UV channel
+  // on one mesh only) which makes BufferGeometryUtils.mergeGeometries()
+  // bail out — so strip everything but position before merging
+  function positionOnlyGeometry(mesh) {
+    const g = mesh.geometry.clone();
+    g.applyMatrix4(mesh.matrixWorld);
+    Object.keys(g.attributes).forEach((name) => { if (name !== 'position') g.deleteAttribute(name); });
+    return g;
+  }
+
   function buildSectionCap(meshes, plane, size, color) {
     const group = new THREE.Group();
-    const geometries = meshes.map((mesh) => {
-      const g = mesh.geometry.clone();
-      g.applyMatrix4(mesh.matrixWorld);
-      return g;
-    });
+    const geometries = meshes.map((mesh) => positionOnlyGeometry(mesh));
     const geometry = mergeGeometries(geometries, false);
 
     const baseMat = new THREE.MeshBasicMaterial();
@@ -888,6 +895,9 @@
             child.material.polygonOffset = true;
             child.material.polygonOffsetFactor = 1;
             child.material.polygonOffsetUnits = 1;
+            // "Transparent plastic" meshes stay in the model for edge
+            // extraction below but never render their own surface
+            if (child.material.name === 'Transparent plastic') child.visible = false;
           }
         });
 
@@ -922,11 +932,7 @@
         sectionCap.visible = false;
         group.add(sectionCap);
 
-        const clipGeoms = sectionMeshes.map((mesh) => {
-          const g = mesh.geometry.clone();
-          g.applyMatrix4(mesh.matrixWorld);
-          return g;
-        });
+        const clipGeoms = sectionMeshes.map((mesh) => positionOnlyGeometry(mesh));
         const mergedForClip = mergeGeometries(clipGeoms, false).toNonIndexed();
         const { geometry: clippedGeom, cutEdges } = clipGeometryByPlane(mergedForClip, clipPlane);
         const clippedOutlineMesh = new THREE.Mesh(
@@ -944,12 +950,7 @@
         cutBoundaryEdges.visible = false;
         group.add(cutBoundaryEdges);
 
-        const edgeGeoms = sectionMeshes.map((mesh) => {
-          const g = mesh.geometry.clone();
-          g.deleteAttribute('normal');
-          g.applyMatrix4(mesh.matrixWorld);
-          return g;
-        });
+        const edgeGeoms = sectionMeshes.map((mesh) => positionOnlyGeometry(mesh));
         const weldedForEdges = mergeVertices(mergeGeometries(edgeGeoms, false), maxDim * 0.001);
         const edgesGeom = new THREE.EdgesGeometry(weldedForEdges, 22);
         const fatEdgesGeom = new LineSegmentsGeometry().fromEdgesGeometry(edgesGeom);

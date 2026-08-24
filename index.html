@@ -465,6 +465,7 @@
           child.receiveShadow = true;
           recolorMesh(child);
           child.material.metalness = 0;
+          if (child.material.name === 'Transparent plastic') child.visible = false;
         }
       });
 
