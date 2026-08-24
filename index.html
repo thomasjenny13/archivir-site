@@ -350,15 +350,21 @@
   const cache = new Map();
   let renderer, scene, camera, keyLight, currentModel;
 
-  // stone tone in dark mode, dark charcoal in light mode — keeps the
+  // warm stone in dark mode, satin black in light mode — keeps the
   // model readable against the light background
-  function baseModelColor(){
-    return document.documentElement.dataset.theme === 'light' ? [0.11, 0.11, 0.11] : [0.735, 0.72, 0.675];
+  const THEME_STYLE = {
+    dark:  { color: [0.735, 0.72, 0.675], roughness: 0.725, envMapIntensity: 0.4 },
+    light: { color: [0.02, 0.02, 0.02],   roughness: 0.35,  envMapIntensity: 0.5 },
+  };
+  function themeStyle(){
+    return THEME_STYLE[document.documentElement.dataset.theme === 'light' ? 'light' : 'dark'];
   }
   function recolorMesh(child){
     if (!child.isMesh) return;
-    const c = baseModelColor();
-    child.material.color.setRGB(c[0], c[1], c[2]);
+    const style = themeStyle();
+    child.material.color.setRGB(style.color[0], style.color[1], style.color[2]);
+    child.material.roughness = style.roughness;
+    child.material.envMapIntensity = style.envMapIntensity;
   }
   let spinId = null;
   function spinFrame(){
@@ -443,9 +449,7 @@
           child.castShadow = true;
           child.receiveShadow = true;
           recolorMesh(child);
-          child.material.roughness = 0.725;
           child.material.metalness = 0;
-          child.material.envMapIntensity = 0.4;
         }
       });
 
