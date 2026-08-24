@@ -429,39 +429,46 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 .full-model canvas{ display: block; width: 100%; height: 100%; }
 
 /* ---------- floating nav widgets ---------- */
+/* a circle split into four pie-slice quadrants (N/E/S/O), each its own
+   clickable button — the clip-path triangle runs from the center out to
+   two adjacent corners of the square box (a true 90° wedge at the center
+   vertex), then the circular crop on .compass trims it to the round dial */
 .compass{
   position: fixed; top: 72px; right: 24px; z-index: 5;
   width: 68px; height: 68px;
-}
-.compass-ring{
-  position: absolute; inset: 0;
-  border: 1px solid var(--line);
   border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid var(--line);
   background: color-mix(in srgb, var(--bg-2) 65%, transparent);
   backdrop-filter: blur(6px);
 }
+.compass::before, .compass::after{
+  content: "";
+  position: absolute; top: 0; left: 50%; width: 1px; height: 100%;
+  background: var(--line);
+  pointer-events: none;
+}
+.compass::before{ transform: rotate(45deg); }
+.compass::after{ transform: rotate(-45deg); }
 .compass-pt{
-  position: absolute;
-  display: flex; align-items: center; justify-content: center;
-  width: 22px; height: 22px;
-  border-radius: 50%;
-  border: 1px solid var(--pink-deep);
-  background: var(--bg-2);
+  position: absolute; inset: 0;
+  display: flex;
+  border: none;
+  background: transparent;
   color: var(--pink);
   font-family: var(--mono);
   font-size: 0.6rem; letter-spacing: 0.02em;
   cursor: pointer;
-  transition: background .2s ease, color .2s ease, border-color .2s ease;
+  transition: background .2s ease, color .2s ease;
 }
 .compass-pt:hover{
-  background: var(--pink);
-  color: var(--bg);
-  border-color: var(--pink);
+  background: color-mix(in srgb, var(--pink) 25%, transparent);
+  color: var(--pink);
 }
-.compass-n{ top: 0; left: 50%; transform: translate(-50%, -50%); }
-.compass-s{ bottom: 0; left: 50%; transform: translate(-50%, 50%); }
-.compass-e{ top: 50%; right: 0; transform: translate(50%, -50%); }
-.compass-o{ top: 50%; left: 0; transform: translate(-50%, -50%); }
+.compass-n{ clip-path: polygon(50% 50%, 0% 0%, 100% 0%); align-items: flex-start; justify-content: center; padding-top: 7px; }
+.compass-e{ clip-path: polygon(50% 50%, 100% 0%, 100% 100%); align-items: center; justify-content: flex-end; padding-right: 7px; }
+.compass-s{ clip-path: polygon(50% 50%, 100% 100%, 0% 100%); align-items: flex-end; justify-content: center; padding-bottom: 7px; }
+.compass-o{ clip-path: polygon(50% 50%, 0% 100%, 0% 0%); align-items: center; justify-content: flex-start; padding-left: 7px; }
 
 .cut-fab{
   position: fixed; bottom: 28px; right: 28px; z-index: 5;
