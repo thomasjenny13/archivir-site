@@ -699,3 +699,74 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 .nav-arrow:hover{ border-color: var(--rose-gold-deep); color: var(--rose-gold); }
 .nav-arrow-left{ left: 20px; }
 .nav-arrow-right{ right: 20px; }
+
+/* ---------- phones: every floating control shrinks and pulls in from
+   the edge, and the plans menu switches from a tall dropdown list to a
+   compact horizontal strip so it doesn't swallow half the screen ---------- */
+@media (max-width: 640px){
+  .site-banner{ height: 44px; padding: 0 16px; }
+  .site-logo{ font-size: 1.05rem; }
+  .site-banner-right{ gap: 10px; }
+  .theme-toggle{ width: 30px; height: 30px; font-size: 0.82rem; }
+
+  .back-link{ top: 58px; left: 16px; font-size: 0.66rem; }
+
+  .index-page{ padding: 76px 16px 40px; }
+  .index-header{ margin-bottom: 24px; }
+  .index-reset{ top: 58px; right: 16px; width: 38px; height: 38px; font-size: 1rem; }
+
+  .compass{ top: 58px; right: 16px; width: 54px; height: 54px; }
+  .compass-pt{ font-size: 0.5rem; }
+  .compass-n{ padding-top: 5px; }
+  .compass-s{ padding-bottom: 5px; }
+  .compass-o{ padding-left: 5px; }
+  .compass-e{ padding-right: 5px; }
+
+  .nav-arrow{ width: 36px; height: 36px; font-size: 1rem; }
+  .nav-arrow-left{ left: 12px; }
+  .nav-arrow-right{ right: 12px; }
+
+  .cut-fab{ width: 40px; height: 40px; bottom: 18px; right: 18px; font-size: 1rem; }
+
+  .viewer-credit{
+    bottom: 16px; left: 16px;
+    max-width: 200px;
+    font-size: 0.68rem;
+  }
+  .viewer-credit .credit-meta{ font-size: 0.6rem; }
+
+  .plans-menu{ bottom: 18px; right: 62px; padding: 0; }
+  .plans-menu-toggle{ width: 40px; height: 40px; font-size: 1rem; }
+
+  /* dropdown -> a fixed strip along the bottom, item list -> horizontal
+     scroll of icon-only tiles instead of a tall column of full-width rows */
+  .plans-dropdown{
+    position: fixed;
+    left: 12px; right: 12px; bottom: 66px;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px;
+    max-width: none;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .plans-dropdown-group{ display: contents; }
+  .plans-dropdown-heading{ display: none; }
+  .plans-dropdown-item{
+    flex: none;
+    width: 56px;
+    flex-direction: column;
+    gap: 4px;
+    padding: 4px;
+    text-align: center;
+  }
+  .plans-dropdown-thumb{ width: 44px; height: 44px; }
+  .plans-dropdown-label{
+    font-size: 0.56rem;
+    line-height: 1.15;
+    white-space: normal;
+  }
+
+  .plans-close{ top: 16px; right: 16px; width: 32px; height: 32px; }
+}
