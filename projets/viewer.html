@@ -503,7 +503,10 @@
   const TINT_STYLE = {
     white: { color: [0.735, 0.72, 0.675], roughness: 0.725, envMapIntensity: 0.4,
              edgeColor: 0x1a1712, outlineThickness: 0.8, outlineStrength: 3.5, lineWidth: 0.9 },
-    dark:  { color: [0.02, 0.02, 0.02],   roughness: 0.725, envMapIntensity: 0.4,
+    // near-black surface mirrors the RoomEnvironment's light panels as
+    // ugly vertical streaks at any gloss — force it fully matte and cut
+    // the env reflection right down so it reads as a solid massing model
+    dark:  { color: [0.02, 0.02, 0.02],   roughness: 1.0, envMapIntensity: 0.08,
              edgeColor: 0xffffff,         outlineThickness: 0.35, outlineStrength: 1.8, lineWidth: 0.22 },
   };
   // on a small screen the model renders much smaller on-screen, so the
