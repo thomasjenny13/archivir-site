@@ -14,7 +14,7 @@
       .st1 {
         fill: #2a2620;
         fill-rule: evenodd;
-        opacity: .25;
+        opacity: .5;
       }
     </style>
   </defs>
