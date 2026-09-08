@@ -646,6 +646,12 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 /* the south facade's ground shadow inverts into a bright smudge on
    the dark backdrop instead of reading as a shadow, so drop it there */
 [data-theme="dark"] .plan-page[data-plan="sud"] .st1{ display: none; }
+/* every inline <style> in viewer.html declares .st1 globally, and the
+   last one to load (Haus coupe: fill #000 / opacity 1) wins the cascade,
+   forcing this shadow to solid black — override it back to a soft grey
+   shadow at 50% with a selector specific enough to beat those (0,1,0) rules */
+.plan-page[data-plan="sud"] .st1,
+.plans-dropdown-item[data-plan="sud"] .st1{ fill: #2a2620; opacity: .5; }
 /* force the étage/coupe poché to solid black regardless of whatever
    fill the source SVG carries — combined with the invert filter above,
    this guarantees solid black in light theme and solid white in dark.
