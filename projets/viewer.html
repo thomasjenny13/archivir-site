@@ -679,6 +679,34 @@
     }
   }
 
+  // re-apply the current tint (surfaces + edge lines) to one rig. Rigs
+  // are cached and keep whatever tint was active when they loaded, so
+  // both the tint toggle and a project switch have to refresh them —
+  // otherwise the dark/stone choice only sticks on the visible model.
+  function retintRig(rig){
+    if (!rig) return;
+    const style = tintStyle();
+    if (!document.querySelector('.swatch.active')) {
+      rig.sectionMeshes.forEach((mesh) => {
+        mesh.material.color.setRGB(style.color[0], style.color[1], style.color[2]);
+        mesh.material.roughness = style.roughness;
+        mesh.material.envMapIntensity = style.envMapIntensity;
+      });
+    }
+    if (rig.cutBoundaryEdges) {
+      rig.cutBoundaryEdges.material.color.set(style.edgeColor);
+      rig.cutBoundaryEdges.material.linewidth = style.lineWidth;
+    }
+    if (rig.innerEdges) {
+      rig.innerEdges.material.color.set(style.edgeColor);
+      rig.innerEdges.material.linewidth = style.lineWidth;
+    }
+    if (rig.glassEdges) {
+      rig.glassEdges.material.color.set(style.edgeColor);
+      rig.glassEdges.material.linewidth = style.lineWidth * GLASS_EDGE_SCALE;
+    }
+  }
+
   const keyLight = new THREE.DirectionalLight(0xfff2e0, 3.4);
   keyLight.position.set(5, 8, 3);
   keyLight.castShadow = true;
@@ -867,13 +895,9 @@
   document.getElementById('tint-toggle').addEventListener('click', () => {
     requestRender();
     applyEdgeStyle();
-    if (!currentRig || document.querySelector('.swatch.active')) return;
-    const style = tintStyle();
-    currentRig.sectionMeshes.forEach((mesh) => {
-      mesh.material.color.setRGB(style.color[0], style.color[1], style.color[2]);
-      mesh.material.roughness = style.roughness;
-      mesh.material.envMapIntensity = style.envMapIntensity;
-    });
+    // refresh every project already loaded this session, not just the
+    // one on screen, so the tint is already right when you navigate
+    rigCache.forEach(retintRig);
   });
 
   // ---------- section cut toggle ----------
@@ -1102,6 +1126,8 @@
     switching = true;
 
     const newRig = await getRig(slug);
+    // a cached rig may have loaded under a since-changed tint choice
+    retintRig(newRig);
     const oldRig = currentRig;
 
     if (animate && oldRig) {
