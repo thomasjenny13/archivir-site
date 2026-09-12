@@ -520,6 +520,33 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 .swatch:hover{ transform: scale(1.15); }
 .swatch.active{ border-color: var(--rose-gold); border-width: 2px; }
 
+/* ---------- prize picker (competition volumetries) ---------- */
+.prize-picker{
+  position: fixed; bottom: 20px; left: 50%; z-index: 5;
+  transform: translateX(-50%);
+  display: flex; gap: 6px;
+  padding: 6px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg-2) 85%, transparent);
+  backdrop-filter: blur(8px);
+}
+.prize-btn{
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: none;
+  font-family: var(--mono);
+  font-size: 0.72rem; letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color .15s ease, color .15s ease, opacity .15s ease;
+}
+.prize-btn:hover:not(:disabled){ color: var(--rose-gold); }
+.prize-btn.active{ border-color: var(--rose-gold); color: var(--rose-gold); }
+.prize-btn:disabled{ opacity: 0.35; cursor: default; }
+
 /* ---------- plans overlay ---------- */
 .plans-menu{
   position: fixed; bottom: 16px; right: 76px; z-index: 35;
@@ -743,6 +770,14 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 
   .plans-menu{ bottom: 18px; right: 62px; padding: 0; }
   .plans-menu-toggle{ width: 40px; height: 40px; font-size: 1rem; }
+
+  .prize-picker{
+    bottom: 68px;
+    max-width: calc(100vw - 32px);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .prize-btn{ padding: 5px 10px; font-size: 0.62rem; }
 
   /* dropdown -> a fixed strip along the bottom, item list -> horizontal
      scroll of icon-only tiles instead of a tall column of full-width rows */

@@ -56,6 +56,8 @@
 
   <p id="viewer-credit" class="viewer-credit"></p>
 
+  <div id="prize-picker" class="prize-picker" hidden></div>
+
 </main>
   <div id="plans-menu" class="plans-menu">
     <div id="plans-dropdown" class="plans-dropdown">
@@ -493,8 +495,26 @@
       creditMeta: '2017 · Wollerau (SZ)',
       hasPlans: true,
     },
+    oberaletsch: {
+      glb: 'concours/oberaletsch/base.glb',
+      title: 'Oberaletschhütte — Archivir',
+      creditHtml: '<strong>Oberaletschhütte</strong>Transformation et extension — SAC section Chasseral',
+      creditMeta: '2024 · Belalp (VS) · Refuge de montagne · Concours',
+      hasPlans: false,
+      // one competition, several submitted volumetries added onto the
+      // same existing-hut base model — switched via the prize picker
+      // rather than the project carousel. "glb" above doubles as the
+      // "base" variant so the two never load twice.
+      variants: {
+        base:  { glb: 'concours/oberaletsch/base.glb', label: 'Existant' },
+        prix1: { label: '1er prix', creditHtml: '<strong>Aile d’Épervier</strong>GayMenzel Sàrl · Monthey' },
+        prix2: { glb: 'concours/oberaletsch/mijong.glb', label: '2e prix', creditHtml: '<strong>LUA</strong>mijong architecture design · Sion' },
+        prix3: { label: '3e prix', creditHtml: '<strong>Tandem</strong>Studio V9 · Bienne' },
+      },
+      variantOrder: ['base', 'prix1', 'prix2', 'prix3'],
+    },
   };
-  const ORDER = ['pavillon', 'tupi', 'haus'];
+  const ORDER = ['pavillon', 'tupi', 'haus', 'oberaletsch'];
 
   // model tint is a user choice, independent of the light/dark site
   // theme: warm stone + dark hairlines, or matte black + white hairlines
@@ -1083,6 +1103,82 @@
     sectionView = false;
     cutToggle.classList.remove('active');
     document.querySelectorAll('.swatch').forEach((b) => b.classList.remove('active'));
+
+    buildPrizePicker(slug);
+  }
+
+  // ---------- prize picker: one project (a single competition), several
+  // submitted volumetries switched in place over the same base model ----------
+  const prizePicker = document.getElementById('prize-picker');
+  let currentVariant = null;
+
+  function buildPrizePicker(slug){
+    const cfg = PROJECTS[slug];
+    prizePicker.innerHTML = '';
+    if (!cfg.variants) { prizePicker.hidden = true; return; }
+    cfg.variantOrder.forEach((key) => {
+      const v = cfg.variants[key];
+      const btn = document.createElement('button');
+      btn.className = 'prize-btn';
+      btn.dataset.variant = key;
+      btn.textContent = v.label;
+      if (!v.glb && key !== 'base') {
+        btn.disabled = true;
+        btn.title = 'Maquette à venir';
+      } else {
+        btn.addEventListener('click', () => switchVariant(slug, key));
+      }
+      prizePicker.appendChild(btn);
+    });
+    prizePicker.hidden = false;
+    currentVariant = 'base';
+    prizePicker.querySelector('.prize-btn[data-variant="base"]')?.classList.add('active');
+  }
+
+  // rigs for non-base variants are cached the same way as project rigs,
+  // just keyed by "slug::variant" so they don't collide
+  const variantRigCache = new Map();
+  async function getVariantRig(slug, variantKey){
+    if (variantKey === 'base') return getRig(slug);
+    const key = slug + '::' + variantKey;
+    if (variantRigCache.has(key)) return variantRigCache.get(key);
+    const rig = await loadRig(PROJECTS[slug].variants[variantKey].glb);
+    variantRigCache.set(key, rig);
+    return rig;
+  }
+
+  async function switchVariant(slug, variantKey){
+    if (slug !== currentSlug || variantKey === currentVariant || switching) return;
+    const cfg = PROJECTS[slug];
+    const v = cfg.variants[variantKey];
+    if (!v.glb && variantKey !== 'base') return;
+    switching = true;
+
+    const newRig = await getVariantRig(slug, variantKey);
+    retintRig(newRig);
+    const oldRig = currentRig;
+
+    scene.add(newRig.group);
+    newRig.group.visible = true;
+    newRig.group.position.set(0, 0, 0);
+    newRig.group.scale.setScalar(1);
+    if (oldRig && oldRig !== newRig) oldRig.group.visible = false;
+
+    currentRig = newRig;
+    currentVariant = variantKey;
+    outlinePass.selectedObjects = [currentRig.model];
+    frameCamera(newRig, false);
+
+    const creditHtml = v.creditHtml || cfg.creditHtml;
+    const creditMeta = v.creditMeta || cfg.creditMeta;
+    document.getElementById('viewer-credit').innerHTML =
+      creditHtml + (creditMeta ? '<br><span class="credit-meta">' + creditMeta + '</span>' : '');
+    prizePicker.querySelectorAll('.prize-btn').forEach((b) => b.classList.toggle('active', b.dataset.variant === variantKey));
+
+    sectionView = false;
+    cutToggle.classList.remove('active');
+    switching = false;
+    requestRender();
   }
 
   function frameCamera(rig, instant) {
