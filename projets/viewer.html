@@ -1167,7 +1167,9 @@
     currentRig = newRig;
     currentVariant = variantKey;
     outlinePass.selectedObjects = [currentRig.model];
-    frameCamera(newRig, false);
+    // deliberately no frameCamera() here: switching between a competition's
+    // submitted volumetries should read as the same building under the
+    // viewer's current angle/zoom, not a fresh reframe each time
 
     const creditHtml = v.creditHtml || cfg.creditHtml;
     const creditMeta = v.creditMeta || cfg.creditMeta;
