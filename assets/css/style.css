@@ -408,6 +408,23 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 .site-banner-right{
   display: flex; align-items: center; gap: 18px;
 }
+.site-nav{
+  display: flex; align-items: center; gap: 16px;
+}
+.site-nav-link{
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  text-decoration: none;
+  padding-bottom: 2px;
+  border-bottom: 1px solid transparent;
+  transition: color .2s ease, border-color .2s ease;
+}
+.site-nav-link:hover{ color: var(--rose-gold); }
+.site-nav-link.is-active{ color: var(--ink); border-bottom-color: var(--rose-gold-deep); }
 .back-link{
   position: fixed; top: 72px; left: 24px; z-index: 5;
   font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase;
@@ -810,4 +827,104 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   }
 
   .plans-close{ top: 16px; right: 16px; width: 32px; height: 32px; }
+}
+
+/* ---------- carte suisse ---------- */
+.carte-page{
+  position: relative; z-index: 2;
+  min-height: 100vh;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 120px 24px 60px;
+}
+.ch-map-wrap{
+  position: relative;
+  width: 100%;
+  max-width: 880px;
+  margin: 0 auto;
+}
+.ch-map{ display: block; width: 100%; height: auto; }
+.ch-map-cantons path{
+  fill: var(--bg-2);
+  stroke: var(--line);
+  stroke-width: 1;
+  transition: fill .2s ease;
+}
+.ch-map-cantons path:hover{ fill: color-mix(in srgb, var(--rose-gold) 14%, var(--bg-2)); }
+.ch-map-border path{
+  fill: none;
+  stroke: var(--ink-faint);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.ch-map-lakes path{
+  fill: var(--blue);
+  opacity: 0.32;
+  stroke: none;
+}
+.ch-pins{ position: absolute; inset: 0; pointer-events: none; }
+.ch-pin{
+  position: absolute;
+  width: 11px; height: 11px;
+  border-radius: 50%;
+  background: var(--rose-gold);
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 0 1px var(--rose-gold-deep);
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  cursor: pointer;
+  transition: background .2s ease, transform .2s ease;
+}
+.ch-pin:hover, .ch-pin:focus-visible{
+  background: var(--pink);
+  box-shadow: 0 0 0 1px var(--pink-deep);
+  transform: translate(-50%, -50%) scale(1.35);
+  outline: none;
+}
+.ch-pin-tip{
+  position: absolute;
+  left: 50%; bottom: calc(100% + 10px);
+  transform: translate(-50%, 4px);
+  min-width: 170px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+  font-family: var(--mono);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity .15s ease, transform .15s ease;
+  z-index: 20;
+}
+.ch-pin:hover .ch-pin-tip, .ch-pin:focus-visible .ch-pin-tip{
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.ch-pin-tip-title{ display: block; font-size: 0.76rem; font-weight: 600; color: var(--ink); }
+.ch-pin-tip-arch{ display: block; font-size: 0.68rem; color: var(--ink-soft); margin-top: 2px; }
+.ch-pin-tip-loc{ display: block; font-size: 0.62rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--rose-gold); margin-top: 4px; }
+.ch-empty{
+  margin: 32px 0 0;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+}
+.ch-credit{
+  margin: 48px 0 0;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.02em;
+  color: var(--ink-faint);
+}
+.ch-credit a{ color: var(--ink-faint); text-decoration: underline; text-decoration-style: dashed; text-underline-offset: 2px; }
+.ch-credit a:hover{ color: var(--rose-gold); }
+@media (max-width: 640px){
+  .carte-page{ padding: 92px 16px 40px; }
+  .ch-pin{ width: 9px; height: 9px; }
+  .ch-pin-tip{ min-width: 140px; padding: 7px 9px; }
 }
