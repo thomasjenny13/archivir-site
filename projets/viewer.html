@@ -506,7 +506,11 @@
       hasPlans: false,
       // building runs the other way vs. the other projects — cut left/right
       // instead of the default front/back, so the section actually crosses it
-      clipNormal: [1, 0, 0],
+      clipNormal: [-1, 0, 0],
+      // mirrored on X to match clipNormal above — otherwise the default
+      // view faces the kept half's *outside*, with the cut cap hidden
+      // around the back
+      viewDir: [1.5, 1.3, 0.55],
       // one competition, several submitted volumetries added onto the
       // same existing-hut base model — switched via the prize picker
       // rather than the project carousel. "glb" above doubles as the
@@ -759,6 +763,10 @@
   // normal along Z) — each rig bakes its own Plane instance from this at
   // load time, so a project can be cut along a different axis
   const DEFAULT_CLIP_NORMAL = [0, 0, -1];
+  // default initial camera direction — kept on the same side as
+  // -DEFAULT_CLIP_NORMAL so a section cut's cap faces the camera by
+  // default instead of hiding behind the kept half
+  const DEFAULT_VIEW_DIR = [-1.5, 1.3, 0.55];
 
   // ---------- helpers (unchanged from the per-project pages) ----------
   function clipGeometryByPlane(geometry, plane) {
@@ -935,16 +943,23 @@
   // ---------- section cut toggle ----------
   let sectionView = false;
   const cutToggle = document.getElementById('cut-toggle');
+  // applies the current on/off section-cut state to a given rig — shared by
+  // the toggle click and by a variant switch that should keep the cut open
+  // (the picker swaps in a whole new rig, which loads with clipping off)
+  function applySectionView(rig, on) {
+    if (!rig) return;
+    const planes = on ? [rig.clipPlane] : [];
+    rig.sectionMeshes.forEach((mesh) => { mesh.material.clippingPlanes = planes; });
+    if (rig.innerEdges) rig.innerEdges.material.clippingPlanes = planes;
+    if (rig.glassEdges) rig.glassEdges.material.clippingPlanes = planes;
+    outlinePass.selectedObjects = on ? [rig.clippedOutlineMesh] : [rig.model];
+    if (rig.cutBoundaryEdges) rig.cutBoundaryEdges.visible = on;
+    if (rig.sectionCap) rig.sectionCap.visible = on;
+  }
   cutToggle.addEventListener('click', () => {
     if (!currentRig) return;
     sectionView = !sectionView;
-    const planes = sectionView ? [currentRig.clipPlane] : [];
-    currentRig.sectionMeshes.forEach((mesh) => { mesh.material.clippingPlanes = planes; });
-    if (currentRig.innerEdges) currentRig.innerEdges.material.clippingPlanes = planes;
-    if (currentRig.glassEdges) currentRig.glassEdges.material.clippingPlanes = planes;
-    outlinePass.selectedObjects = sectionView ? [currentRig.clippedOutlineMesh] : [currentRig.model];
-    if (currentRig.cutBoundaryEdges) currentRig.cutBoundaryEdges.visible = sectionView;
-    if (currentRig.sectionCap) currentRig.sectionCap.visible = sectionView;
+    applySectionView(currentRig, sectionView);
     cutToggle.classList.toggle('active', sectionView);
     requestRender();
   });
@@ -1175,7 +1190,10 @@
 
     currentRig = newRig;
     currentVariant = variantKey;
-    outlinePass.selectedObjects = [currentRig.model];
+    // a fresh rig always loads with clipping off — re-apply whatever
+    // section-cut state was already showing, so it stays cut across
+    // Existant/1er/2e/3e prix instead of resetting on every switch
+    applySectionView(currentRig, sectionView);
     // deliberately no frameCamera() here: switching between a competition's
     // submitted volumetries should read as the same building under the
     // viewer's current angle/zoom, not a fresh reframe each time
@@ -1185,17 +1203,14 @@
     document.getElementById('viewer-credit').innerHTML =
       creditHtml + (creditMeta ? '<br><span class="credit-meta">' + creditMeta + '</span>' : '');
     prizePicker.querySelectorAll('.prize-btn').forEach((b) => b.classList.toggle('active', b.dataset.variant === variantKey));
-
-    sectionView = false;
-    cutToggle.classList.remove('active');
     switching = false;
     requestRender();
   }
 
-  function frameCamera(rig, instant) {
+  function frameCamera(rig, instant, viewDir = DEFAULT_VIEW_DIR) {
     viewDistance = rig.fitDistance;
     viewEyeY = rig.fitCenter.y;
-    const dir = new THREE.Vector3(-1.5, 1.3, 0.55).normalize();
+    const dir = new THREE.Vector3(...viewDir).normalize();
     const pos = dir.clone().multiplyScalar(rig.fitDistance).add(rig.fitCenter);
     camera.near = rig.fitDistance / 100;
     camera.far = rig.fitDistance * 100;
@@ -1316,7 +1331,7 @@
       newRig.group.position.set(0, 0, 0);
       newRig.group.scale.setScalar(1);
       if (oldRig) oldRig.group.visible = false;
-      frameCamera(newRig, true);
+      frameCamera(newRig, true, PROJECTS[slug].viewDir);
     }
 
     currentRig = newRig;
