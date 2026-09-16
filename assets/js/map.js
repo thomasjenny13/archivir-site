@@ -11,24 +11,17 @@ function currentTheme(){
   return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
 }
 
-// OpenFreeMap: free, no-key vector tiles (OpenMapTiles schema) rendered
-// with MapLibre GL — "positron"/"dark" are its own minimal, near-
-// monochrome styles (thin gray streets, place labels, no landuse
-// clutter), the same family CARTO's raster Positron belongs to, but
-// vector — crisp at any zoom and stylable in code (see applyWaterColor)
-// instead of guessed at with CSS filters over a raster image.
-const STYLES = {
-  light: 'https://tiles.openfreemap.org/styles/positron',
-  dark: 'https://tiles.openfreemap.org/styles/dark',
-};
-// both styles ship a "water" fill layer close to the land color (barely
-// legible as water) — set explicitly instead, muted but distinct,
-// broadly in line with the site's warm/neutral palette
-const WATER_COLOR = { light: '#a9c7ce', dark: '#1c2b31' };
+// OpenFreeMap "liberty" — the exact style referenced from
+// geodataviewer.com/open-pbf-online (found by inspecting its network
+// requests: MapLibre GL + this OpenFreeMap style, free, no key). One
+// style regardless of the site's light/dark theme — that reference
+// page's own dark mode only re-themes its UI chrome, never re-requests
+// a different map style, so neither do we.
+const STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 
 const map = new maplibregl.Map({
   container: 'osm-map',
-  style: STYLES[currentTheme()],
+  style: STYLE,
   center: [10, 45],
   zoom: 2,
   minZoom: 2,
@@ -38,12 +31,9 @@ const map = new maplibregl.Map({
 map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
 
 // OpenMapTiles has no elevation data — contour lines still come from
-// OpenTopoMap as a raster overlay, just added as a MapLibre raster
-// source/layer now instead of a Leaflet tile layer. raster-saturation
-// mutes its full-color style (green forest, blue water, brown
-// contours) toward the site's calmer palette without flattening it to
-// pure grayscale the way a CSS filter would.
-function addContourLayer(){
+// OpenTopoMap as a raster overlay, added as a MapLibre raster
+// source/layer on top of the liberty base.
+map.on('style.load', () => {
   if (map.getSource('topo')) return;
   map.addSource('topo', {
     type: 'raster',
@@ -61,22 +51,11 @@ function addContourLayer(){
     id: 'topo',
     type: 'raster',
     source: 'topo',
-    paint: { 'raster-opacity': 0.85, 'raster-saturation': -0.35, 'raster-contrast': 0.15 },
+    paint: { 'raster-opacity': 0.55, 'raster-saturation': -0.35, 'raster-contrast': 0.15 },
   });
-}
-function applyWaterColor(){
-  if (map.getLayer('water')) map.setPaintProperty('water', 'fill-color', WATER_COLOR[currentTheme()]);
-}
-// fires on the initial style load AND every later setStyle() call —
-// setStyle() wipes any source/layer added on top, so both need redoing
-// each time rather than just once
-map.on('style.load', () => {
-  addContourLayer();
-  applyWaterColor();
 });
 
 document.getElementById('theme-toggle').addEventListener('click', () => {
-  setTimeout(() => map.setStyle(STYLES[currentTheme()]), 0);
   popupCache.forEach((entry) => entry.model.traverse(recolorMesh));
   if (popupRenderer) popupRenderer.render(popupScene, popupCamera);
 });
