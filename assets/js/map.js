@@ -13,18 +13,19 @@ const map = L.map('osm-map', {
 });
 L.control.zoom({ position: 'topright' }).addTo(map);
 
-// Esri's free, no-key "Canvas" basemaps — abstract flat gray shapes
-// instead of a busy street map, with a real light/dark pair (each is a
-// Base fill layer plus a Reference layer of labels/borders on top). A
-// hillshade layer sits between the two so mountain terrain (ridges,
-// glaciers, valleys) reads at a glance — useful context for a pin like
+// CARTO's free, no-key Positron/Dark Matter basemaps — thin gray street
+// linework close to the "every street in the city" line-art look,
+// but with city/country name labels kept (split as its own layer so
+// theme toggles can swap Base + Reference independently). A hillshade
+// layer sits between the two so mountain terrain (ridges, glaciers,
+// valleys) reads at a glance — useful context for a pin like
 // Oberaletschhütte that can't be checked against a street address.
 // Explicit panes keep the stacking order fixed regardless of when each
-// layer is added/removed (theme toggles swap Base + Reference only).
-const ATTRIBUTION = 'Esri, HERE, Garmin, &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors';
+// layer is added/removed.
+const ATTRIBUTION = '&copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>, &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors';
 const CANVAS = {
-  light: ['World_Light_Gray_Base', 'World_Light_Gray_Reference'],
-  dark: ['World_Dark_Gray_Base', 'World_Dark_Gray_Reference'],
+  light: ['light_nolabels', 'light_only_labels'],
+  dark: ['dark_nolabels', 'dark_only_labels'],
 };
 
 ['paneBase', 'paneHillshade', 'paneReference', 'paneTopo'].forEach((name, i) => {
@@ -38,7 +39,7 @@ L.tileLayer('https://services.arcgisonline.com/arcgis/rest/services/Elevation/Wo
   opacity: 0.45,
   pane: 'paneHillshade',
   className: 'map-hillshade',
-  attribution: ATTRIBUTION,
+  attribution: 'Esri, HERE, Garmin',
 }).addTo(map);
 
 // hillshade alone reads as terrain texture but has no traced elevation
@@ -69,11 +70,11 @@ function applyTileTheme(){
   canvasLayers.forEach((layer) => map.removeLayer(layer));
   const [base, reference] = CANVAS[currentTheme()];
   canvasLayers = [
-    L.tileLayer(`https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/${base}/MapServer/tile/{z}/{y}/{x}`, {
-      maxZoom: 19, maxNativeZoom: 16, pane: 'paneBase', attribution: ATTRIBUTION,
+    L.tileLayer(`https://{s}.basemaps.cartocdn.com/${base}/{z}/{x}/{y}{r}.png`, {
+      subdomains: 'abcd', maxZoom: 19, maxNativeZoom: 20, pane: 'paneBase', attribution: ATTRIBUTION, detectRetina: true,
     }).addTo(map),
-    L.tileLayer(`https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/${reference}/MapServer/tile/{z}/{y}/{x}`, {
-      maxZoom: 19, maxNativeZoom: 16, pane: 'paneReference',
+    L.tileLayer(`https://{s}.basemaps.cartocdn.com/${reference}/{z}/{x}/{y}{r}.png`, {
+      subdomains: 'abcd', maxZoom: 19, maxNativeZoom: 20, pane: 'paneReference', detectRetina: true,
     }).addTo(map),
   ];
 }
