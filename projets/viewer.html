@@ -501,6 +501,9 @@
       creditHtml: '<strong>Oberaletschhütte</strong>Transformation et extension — SAC section Chasseral',
       creditMeta: '2024 · Belalp (VS) · Refuge de montagne · Concours',
       hasPlans: false,
+      // building runs the other way vs. the other projects — cut left/right
+      // instead of the default front/back, so the section actually crosses it
+      clipNormal: [1, 0, 0],
       // one competition, several submitted volumetries added onto the
       // same existing-hut base model — switched via the prize picker
       // rather than the project carousel. "glb" above doubles as the
@@ -749,8 +752,10 @@
   ground.receiveShadow = true;
   scene.add(ground);
 
-  // clip plane cuts front/back halves (normal along Z)
-  const clipPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0);
+  // section-cut plane normal, per project (default: front/back halves,
+  // normal along Z) — each rig bakes its own Plane instance from this at
+  // load time, so a project can be cut along a different axis
+  const DEFAULT_CLIP_NORMAL = [0, 0, -1];
 
   // ---------- helpers (unchanged from the per-project pages) ----------
   function clipGeometryByPlane(geometry, plane) {
@@ -930,7 +935,7 @@
   cutToggle.addEventListener('click', () => {
     if (!currentRig) return;
     sectionView = !sectionView;
-    const planes = sectionView ? [clipPlane] : [];
+    const planes = sectionView ? [currentRig.clipPlane] : [];
     currentRig.sectionMeshes.forEach((mesh) => { mesh.material.clippingPlanes = planes; });
     if (currentRig.innerEdges) currentRig.innerEdges.material.clippingPlanes = planes;
     if (currentRig.glassEdges) currentRig.glassEdges.material.clippingPlanes = planes;
@@ -945,11 +950,12 @@
   // so it can be positioned/scaled/disposed as a unit ----------
   const loader = new GLTFLoader();
 
-  function loadRig(glbPath) {
+  function loadRig(glbPath, clipNormal = DEFAULT_CLIP_NORMAL) {
     return new Promise((resolve, reject) => {
       loader.load(glbPath, (gltf) => {
         const model = gltf.scene;
         const group = new THREE.Group();
+        const clipPlane = new THREE.Plane(new THREE.Vector3(...clipNormal), 0);
 
         model.traverse((child) => {
           if (child.isMesh) {
@@ -1057,7 +1063,7 @@
 
         resolve({
           group, model, sectionMeshes, sectionCap, clippedOutlineMesh,
-          cutBoundaryEdges, innerEdges, glassEdges,
+          cutBoundaryEdges, innerEdges, glassEdges, clipPlane,
           fitDistance, fitCenter: sphere.center.clone(),
           maxDim,
           dispose() {
@@ -1142,7 +1148,7 @@
     if (variantKey === 'base') return getRig(slug);
     const key = slug + '::' + variantKey;
     if (variantRigCache.has(key)) return variantRigCache.get(key);
-    const rig = await loadRig(PROJECTS[slug].variants[variantKey].glb);
+    const rig = await loadRig(PROJECTS[slug].variants[variantKey].glb, PROJECTS[slug].clipNormal);
     variantRigCache.set(key, rig);
     return rig;
   }
@@ -1218,7 +1224,7 @@
   const rigCache = new Map();
   async function getRig(slug){
     if (rigCache.has(slug)) return rigCache.get(slug);
-    const rig = await loadRig(PROJECTS[slug].glb);
+    const rig = await loadRig(PROJECTS[slug].glb, PROJECTS[slug].clipNormal);
     rigCache.set(slug, rig);
     return rig;
   }
