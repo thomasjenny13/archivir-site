@@ -80,7 +80,7 @@ function recolorMesh(child){
 
 const popupLoader = new GLTFLoader();
 const popupCache = new Map();
-let popupRenderer, popupScene, popupCamera, popupKeyLight, popupModel, popupSpinId;
+let popupRenderer, popupScene, popupCamera, popupKeyLight, popupModel;
 
 function ensurePopupViewer(container){
   if (!popupRenderer) {
@@ -179,22 +179,23 @@ function showPopupModel(glbPath, container){
   });
 }
 
-function popupSpinFrame(){
-  if (popupModel) popupModel.rotation.y += 0.006;
-  if (popupRenderer) popupRenderer.render(popupScene, popupCamera);
-  popupSpinId = requestAnimationFrame(popupSpinFrame);
-}
-function stopPopupSpin(){ if (popupSpinId) { cancelAnimationFrame(popupSpinId); popupSpinId = null; } }
+// a fixed (non-spinning) render — applyPopupModel already draws exactly
+// one frame, so there's nothing else to do here beyond not starting a
+// requestAnimationFrame loop the way an earlier version of this did
 
 function popupHtml(project){
-  const wrap = document.createElement('div');
+  // the whole card is the link — a round, static 3D bubble up top, the
+  // project text anchored bottom-left underneath it in the same card
+  const wrap = document.createElement('a');
   wrap.className = 'map-popup';
+  wrap.href = project.url;
   wrap.innerHTML =
+    `<div class="map-popup-3d"></div>` +
+    `<div class="map-popup-info">` +
     `<p class="map-popup-title">${project.nom}</p>` +
     `<p class="map-popup-arch">${project.architecte}</p>` +
     `<p class="map-popup-loc">${project.lieu}</p>` +
-    `<div class="map-popup-3d"></div>` +
-    `<a class="map-popup-link" href="${project.url}">Voir en 3D →</a>`;
+    `</div>`;
   return wrap;
 }
 
@@ -242,7 +243,6 @@ map.on('popupopen', (e) => {
   const container = e.popup.getElement()?.querySelector('.map-popup-3d');
   if (!project || !container) return;
   showPopupModel(project.glb, container);
-  if (!popupSpinId) popupSpinId = requestAnimationFrame(popupSpinFrame);
 });
 // closing a popup flies back to wherever the visitor was looking before
 // this viewing session started — so checking several projects in a row
@@ -253,7 +253,6 @@ map.on('popupopen', (e) => {
 // an actual dismissal (✕, Escape, clicking the map) leaves no popup
 // open by the time this runs.
 map.on('popupclose', () => {
-  stopPopupSpin();
   setTimeout(() => {
     // map._popup keeps referencing the last popup even after it's
     // closed (Leaflet never nulls it out) — .isOpen() is what actually

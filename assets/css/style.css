@@ -883,41 +883,51 @@ html[data-theme="dark"] .map-topo .leaflet-tile{ filter: grayscale(0.55) saturat
 .map-tip-arch{ display: block; font-size: 0.68rem; color: var(--ink-soft); margin-top: 2px; }
 .map-tip-loc{ display: block; font-size: 0.62rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--rose-gold); margin-top: 4px; }
 
-/* click popup: a docked (not cursor-following) live 3D preview + a way
-   in — Leaflet's own popup chrome (white box, drop-shadow tail) is
-   stripped below and rebuilt to match .map-tip's flat, bordered look */
+/* click popup: a docked (not cursor-following), static (not spinning)
+   3D medallion + a way in — Leaflet's own popup chrome (white box,
+   drop-shadow tail) is stripped below and rebuilt to match .map-tip's
+   flat, bordered look */
 .leaflet-popup-content-wrapper{
   background: var(--bg-2);
   color: var(--ink);
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 10px;
   box-shadow: 0 12px 30px rgba(0,0,0,0.25);
 }
-.leaflet-popup-content{ margin: 10px 12px; width: 216px !important; }
+.leaflet-popup-content{ margin: 0; width: 216px !important; }
 .leaflet-popup-tip-container{ display: none; }
 .leaflet-popup-close-button{
   color: var(--ink-soft) !important;
   font-family: var(--mono);
+  z-index: 1;
 }
 .leaflet-popup-close-button:hover{ color: var(--rose-gold) !important; }
+/* the whole card is the link into the 3D viewer — one big, obvious tap
+   target instead of a separate button competing for space with the
+   medallion + caption */
+.map-popup{
+  display: block;
+  padding: 18px 14px 14px;
+  text-decoration: none;
+  border-radius: 10px;
+  transition: background .2s ease;
+}
+.map-popup:hover{ background: color-mix(in srgb, var(--rose-gold) 8%, transparent); }
+.map-popup:hover .map-popup-3d{ border-color: var(--rose-gold); }
+/* fixed, non-spinning render — a single static frame, not a live turntable */
+.map-popup-3d{
+  width: 108px; height: 108px; margin: 0 auto;
+  border-radius: 50%; overflow: hidden;
+  background: var(--bg); border: 1px solid var(--line);
+  transition: border-color .2s ease;
+}
+.map-popup-3d canvas{ display: block; width: 100%; height: 100%; }
+/* caption plate: same rectangle as the card, text anchored bottom-left
+   under the medallion rather than centered */
+.map-popup-info{ margin-top: 12px; text-align: left; }
 .map-popup-title{ font-size: 0.76rem; font-weight: 600; color: var(--ink); margin: 0; }
 .map-popup-arch{ font-size: 0.68rem; color: var(--ink-soft); margin: 2px 0 0; }
 .map-popup-loc{ font-size: 0.62rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--rose-gold); margin: 4px 0 0; }
-.map-popup-3d{
-  width: 100%; height: 150px; margin: 10px 0 8px;
-  border-radius: 6px; overflow: hidden;
-  background: var(--bg); border: 1px solid var(--line);
-}
-.map-popup-3d canvas{ display: block; width: 100%; height: 100%; }
-.map-popup-link{
-  display: block; text-align: center;
-  font-family: var(--mono); font-size: 0.68rem; font-weight: 600;
-  letter-spacing: 0.06em; text-transform: uppercase;
-  color: var(--ink); text-decoration: none;
-  padding: 7px 0; border: 1px solid var(--line); border-radius: 6px;
-  transition: color .2s ease, border-color .2s ease;
-}
-.map-popup-link:hover{ color: var(--rose-gold); border-color: var(--rose-gold); }
 
 /* restyle Leaflet's own chrome to match the site instead of its default
    white-box look, especially needed in dark theme */
