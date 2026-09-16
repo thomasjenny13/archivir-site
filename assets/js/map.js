@@ -30,6 +30,45 @@ const map = new maplibregl.Map({
 });
 map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
 
+// strip "bright" down to just city names on a plain white-roads base —
+// no POI icons, no route-number shields, no street/water names, no
+// admin-region or country labels. Layer ids are OpenMapTiles' own,
+// read straight off the fetched style (openfreemap.org/…/bright).
+const HIDE_LAYERS = [
+  // POI / shop / transit / airport icons
+  'poi_r20', 'poi_r7', 'poi_r1', 'poi_transit', 'airport',
+  // route-number shields (A9, "9", …)
+  'highway-shield-non-us', 'highway-shield-us-interstate', 'road_shield_us',
+  // street and path name labels
+  'highway-name-path', 'highway-name-minor', 'highway-name-major',
+  // one-way arrows
+  'road_oneway', 'road_oneway_opposite',
+  // river/lake names
+  'waterway_line_label', 'water_name_point_label', 'water_name_line_label',
+  // every place label except city/town/village
+  'label_other', 'label_state', 'label_country_1', 'label_country_2', 'label_country_3',
+];
+const WHITE_ROAD_LAYERS = [
+  'tunnel-service-track-casing', 'tunnel-motorway-link-casing', 'tunnel-minor-casing',
+  'tunnel-link-casing', 'tunnel-secondary-tertiary-casing', 'tunnel-trunk-primary-casing',
+  'tunnel-motorway-casing', 'tunnel-motorway-link', 'tunnel-service-track', 'tunnel-link',
+  'tunnel-minor', 'tunnel-secondary-tertiary', 'tunnel-trunk-primary', 'tunnel-motorway',
+  'highway-motorway-link-casing', 'highway-link-casing', 'highway-minor-casing',
+  'highway-secondary-tertiary-casing', 'highway-primary-casing', 'highway-trunk-casing',
+  'highway-motorway-casing', 'highway-motorway-link', 'highway-link', 'highway-minor',
+  'highway-secondary-tertiary', 'highway-primary', 'highway-trunk', 'highway-motorway',
+  'bridge-motorway-link-casing', 'bridge-link-casing', 'bridge-secondary-tertiary-casing',
+  'bridge-trunk-primary-casing', 'bridge-motorway-casing', 'bridge-minor-casing',
+  'bridge-motorway-link', 'bridge-link', 'bridge-minor', 'bridge-secondary-tertiary',
+  'bridge-trunk-primary', 'bridge-motorway',
+];
+map.on('style.load', () => {
+  HIDE_LAYERS.forEach((id) => { if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none'); });
+  // casing + main line both forced white so a road reads as a single
+  // flat white stroke, not a colored line with a contrasting border
+  WHITE_ROAD_LAYERS.forEach((id) => { if (map.getLayer(id)) map.setPaintProperty(id, 'line-color', '#ffffff'); });
+});
+
 document.getElementById('theme-toggle').addEventListener('click', () => {
   popupCache.forEach((entry) => entry.model.traverse(recolorMesh));
   if (popupRenderer) popupRenderer.render(popupScene, popupCamera);
