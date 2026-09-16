@@ -11,8 +11,8 @@ const tipArch = tip.querySelector('.ch-pin-tip-arch');
 const tipLoc = tip.querySelector('.ch-pin-tip-loc');
 
 const PALETTE = {
-  light: { fill: 0xF2F1EE, land: 0x8A5D2C, grid: 0xE3E1DB, pin: 0xB07A3E, pinHover: 0xC13574 },
-  dark:  { fill: 0x242220, land: 0xD8A66C, grid: 0x332F2B, pin: 0xD8A66C, pinHover: 0xE8488F },
+  light: { water: 0xD7E8ED, landFill: 0xEDE2C9, land: 0x8A5D2C, grid: 0xE3E1DB, pin: 0xB07A3E, pinHover: 0xC13574 },
+  dark:  { water: 0x16232A, landFill: 0x362E22, land: 0xD8A66C, grid: 0x332F2B, pin: 0xD8A66C, pinHover: 0xE8488F },
 };
 function currentTheme(){
   return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
@@ -54,9 +54,41 @@ scene.add(sunLight);
 const globeGroup = new THREE.Group();
 scene.add(globeGroup);
 
+// land/water fill is painted onto a flat equirectangular canvas (lon/lat
+// map 1:1 to x/y) using the canvas 2D fill — it handles arbitrarily
+// concave coastlines natively, unlike triangulating each country and
+// projecting the (often huge) triangles onto the sphere, which drew
+// visible straight-chord "sails" cutting across bays at a country's
+// widest points instead of following the curved surface
+const mapCanvas = document.createElement('canvas');
+mapCanvas.width = 2048;
+mapCanvas.height = 1024;
+const mapCtx = mapCanvas.getContext('2d');
+function lonLatToCanvas(lon, lat){
+  return [(lon + 180) / 360 * mapCanvas.width, (90 - lat) / 180 * mapCanvas.height];
+}
+function paintMap(theme){
+  const p = PALETTE[theme];
+  mapCtx.fillStyle = '#' + p.water.toString(16).padStart(6, '0');
+  mapCtx.fillRect(0, 0, mapCanvas.width, mapCanvas.height);
+  mapCtx.fillStyle = '#' + p.landFill.toString(16).padStart(6, '0');
+  WORLD_LAND.forEach((ring) => {
+    mapCtx.beginPath();
+    ring.forEach(([lon, lat], i) => {
+      const [x, y] = lonLatToCanvas(lon, lat);
+      if (i === 0) mapCtx.moveTo(x, y); else mapCtx.lineTo(x, y);
+    });
+    mapCtx.closePath();
+    mapCtx.fill();
+  });
+}
+paintMap(currentTheme());
+const mapTexture = new THREE.CanvasTexture(mapCanvas);
+mapTexture.colorSpace = THREE.SRGBColorSpace;
+
 const sphere = new THREE.Mesh(
   new THREE.SphereGeometry(R * 0.995, 64, 48),
-  new THREE.MeshLambertMaterial({ color: PALETTE[currentTheme()].fill })
+  new THREE.MeshLambertMaterial({ map: mapTexture })
 );
 globeGroup.add(sphere);
 
@@ -96,13 +128,15 @@ const pinEntries = PROJECTS.map((project) => {
 globeGroup.add(pinsGroup);
 
 function applyTheme(){
-  const p = PALETTE[currentTheme()];
-  sphere.material.color.setHex(p.fill);
+  const theme = currentTheme();
+  const p = PALETTE[theme];
+  paintMap(theme);
+  mapTexture.needsUpdate = true;
   graticuleMat.color.setHex(p.grid);
   landMat.color.setHex(p.land);
   pinEntries.forEach(({ mesh }) => { if (mesh !== hovered?.mesh) mesh.material.color.setHex(p.pin); });
 }
-document.getElementById('theme-toggle').addEventListener('click', () => setTimeout(applyTheme, 0));
+document.getElementById('theme-toggle').addEventListener('click', () => setTimeout(() => { applyTheme(); renderer.render(scene, camera); }, 0));
 
 function resize(){
   const w = wrap.clientWidth, h = wrap.clientHeight;
