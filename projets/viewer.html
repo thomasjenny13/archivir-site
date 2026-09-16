@@ -968,10 +968,19 @@
   // so it can be positioned/scaled/disposed as a unit ----------
   const loader = new GLTFLoader();
 
-  function loadRig(glbPath, clipNormal = DEFAULT_CLIP_NORMAL) {
-    return new Promise((resolve, reject) => {
-      loader.load(glbPath, (gltf) => {
-        const model = gltf.scene;
+  function loadRig(glbPath, clipNormal = DEFAULT_CLIP_NORMAL, extraGlbPath = null) {
+    return (async () => {
+      const gltf = await loader.loadAsync(glbPath);
+      const model = gltf.scene;
+      if (extraGlbPath) {
+        // the extension shares the base export's coordinate system —
+        // parent it directly onto the base model so everything below
+        // (centering, welding, section cap, edges) treats base + extension
+        // as one combined volume instead of two separate rigs
+        const extraGltf = await loader.loadAsync(extraGlbPath);
+        model.add(extraGltf.scene);
+      }
+      {
         const group = new THREE.Group();
         const clipPlane = new THREE.Plane(new THREE.Vector3(...clipNormal), 0);
 
@@ -1079,7 +1088,7 @@
         const innerEdges = buildEdges(solidMeshes, 1);
         const glassEdges = buildEdges(glassMeshes, GLASS_EDGE_SCALE);
 
-        resolve({
+        return {
           group, model, sectionMeshes, sectionCap, clippedOutlineMesh,
           cutBoundaryEdges, innerEdges, glassEdges, clipPlane,
           fitDistance, fitCenter: sphere.center.clone(),
@@ -1093,9 +1102,9 @@
               }
             });
           },
-        });
-      }, undefined, reject);
-    });
+        };
+      }
+    })();
   }
 
   // ---------- UI updates per project ----------
@@ -1166,7 +1175,11 @@
     if (variantKey === 'base') return getRig(slug);
     const key = slug + '::' + variantKey;
     if (variantRigCache.has(key)) return variantRigCache.get(key);
-    const rig = await loadRig(PROJECTS[slug].variants[variantKey].glb, PROJECTS[slug].clipNormal);
+    const cfg = PROJECTS[slug];
+    // a prize variant's own glb is just the added volumetry, not a full
+    // scene — load it merged onto the project's base so the section cut,
+    // edges and cap all read the combined base + extension as one piece
+    const rig = await loadRig(cfg.glb, cfg.clipNormal, cfg.variants[variantKey].glb);
     variantRigCache.set(key, rig);
     return rig;
   }
