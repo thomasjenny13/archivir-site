@@ -1,68 +1,90 @@
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+// v6's ESM build has no default export (only named exports) — a
+// namespace import keeps every maplibregl.X reference below unchanged
+import * as maplibregl from 'maplibre-gl';
 
 const PROJECTS = window.PROJECTS || [];
-
-const map = L.map('osm-map', {
-  minZoom: 2,
-  maxZoom: 19,
-  worldCopyJump: true,
-  zoomControl: false,
-  fadeAnimation: false,
-});
-L.control.zoom({ position: 'topright' }).addTo(map);
-
-// no street basemap and no hillshade: just contour lines (OpenTopoMap)
-// plus CARTO's label-only layer for city/country names. Explicit panes
-// keep the stacking order fixed regardless of when each layer is
-// added/removed (theme toggle swaps the Reference/labels layer only).
-const ATTRIBUTION = '&copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>, &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors';
-const LABELS = { light: 'light_only_labels', dark: 'dark_only_labels' };
-
-['paneReference', 'paneTopo'].forEach((name, i) => {
-  map.createPane(name);
-  map.getPane(name).style.zIndex = 200 + i * 10;
-});
-
-// OpenTopoMap's own style is full-color (green forest fill, blue water,
-// brown contours) — a CSS filter strips most of that to grayscale
-// linework, but keeps a muted, theme-consistent blue for water/glaciers
-// (see .map-topo in style.css) rather than flattening it to the same
-// gray as everything else, so lakes/rivers/ice stay legible
-L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-  minZoom: 2,
-  maxZoom: 19,
-  maxNativeZoom: 17,
-  subdomains: 'abc',
-  pane: 'paneTopo',
-  className: 'map-topo',
-  attribution: 'Contours: &copy; <a href="https://opentopomap.org" target="_blank" rel="noopener">OpenTopoMap</a> (CC-BY-SA)',
-}).addTo(map);
 
 function currentTheme(){
   return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
 }
 
-let labelLayer = null;
-function applyTileTheme(){
-  if (labelLayer) map.removeLayer(labelLayer);
-  labelLayer = L.tileLayer(`https://{s}.basemaps.cartocdn.com/${LABELS[currentTheme()]}/{z}/{x}/{y}{r}.png`, {
-    subdomains: 'abcd', maxZoom: 19, maxNativeZoom: 20, pane: 'paneReference', attribution: ATTRIBUTION, detectRetina: true,
-  }).addTo(map);
+// OpenFreeMap: free, no-key vector tiles (OpenMapTiles schema) rendered
+// with MapLibre GL — "positron"/"dark" are its own minimal, near-
+// monochrome styles (thin gray streets, place labels, no landuse
+// clutter), the same family CARTO's raster Positron belongs to, but
+// vector — crisp at any zoom and stylable in code (see applyWaterColor)
+// instead of guessed at with CSS filters over a raster image.
+const STYLES = {
+  light: 'https://tiles.openfreemap.org/styles/positron',
+  dark: 'https://tiles.openfreemap.org/styles/dark',
+};
+// both styles ship a "water" fill layer close to the land color (barely
+// legible as water) — set explicitly instead, muted but distinct,
+// broadly in line with the site's warm/neutral palette
+const WATER_COLOR = { light: '#a9c7ce', dark: '#1c2b31' };
+
+const map = new maplibregl.Map({
+  container: 'osm-map',
+  style: STYLES[currentTheme()],
+  center: [10, 45],
+  zoom: 2,
+  minZoom: 2,
+  maxZoom: 19,
+  attributionControl: { compact: false },
+});
+map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+
+// OpenMapTiles has no elevation data — contour lines still come from
+// OpenTopoMap as a raster overlay, just added as a MapLibre raster
+// source/layer now instead of a Leaflet tile layer. raster-saturation
+// mutes its full-color style (green forest, blue water, brown
+// contours) toward the site's calmer palette without flattening it to
+// pure grayscale the way a CSS filter would.
+function addContourLayer(){
+  if (map.getSource('topo')) return;
+  map.addSource('topo', {
+    type: 'raster',
+    tiles: [
+      'https://a.tile.opentopomap.org/{z}/{x}/{y}.png',
+      'https://b.tile.opentopomap.org/{z}/{x}/{y}.png',
+      'https://c.tile.opentopomap.org/{z}/{x}/{y}.png',
+    ],
+    tileSize: 256,
+    minzoom: 2,
+    maxzoom: 17,
+    attribution: 'Contours: &copy; <a href="https://opentopomap.org" target="_blank" rel="noopener">OpenTopoMap</a> (CC-BY-SA)',
+  });
+  map.addLayer({
+    id: 'topo',
+    type: 'raster',
+    source: 'topo',
+    paint: { 'raster-opacity': 0.85, 'raster-saturation': -0.35, 'raster-contrast': 0.15 },
+  });
 }
-applyTileTheme();
+function applyWaterColor(){
+  if (map.getLayer('water')) map.setPaintProperty('water', 'fill-color', WATER_COLOR[currentTheme()]);
+}
+// fires on the initial style load AND every later setStyle() call —
+// setStyle() wipes any source/layer added on top, so both need redoing
+// each time rather than just once
+map.on('style.load', () => {
+  addContourLayer();
+  applyWaterColor();
+});
+
 document.getElementById('theme-toggle').addEventListener('click', () => {
-  setTimeout(applyTileTheme, 0);
+  setTimeout(() => map.setStyle(STYLES[currentTheme()]), 0);
   popupCache.forEach((entry) => entry.model.traverse(recolorMesh));
   if (popupRenderer) popupRenderer.render(popupScene, popupCamera);
 });
 
-// ---------- click popup: closer zoom + a live-spinning 3D preview,
-// reusing the same mini-viewer approach as the index table's hover
-// thumbnail (assets/js/... in index.html), but docked inside the popup
-// instead of floating at the cursor, and opened on click rather than
-// hover so it survives on touch devices too ----------
+// ---------- click popup: closer zoom + a fixed (non-spinning) 3D
+// preview, reusing the same mini-viewer approach as the index table's
+// hover thumbnail (assets/js/... in index.html), but docked in a round
+// bubble inside the popup card rather than floating at the cursor ----------
 const TINT_STYLE = {
   white: { color: [0.735, 0.72, 0.675], roughness: 0.725, envMapIntensity: 0.4 },
   dark:  { color: [0.02, 0.02, 0.02],   roughness: 1.0,   envMapIntensity: 0 },
@@ -179,10 +201,6 @@ function showPopupModel(glbPath, container){
   });
 }
 
-// a fixed (non-spinning) render — applyPopupModel already draws exactly
-// one frame, so there's nothing else to do here beyond not starting a
-// requestAnimationFrame loop the way an earlier version of this did
-
 function popupHtml(project){
   // the whole card is the link — a round, static 3D bubble up top, the
   // project text anchored bottom-left underneath it in the same card
@@ -200,8 +218,8 @@ function popupHtml(project){
 }
 
 // how close "agrandir l'environnement" zooms in on click — close enough
-// to sit inside the OpenTopoMap contour range (kicks in at 13), so the
-// terrain around the pin actually shows relief instead of a flat tile
+// to sit inside the OpenTopoMap contour range, so the terrain around
+// the pin actually shows relief instead of a flat tile
 const FOCUS_ZOOM = 16;
 // view to fly back to when a popup is dismissed — captured right before
 // the *first* zoom-in of a viewing session (not overwritten while
@@ -210,63 +228,72 @@ const FOCUS_ZOOM = 16;
 // actually started, not a forced reset to the global overview
 let previousView = null;
 
-const markers = PROJECTS.map((project) => {
-  const icon = L.divIcon({
-    className: 'map-pin',
-    html: '<span></span>',
-    iconSize: [14, 14],
-    iconAnchor: [7, 7],
-  });
-  const marker = L.marker([project.lat, project.lon], { icon, keyboard: false });
-  marker.bindTooltip(
-    `<span class="map-tip-title">${project.nom}</span>` +
-    `<span class="map-tip-arch">${project.architecte}</span>` +
-    `<span class="map-tip-loc">${project.lieu}</span>`,
-    { direction: 'top', offset: [0, -10], className: 'map-tip' }
-  );
+function anyPopupOpen(){
+  return markers.some((m) => m.popup && m.popup.isOpen());
+}
+
+const markers = [];
+PROJECTS.forEach((project) => {
+  const el = document.createElement('div');
+  el.className = 'map-pin';
+  el.innerHTML = '<span></span>';
+
+  const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
+    .setLngLat([project.lon, project.lat])
+    .addTo(map);
+
+  const tip = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 14, className: 'map-tip-wrap', anchor: 'bottom' })
+    .setLngLat([project.lon, project.lat])
+    .setHTML(
+      `<span class="map-tip-title">${project.nom}</span>` +
+      `<span class="map-tip-arch">${project.architecte}</span>` +
+      `<span class="map-tip-loc">${project.lieu}</span>`
+    );
+  el.addEventListener('mouseenter', () => { el.classList.add('is-active'); tip.addTo(map); });
+  el.addEventListener('mouseleave', () => { el.classList.remove('is-active'); tip.remove(); });
+
+  let popup = null;
   if (project.glb) {
-    marker.bindPopup(popupHtml(project), { className: 'map-popup-wrap', maxWidth: 240, closeButton: true });
+    popup = new maplibregl.Popup({ closeButton: true, className: 'map-popup-wrap', maxWidth: '240px' })
+      .setDOMContent(popupHtml(project));
+    marker.setPopup(popup);
+    popup.on('open', () => {
+      const container = popup.getElement()?.querySelector('.map-popup-3d');
+      if (container) showPopupModel(project.glb, container);
+    });
+    // closing a popup flies back to wherever the visitor was looking
+    // before this viewing session started — so checking several
+    // projects in a row is close → look → close → close → look, not
+    // close → manually zoom back out → click the next one. Deferred a
+    // tick: switching straight from one marker's popup to another
+    // closes the old one and opens the new one in the same call stack,
+    // and that case should NOT fly back — only an actual dismissal (✕,
+    // Escape, clicking the map) leaves no popup open by the time this runs.
+    popup.on('close', () => {
+      setTimeout(() => {
+        if (!anyPopupOpen() && previousView) {
+          map.flyTo({ center: previousView.center, zoom: previousView.zoom, duration: 1100 });
+          previousView = null;
+        }
+      }, 0);
+    });
   }
-  marker.on('mouseover', () => marker.getElement()?.classList.add('is-active'));
-  marker.on('mouseout', () => marker.getElement()?.classList.remove('is-active'));
-  marker.on('click', () => {
+
+  el.addEventListener('click', () => {
+    tip.remove();
+    markers.forEach((m) => { if (m.popup && m.popup !== popup && m.popup.isOpen()) m.popup.remove(); });
     if (!previousView) previousView = { center: map.getCenter(), zoom: map.getZoom() };
-    if (map.getZoom() < FOCUS_ZOOM) map.flyTo([project.lat, project.lon], FOCUS_ZOOM, { duration: 1.1 });
-    else map.panTo([project.lat, project.lon], { animate: true });
+    if (map.getZoom() < FOCUS_ZOOM) map.flyTo({ center: [project.lon, project.lat], zoom: FOCUS_ZOOM, duration: 1100 });
+    else map.panTo([project.lon, project.lat]);
   });
-  marker.addTo(map);
-  return { marker, project };
+
+  markers.push({ marker, project, popup });
 });
 
-map.on('popupopen', (e) => {
-  const project = markers.find((m) => m.marker === e.popup._source)?.project;
-  const container = e.popup.getElement()?.querySelector('.map-popup-3d');
-  if (!project || !container) return;
-  showPopupModel(project.glb, container);
-});
-// closing a popup flies back to wherever the visitor was looking before
-// this viewing session started — so checking several projects in a row
-// is close → look → close → close → look, not close → manually zoom
-// back out → click the next one. Deferred a tick: clicking a different
-// marker while one popup is open closes the old one and opens the new
-// one in the same call stack, and that case should NOT fly back — only
-// an actual dismissal (✕, Escape, clicking the map) leaves no popup
-// open by the time this runs.
-map.on('popupclose', () => {
-  setTimeout(() => {
-    // map._popup keeps referencing the last popup even after it's
-    // closed (Leaflet never nulls it out) — .isOpen() is what actually
-    // tells a real dismissal apart from a switch to a new marker
-    const stillOpen = map._popup && map._popup.isOpen();
-    if (!stillOpen && previousView) {
-      map.flyTo(previousView.center, previousView.zoom, { duration: 1.1 });
-      previousView = null;
-    }
-  }, 0);
-});
-
-if (markers.length) {
-  map.fitBounds(L.featureGroup(markers.map((m) => m.marker)).getBounds().pad(0.35), { maxZoom: 9 });
-} else {
-  map.setView([20, 10], 2);
+if (PROJECTS.length) {
+  const lons = PROJECTS.map((p) => p.lon), lats = PROJECTS.map((p) => p.lat);
+  map.fitBounds(
+    [[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]],
+    { padding: 60, maxZoom: 9, duration: 0 }
+  );
 }

@@ -840,19 +840,11 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   background: var(--bg);
 }
 /* OpenTopoMap ships full-color (green forest, blue water, brown
-   contours) — mostly desaturated to plain grayscale linework so it
-   reads as calm contour lines rather than a busy full-color map, but
-   only *partly*: water/glaciers stay a muted, legible blue instead of
-   flattening to the same gray as the terrain lines (relevant right at
-   Oberaletschhütte, which sits beside the Aletsch glacier). Dark theme
-   uses invert()+hue-rotate(180deg) rather than plain invert() — the
-   standard trick for flipping an image to a dark background while
-   keeping its original hues instead of flipping to their complements
-   (which would turn the blue water orange).
-   Leaflet's tileLayer `className` lands on the layer's own container
-   div, not each tile <img> — a descendant selector reaches the tiles. */
-.map-topo .leaflet-tile{ filter: grayscale(0.55) saturate(1.8) contrast(1.15) brightness(1.05); mix-blend-mode: multiply; }
-html[data-theme="dark"] .map-topo .leaflet-tile{ filter: grayscale(0.55) saturate(1.8) invert(1) hue-rotate(180deg) contrast(1.15) brightness(0.85); mix-blend-mode: screen; }
+   contours) — muted via the MapLibre raster layer's own paint
+   properties (raster-saturation/-contrast, set in map.js) rather than
+   a CSS filter over each tile image the way the old Leaflet raster
+   setup needed; MapLibre draws the whole map — vector base included —
+   into one shared canvas, so there's no separate tile <img> to filter. */
 .map-pin{ background: none; border: none; }
 .map-pin span{
   display: block;
@@ -868,45 +860,37 @@ html[data-theme="dark"] .map-topo .leaflet-tile{ filter: grayscale(0.55) saturat
   box-shadow: 0 0 0 1px var(--pink-deep);
   transform: scale(1.25);
 }
-.map-tip.leaflet-tooltip{
-  padding: 8px 10px;
-  border-radius: 6px;
-  border: 1px solid var(--line);
-  background: var(--bg-2);
-  box-shadow: 0 12px 30px rgba(0,0,0,0.25);
-  font-family: var(--mono);
-  color: var(--ink);
-  opacity: 1;
-}
-.map-tip.leaflet-tooltip::before{ display: none; }
-.map-tip-title{ display: block; font-size: 0.76rem; font-weight: 600; color: var(--ink); }
-.map-tip-arch{ display: block; font-size: 0.68rem; color: var(--ink-soft); margin-top: 2px; }
-.map-tip-loc{ display: block; font-size: 0.62rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--rose-gold); margin-top: 4px; }
-
-/* click popup: a docked (not cursor-following), static (not spinning)
-   3D medallion + a way in — Leaflet's own popup chrome (white box,
-   drop-shadow tail) is stripped below and rebuilt to match .map-tip's
-   flat, bordered look */
-.leaflet-popup-content-wrapper{
+/* both the hover tooltip and the click popup are maplibregl.Popup
+   instances — strip its default white-box-with-tail chrome the same
+   way for both, then style each one's own content class */
+.maplibregl-popup-tip{ display: none; }
+.maplibregl-popup-content{
   background: var(--bg-2);
   color: var(--ink);
   border: 1px solid var(--line);
   border-radius: 10px;
   box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+  padding: 0;
 }
-.leaflet-popup-content{ margin: 0; width: 216px !important; }
-.leaflet-popup-tip-container{ display: none; }
-.leaflet-popup-close-button{
-  color: var(--ink-soft) !important;
+.map-tip-wrap .maplibregl-popup-content{ padding: 8px 10px; font-family: var(--mono); }
+.map-tip-title{ display: block; font-size: 0.76rem; font-weight: 600; color: var(--ink); }
+.map-tip-arch{ display: block; font-size: 0.68rem; color: var(--ink-soft); margin-top: 2px; }
+.map-tip-loc{ display: block; font-size: 0.62rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--rose-gold); margin-top: 4px; }
+
+.maplibregl-popup-close-button{
+  color: var(--ink-soft);
   font-family: var(--mono);
+  font-size: 1rem;
+  padding: 4px 8px;
   z-index: 1;
 }
-.leaflet-popup-close-button:hover{ color: var(--rose-gold) !important; }
+.maplibregl-popup-close-button:hover{ color: var(--rose-gold); background: none; }
 /* the whole card is the link into the 3D viewer — one big, obvious tap
    target instead of a separate button competing for space with the
    medallion + caption */
 .map-popup{
   display: block;
+  width: 216px;
   padding: 18px 14px 14px;
   text-decoration: none;
   border-radius: 10px;
@@ -929,34 +913,33 @@ html[data-theme="dark"] .map-topo .leaflet-tile{ filter: grayscale(0.55) saturat
 .map-popup-arch{ font-size: 0.68rem; color: var(--ink-soft); margin: 2px 0 0; }
 .map-popup-loc{ font-size: 0.62rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--rose-gold); margin: 4px 0 0; }
 
-/* restyle Leaflet's own chrome to match the site instead of its default
-   white-box look, especially needed in dark theme */
-.leaflet-control-zoom.leaflet-bar{
+/* restyle MapLibre's own chrome to match the site instead of its
+   default white-box look, especially needed in dark theme */
+.maplibregl-ctrl-group{
+  background: color-mix(in srgb, var(--bg-2) 92%, transparent);
   border: 1px solid var(--line);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 }
-.leaflet-control-zoom a{
-  background: color-mix(in srgb, var(--bg-2) 92%, transparent);
-  color: var(--ink-soft);
-  border-color: var(--line) !important;
-  width: 38px !important; height: 38px !important;
-  /* flex-centered instead of relying on line-height matching the glyph's
-     metrics — Leaflet's default font (Lucida Console) centers differently
-     than ours, which is what made the +/- look visually off */
-  display: flex !important; align-items: center; justify-content: center;
-  line-height: normal !important;
-  font: 400 1.15rem var(--mono) !important;
+.maplibregl-ctrl-group button{
+  width: 38px; height: 38px;
+  background: transparent;
 }
-.leaflet-control-zoom a:hover{ background: var(--bg-2); color: var(--rose-gold); }
-.leaflet-control-attribution{
+.maplibregl-ctrl-group button + button{ border-top: 1px solid var(--line); }
+.maplibregl-ctrl-group button:hover{ background: var(--bg-2); }
+/* the +/- icons are baked-in dark SVGs (background-image) — fine as-is
+   against the light theme's pale control, inverted to read as light
+   icons against the dark theme's dark control */
+html[data-theme="dark"] .maplibregl-ctrl-icon{ filter: invert(1); }
+.maplibregl-ctrl-attrib{
   background: color-mix(in srgb, var(--bg-2) 80%, transparent) !important;
-  color: var(--ink-faint) !important;
   font-family: var(--mono);
   font-size: 0.62rem !important;
 }
-.leaflet-control-attribution a{ color: var(--ink-soft) !important; }
+.maplibregl-ctrl-attrib a{ color: var(--ink-soft) !important; }
+.maplibregl-ctrl-attrib-button{ filter: var(--icon-filter, none); }
+html[data-theme="dark"] .maplibregl-ctrl-attrib-button{ filter: invert(1); }
 @media (max-width: 640px){
-  .leaflet-top.leaflet-right{ top: 58px; }
+  .maplibregl-ctrl-top-right{ top: 58px; }
 }
