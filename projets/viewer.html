@@ -1035,11 +1035,24 @@
         const sectionMeshes = [];
         model.traverse((child) => { if (child.isMesh) sectionMeshes.push(child); });
 
-        const sectionCap = buildSectionCap(sectionMeshes, clipPlane, maxDim * 2.2, 0xb4864f);
+        // a mesh spanning most of the model's own footprint (terrain, not
+        // a building element) legitimately fills its whole cross-section
+        // when cut — solid ground — which reads as "everything turned
+        // orange" rather than a readable section. Leave it out of the cap
+        // and boundary outline; it's still physically clipped below via
+        // the full sectionMeshes list, just without a fill of its own.
+        const totalFootprint = (fitBox.max.x - fitBox.min.x) * (fitBox.max.z - fitBox.min.z);
+        const capMeshes = sectionMeshes.filter((mesh) => {
+          const b = new THREE.Box3().setFromObject(mesh);
+          const footprint = (b.max.x - b.min.x) * (b.max.z - b.min.z);
+          return footprint <= totalFootprint * 0.4;
+        });
+
+        const sectionCap = buildSectionCap(capMeshes, clipPlane, maxDim * 2.2, 0xb4864f);
         sectionCap.visible = false;
         group.add(sectionCap);
 
-        const clipGeoms = sectionMeshes.map((mesh) => positionOnlyGeometry(mesh));
+        const clipGeoms = capMeshes.map((mesh) => positionOnlyGeometry(mesh));
         const mergedForClip = mergeGeometries(clipGeoms, false).toNonIndexed();
         const { geometry: clippedGeom, cutEdges } = clipGeometryByPlane(mergedForClip, clipPlane);
         const clippedOutlineMesh = new THREE.Mesh(
