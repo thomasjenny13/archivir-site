@@ -42,12 +42,17 @@ L.tileLayer('https://services.arcgisonline.com/arcgis/rest/services/Elevation/Wo
 // real contour lines (from SRTM data) — its own full style, so it
 // covers the abstract canvas/hillshade underneath rather than blending
 // with them, only within its own zoom range
+// OpenTopoMap's own style is full-color (green forest fill, blue water,
+// brown contours) — a CSS filter strips that down to grayscale linework
+// so it reads as an extension of the flat canvas basemap instead of a
+// completely different, busier map dropped on top
 L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
   minZoom: 13,
   maxZoom: 19,
   maxNativeZoom: 17,
   subdomains: 'abc',
   pane: 'paneTopo',
+  className: 'map-topo',
   attribution: 'Contours: &copy; <a href="https://opentopomap.org" target="_blank" rel="noopener">OpenTopoMap</a> (CC-BY-SA)',
 }).addTo(map);
 
