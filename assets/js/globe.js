@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 const PROJECTS = window.PROJECTS || [];
 const WORLD_LAND = window.WORLD_LAND || [];
+const SWISS_CANTONS = window.SWISS_CANTONS || [];
 
 const wrap = document.getElementById('globe-wrap');
 const tip = document.getElementById('globe-tip');
@@ -29,10 +30,10 @@ function latLonToVector3(lat, lon, r){
 }
 
 const R = 1;
-const MIN_DIST = 1.5;
+const MIN_DIST = 1.05;
 const MAX_DIST = 4;
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 10);
 camera.position.set(0, 0, 2.6);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -65,8 +66,8 @@ scene.add(globeGroup);
 // visible straight-chord "sails" cutting across bays at a country's
 // widest points instead of following the curved surface
 const mapCanvas = document.createElement('canvas');
-mapCanvas.width = 2048;
-mapCanvas.height = 1024;
+mapCanvas.width = 4096;
+mapCanvas.height = 2048;
 const mapCtx = mapCanvas.getContext('2d');
 function lonLatToCanvas(lon, lat){
   return [(lon + 180) / 360 * mapCanvas.width, (90 - lat) / 180 * mapCanvas.height];
@@ -119,6 +120,17 @@ WORLD_LAND.forEach((ring) => {
 });
 globeGroup.add(landGroup);
 
+// Swiss cantons: a finer-detail layer (10m source vs. 110m for the rest
+// of the world) so zooming in close over Switzerland shows real canton
+// shapes instead of just the national outline
+const cantonMat = new THREE.LineBasicMaterial({ color: PALETTE[currentTheme()].land, transparent: true, opacity: 0.55 });
+const cantonGroup = new THREE.Group();
+SWISS_CANTONS.forEach((ring) => {
+  const pts = ring.map(([lon, lat]) => latLonToVector3(lat, lon, R * 1.0028));
+  cantonGroup.add(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(pts), cantonMat));
+});
+globeGroup.add(cantonGroup);
+
 const pinsGroup = new THREE.Group();
 const pinEntries = PROJECTS.map((project) => {
   const mesh = new THREE.Mesh(
@@ -131,6 +143,22 @@ const pinEntries = PROJECTS.map((project) => {
 });
 globeGroup.add(pinsGroup);
 
+// pins keep a fixed WORLD size by default, so up close (zoomed in on
+// Switzerland) they'd otherwise balloon to cover the whole view — scale
+// each one by its distance to the camera to hold a roughly constant
+// on-screen size instead, clamped so they stay visible/sane at the
+// zoom extremes
+const PIN_SCALE_K = 1 / 1.58;
+const PIN_MIN_SCALE = 0.06;
+const PIN_MAX_SCALE = 1.5;
+function updatePinScales(){
+  pinEntries.forEach(({ mesh }) => {
+    const dist = camera.position.distanceTo(mesh.position);
+    const base = THREE.MathUtils.clamp(dist * PIN_SCALE_K, PIN_MIN_SCALE, PIN_MAX_SCALE);
+    mesh.scale.setScalar(mesh === hovered?.mesh ? base * 1.7 : base);
+  });
+}
+
 function applyTheme(){
   const theme = currentTheme();
   const p = PALETTE[theme];
@@ -138,6 +166,7 @@ function applyTheme(){
   mapTexture.needsUpdate = true;
   graticuleMat.color.setHex(p.grid);
   landMat.color.setHex(p.land);
+  cantonMat.color.setHex(p.land);
   pinEntries.forEach(({ mesh }) => { if (mesh !== hovered?.mesh) mesh.material.color.setHex(p.pin); });
 }
 document.getElementById('theme-toggle').addEventListener('click', () => setTimeout(() => { applyTheme(); renderer.render(scene, camera); }, 0));
@@ -158,9 +187,9 @@ let hovered = null;
 function setHover(entry){
   if (hovered === entry) return;
   const theme = currentTheme();
-  if (hovered) { hovered.mesh.material.color.setHex(PALETTE[theme].pin); hovered.mesh.scale.setScalar(1); }
+  if (hovered) hovered.mesh.material.color.setHex(PALETTE[theme].pin);
   hovered = entry;
-  if (hovered) { hovered.mesh.material.color.setHex(PALETTE[theme].pinHover); hovered.mesh.scale.setScalar(1.7); }
+  if (hovered) hovered.mesh.material.color.setHex(PALETTE[theme].pinHover);
   wrap.style.cursor = hovered ? 'pointer' : 'grab';
   tip.hidden = !hovered;
   if (hovered) {
@@ -230,6 +259,7 @@ renderer.domElement.addEventListener('wheel', (e) => {
 function animate(){
   requestAnimationFrame(animate);
   controls.update();
+  updatePinScales();
   if (hovered) updateTipPosition(hovered);
   renderer.render(scene, camera);
 }
