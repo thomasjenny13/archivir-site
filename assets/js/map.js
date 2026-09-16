@@ -11,13 +11,13 @@ function currentTheme(){
   return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
 }
 
-// OpenFreeMap "liberty" — the exact style referenced from
-// geodataviewer.com/open-pbf-online (found by inspecting its network
-// requests: MapLibre GL + this OpenFreeMap style, free, no key). One
-// style regardless of the site's light/dark theme — that reference
-// page's own dark mode only re-themes its UI chrome, never re-requests
-// a different map style, so neither do we.
-const STYLE = 'https://tiles.openfreemap.org/styles/liberty';
+// OpenFreeMap, free/no-key vector tiles via MapLibre GL — "bright" is
+// one of OpenFreeMap's own ready-made styles (alongside liberty,
+// positron, dark). One style regardless of the site's light/dark
+// theme, matching how the geodataviewer.com reference behaves — its
+// own dark mode only re-themes its UI chrome, never re-requests a
+// different map style.
+const STYLE = 'https://tiles.openfreemap.org/styles/bright';
 
 const map = new maplibregl.Map({
   container: 'osm-map',
