@@ -11,12 +11,31 @@ L.control.zoom({ position: 'topright' }).addTo(map);
 
 // Esri's free, no-key "Canvas" basemaps — abstract flat gray shapes
 // instead of a busy street map, with a real light/dark pair (each is a
-// Base fill layer plus a Reference layer of labels/borders on top)
+// Base fill layer plus a Reference layer of labels/borders on top). A
+// hillshade layer sits between the two so mountain terrain (ridges,
+// glaciers, valleys) reads at a glance — useful context for a pin like
+// Oberaletschhütte that can't be checked against a street address.
+// Explicit panes keep the stacking order fixed regardless of when each
+// layer is added/removed (theme toggles swap Base + Reference only).
 const ATTRIBUTION = 'Esri, HERE, Garmin, &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors';
 const CANVAS = {
   light: ['World_Light_Gray_Base', 'World_Light_Gray_Reference'],
   dark: ['World_Dark_Gray_Base', 'World_Dark_Gray_Reference'],
 };
+
+['paneBase', 'paneHillshade', 'paneReference'].forEach((name, i) => {
+  map.createPane(name);
+  map.getPane(name).style.zIndex = 200 + i * 10;
+});
+
+L.tileLayer('https://services.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}', {
+  maxZoom: 19,
+  maxNativeZoom: 13,
+  opacity: 0.45,
+  pane: 'paneHillshade',
+  className: 'map-hillshade',
+  attribution: ATTRIBUTION,
+}).addTo(map);
 
 function currentTheme(){
   return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
@@ -25,13 +44,15 @@ function currentTheme(){
 let canvasLayers = [];
 function applyTileTheme(){
   canvasLayers.forEach((layer) => map.removeLayer(layer));
-  canvasLayers = CANVAS[currentTheme()].map((name) =>
-    L.tileLayer(`https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/${name}/MapServer/tile/{z}/{y}/{x}`, {
-      maxZoom: 19,
-      maxNativeZoom: 16,
-      attribution: ATTRIBUTION,
-    }).addTo(map)
-  );
+  const [base, reference] = CANVAS[currentTheme()];
+  canvasLayers = [
+    L.tileLayer(`https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/${base}/MapServer/tile/{z}/{y}/{x}`, {
+      maxZoom: 19, maxNativeZoom: 16, pane: 'paneBase', attribution: ATTRIBUTION,
+    }).addTo(map),
+    L.tileLayer(`https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/${reference}/MapServer/tile/{z}/{y}/{x}`, {
+      maxZoom: 19, maxNativeZoom: 16, pane: 'paneReference',
+    }).addTo(map),
+  ];
 }
 applyTileTheme();
 document.getElementById('theme-toggle').addEventListener('click', () => setTimeout(applyTileTheme, 0));

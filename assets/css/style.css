@@ -839,6 +839,12 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   z-index: 1;
   background: var(--bg);
 }
+/* hillshade is a plain grayscale relief image — blending it multiply
+   (darkens shadowed slopes onto the pale canvas) in light theme and
+   screen (lightens ridges against the dark canvas) in dark theme reads
+   as terrain texture rather than a separate flat gray layer on top */
+.map-hillshade.leaflet-tile{ mix-blend-mode: multiply; }
+html[data-theme="dark"] .map-hillshade.leaflet-tile{ mix-blend-mode: screen; }
 .map-pin{ background: none; border: none; }
 .map-pin span{
   display: block;
