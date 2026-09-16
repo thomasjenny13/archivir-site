@@ -517,6 +517,16 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   pointer-events: none;
 }
 .viewer-credit strong{ display: block; font-size: 1.05em; color: var(--ink-soft); font-weight: 500; }
+/* no glb yet — the empty 3D scene still frames/orbits normally
+   (compass, cut toggle), this is just a plain label centered over it */
+.viewer-pending{
+  position: fixed; top: 50%; left: 50%; z-index: 4;
+  transform: translate(-50%, -50%);
+  font-family: var(--mono); font-size: 0.78rem;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink-faint);
+  pointer-events: none;
+}
 .credit-link{ pointer-events: auto; text-decoration: none; }
 .credit-link:hover strong{ color: var(--rose-gold); }
 .credit-author{ pointer-events: auto; color: inherit; text-decoration: none; }
@@ -900,6 +910,14 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   transition: border-color .2s ease;
 }
 .map-popup-3d canvas{ display: block; width: 100%; height: 100%; }
+/* no glb yet — a plain label in the same bubble instead of a render */
+.map-popup-3d-pending{
+  display: flex; align-items: center; justify-content: center;
+}
+.map-popup-3d-pending span{
+  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--ink-faint);
+}
 /* caption plate: same rectangle as the card, text anchored bottom-left
    under the medallion rather than centered */
 .map-popup-info{ margin-top: 12px; text-align: left; }

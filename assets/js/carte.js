@@ -6,4 +6,7 @@ window.PROJECTS = [
   { nom: "Tupi", architecte: "mijong architecture", lieu: "Sion (VS)", lat: 46.232209, lon: 7.386007, url: "projets/viewer.html?p=tupi", glb: "projets/tupi/tupi.glb" },
   { nom: "Haus am See", architecte: "Jan Kinsbergen", lieu: "Wollerau (SZ)", lat: 47.1988262, lon: 8.7182138, url: "projets/viewer.html?p=haus", glb: "projets/haus am see/has.glb" },
   { nom: "Oberaletschhütte", architecte: "mijong architecture design", lieu: "Belalp (VS)", lat: 46.42493694470926, lon: 7.973840971676474, url: "projets/viewer.html?p=oberaletsch", glb: "projets/concours/oberaletsch/base.glb" },
+  // no glb yet — the popup falls back to a plain "à venir" placeholder
+  // in the 3D bubble instead of trying to load a model (see map.js)
+  { nom: "St. Paulus", architecte: "Alfons et Florian Leitl", lieu: "Bochum (Allemagne)", lat: 51.4577264, lon: 7.2717421, url: "projets/viewer.html?p=stpaulus" },
 ];

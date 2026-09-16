@@ -227,12 +227,16 @@ function showPopupModel(glbPath, container){
 
 function popupHtml(project){
   // the whole card is the link — a round, static 3D bubble up top, the
-  // project text anchored bottom-left underneath it in the same card
+  // project text anchored bottom-left underneath it in the same card.
+  // No glb yet: the bubble shows a plain "à venir" label instead of
+  // trying (and failing) to load a model.
   const wrap = document.createElement('a');
   wrap.className = 'map-popup';
   wrap.href = project.url;
   wrap.innerHTML =
-    `<div class="map-popup-3d"></div>` +
+    (project.glb
+      ? `<div class="map-popup-3d"></div>`
+      : `<div class="map-popup-3d map-popup-3d-pending"><span>À venir</span></div>`) +
     `<div class="map-popup-info">` +
     `<p class="map-popup-title">${project.nom}</p>` +
     `<p class="map-popup-arch">${project.architecte}</p>` +
@@ -274,32 +278,32 @@ PROJECTS.forEach((project) => {
   el.addEventListener('mouseenter', () => { el.classList.add('is-active'); tip.addTo(map); });
   el.addEventListener('mouseleave', () => { el.classList.remove('is-active'); tip.remove(); });
 
-  let popup = null;
-  if (project.glb) {
-    popup = new maplibregl.Popup({ closeButton: true, className: 'map-popup-wrap', maxWidth: '240px' })
-      .setDOMContent(popupHtml(project));
-    marker.setPopup(popup);
-    popup.on('open', () => {
-      const container = popup.getElement()?.querySelector('.map-popup-3d');
-      if (container) showPopupModel(project.glb, container);
-    });
-    // closing a popup flies back to wherever the visitor was looking
-    // before this viewing session started — so checking several
-    // projects in a row is close → look → close → close → look, not
-    // close → manually zoom back out → click the next one. Deferred a
-    // tick: switching straight from one marker's popup to another
-    // closes the old one and opens the new one in the same call stack,
-    // and that case should NOT fly back — only an actual dismissal (✕,
-    // Escape, clicking the map) leaves no popup open by the time this runs.
-    popup.on('close', () => {
-      setTimeout(() => {
-        if (!anyPopupOpen() && previousView) {
-          map.flyTo({ center: previousView.center, zoom: previousView.zoom, duration: 1100 });
-          previousView = null;
-        }
-      }, 0);
-    });
-  }
+  // every project gets the popup — glb-less ones just show the "à
+  // venir" bubble from popupHtml() instead of loading a model
+  const popup = new maplibregl.Popup({ closeButton: true, className: 'map-popup-wrap', maxWidth: '240px' })
+    .setDOMContent(popupHtml(project));
+  marker.setPopup(popup);
+  popup.on('open', () => {
+    if (!project.glb) return;
+    const container = popup.getElement()?.querySelector('.map-popup-3d');
+    if (container) showPopupModel(project.glb, container);
+  });
+  // closing a popup flies back to wherever the visitor was looking
+  // before this viewing session started — so checking several
+  // projects in a row is close → look → close → close → look, not
+  // close → manually zoom back out → click the next one. Deferred a
+  // tick: switching straight from one marker's popup to another
+  // closes the old one and opens the new one in the same call stack,
+  // and that case should NOT fly back — only an actual dismissal (✕,
+  // Escape, clicking the map) leaves no popup open by the time this runs.
+  popup.on('close', () => {
+    setTimeout(() => {
+      if (!anyPopupOpen() && previousView) {
+        map.flyTo({ center: previousView.center, zoom: previousView.zoom, duration: 1100 });
+        previousView = null;
+      }
+    }, 0);
+  });
 
   el.addEventListener('click', () => {
     tip.remove();

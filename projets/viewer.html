@@ -39,6 +39,7 @@
 
 <main class="viewer-page">
   <div id="viewer-canvas" class="full-model"></div>
+  <p id="viewer-pending" class="viewer-pending" hidden>Maquette 3D à venir</p>
 
   <nav class="compass" aria-label="Vues préréglées">
     <button class="compass-pt compass-n" data-view="north" aria-label="Vue de face">F</button>
@@ -523,8 +524,16 @@
       },
       variantOrder: ['base', 'prix1', 'prix2', 'prix3'],
     },
+    stpaulus: {
+      // no glb yet — getRig() falls back to buildPlaceholderRig(), and
+      // applyProjectUI() shows the "Maquette 3D à venir" label
+      title: 'St. Paulus — Archivir',
+      creditHtml: '<strong>St. Paulus</strong>Alfons et Florian Leitl',
+      creditMeta: '1970–72 · Bochum (Allemagne) · Culte · Reconversion',
+      hasPlans: false,
+    },
   };
-  const ORDER = ['pavillon', 'tupi', 'haus', 'oberaletsch'];
+  const ORDER = ['pavillon', 'tupi', 'haus', 'oberaletsch', 'stpaulus'];
 
   // model tint is a user choice, independent of the light/dark site
   // theme: warm stone + dark hairlines, or matte black + white hairlines
@@ -1107,6 +1116,26 @@
     })();
   }
 
+  // a project with no glb yet ("à venir") gets an empty rig shaped just
+  // like loadRig's — camera framing, section-cut toggle, compass and
+  // project-switch animation all keep working unmodified against an
+  // empty scene, no special-casing needed anywhere else
+  function buildPlaceholderRig(clipNormal = DEFAULT_CLIP_NORMAL) {
+    const model = new THREE.Group();
+    const group = new THREE.Group();
+    group.add(model);
+    const sectionCap = new THREE.Group();
+    sectionCap.visible = false;
+    group.add(sectionCap);
+    return {
+      group, model, sectionMeshes: [], sectionCap, clippedOutlineMesh: model,
+      cutBoundaryEdges: null, innerEdges: null, glassEdges: null,
+      clipPlane: new THREE.Plane(new THREE.Vector3(...clipNormal), 0),
+      fitDistance: 8, fitCenter: new THREE.Vector3(0, 0.6, 0), maxDim: 2,
+      dispose() { scene.remove(group); },
+    };
+  }
+
   // ---------- UI updates per project ----------
   function applyProjectUI(slug) {
     const cfg = PROJECTS[slug];
@@ -1114,6 +1143,7 @@
     document.getElementById('viewer-credit').innerHTML =
       cfg.creditHtml + (cfg.creditMeta ? '<br><span class="credit-meta">' + cfg.creditMeta + '</span>' : '');
     document.getElementById('plans-menu').style.display = cfg.hasPlans ? '' : 'none';
+    document.getElementById('viewer-pending').hidden = !!cfg.glb;
     // each project only shows its own plans in the dropdown — the group
     // key matches the project slug directly
     document.querySelectorAll('.plans-dropdown-group').forEach((g) => {
@@ -1255,7 +1285,8 @@
   const rigCache = new Map();
   async function getRig(slug){
     if (rigCache.has(slug)) return rigCache.get(slug);
-    const rig = await loadRig(PROJECTS[slug].glb, PROJECTS[slug].clipNormal);
+    const cfg = PROJECTS[slug];
+    const rig = cfg.glb ? await loadRig(cfg.glb, cfg.clipNormal) : buildPlaceholderRig(cfg.clipNormal);
     rigCache.set(slug, rig);
     return rig;
   }
