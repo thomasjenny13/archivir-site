@@ -43,9 +43,8 @@ controls.dampingFactor = 0.08;
 controls.enablePan = false;
 controls.minDistance = 1.5;
 controls.maxDistance = 4;
-controls.autoRotate = true;
-controls.autoRotateSpeed = 0.6;
 controls.rotateSpeed = 0.5;
+controls.zoomSpeed = 0.4;
 
 scene.add(new THREE.AmbientLight(0xffffff, 0.75));
 const sunLight = new THREE.DirectionalLight(0xfff2e0, 0.7);
@@ -124,7 +123,6 @@ function setHover(entry){
   if (hovered) { hovered.mesh.material.color.setHex(PALETTE[theme].pin); hovered.mesh.scale.setScalar(1); }
   hovered = entry;
   if (hovered) { hovered.mesh.material.color.setHex(PALETTE[theme].pinHover); hovered.mesh.scale.setScalar(1.7); }
-  controls.autoRotate = !hovered;
   wrap.style.cursor = hovered ? 'pointer' : 'grab';
   tip.hidden = !hovered;
   if (hovered) {
