@@ -1042,11 +1042,17 @@
         // and boundary outline; it's still physically clipped below via
         // the full sectionMeshes list, just without a fill of its own.
         const totalFootprint = (fitBox.max.x - fitBox.min.x) * (fitBox.max.z - fitBox.min.z);
-        const capMeshes = sectionMeshes.filter((mesh) => {
+        const terrainFiltered = sectionMeshes.filter((mesh) => {
           const b = new THREE.Box3().setFromObject(mesh);
           const footprint = (b.max.x - b.min.x) * (b.max.z - b.min.z);
           return footprint <= totalFootprint * 0.4;
         });
+        // a model with no separate terrain (most projects: one or a few
+        // meshes that together ARE the building) can end up with every
+        // mesh over that ratio — filtering down to nothing would leave
+        // buildSectionCap/mergeGeometries an empty array to choke on, so
+        // fall back to the unfiltered list rather than capping nothing
+        const capMeshes = terrainFiltered.length ? terrainFiltered : sectionMeshes;
 
         const sectionCap = buildSectionCap(capMeshes, clipPlane, maxDim * 2.2, 0xb4864f);
         sectionCap.visible = false;
