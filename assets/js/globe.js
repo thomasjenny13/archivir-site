@@ -29,6 +29,8 @@ function latLonToVector3(lat, lon, r){
 }
 
 const R = 1;
+const MIN_DIST = 1.5;
+const MAX_DIST = 4;
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
 camera.position.set(0, 0, 2.6);
@@ -41,10 +43,12 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
 controls.enablePan = false;
-controls.minDistance = 1.5;
-controls.maxDistance = 4;
+controls.minDistance = MIN_DIST;
+controls.maxDistance = MAX_DIST;
 controls.rotateSpeed = 0.5;
-controls.zoomSpeed = 0.4;
+// zoom is handled by our own wheel listener below (cursor-centered),
+// not OrbitControls' built-in dolly, which always zooms toward target
+controls.enableZoom = false;
 
 scene.add(new THREE.AmbientLight(0xffffff, 0.75));
 const sunLight = new THREE.DirectionalLight(0xfff2e0, 0.7);
@@ -195,6 +199,33 @@ renderer.domElement.addEventListener('click', () => {
 wrap.style.cursor = 'grab';
 controls.domElement.addEventListener('pointerdown', () => { wrap.style.cursor = 'grabbing'; });
 window.addEventListener('pointerup', () => { wrap.style.cursor = hovered ? 'pointer' : 'grab'; });
+
+// cursor-centered zoom: dolly the distance as usual, but when zooming in
+// also nudge the camera a bit toward whatever point is under the cursor,
+// so repeated scrolling at the same spot converges the view on it —
+// OrbitControls' own wheel zoom always dollies straight toward the fixed
+// target (the globe's center), ignoring where the cursor is
+renderer.domElement.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const rect = renderer.domElement.getBoundingClientRect();
+  pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+  const dist = camera.position.length();
+  const scale = Math.exp(e.deltaY * 0.0015);
+  const newDist = THREE.MathUtils.clamp(dist * scale, MIN_DIST, MAX_DIST);
+
+  raycaster.setFromCamera(pointer, camera);
+  const hit = raycaster.intersectObject(sphere)[0];
+  if (hit && e.deltaY < 0) {
+    const currentDir = camera.position.clone().normalize();
+    const hitDir = hit.point.clone().normalize();
+    const blended = currentDir.lerp(hitDir, 0.15).normalize();
+    camera.position.copy(blended.multiplyScalar(newDist));
+  } else {
+    camera.position.setLength(newDist);
+  }
+}, { passive: false });
 
 function animate(){
   requestAnimationFrame(animate);
