@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 const PROJECTS = window.PROJECTS || [];
+const WORLD_LAND = window.WORLD_LAND || [];
 
 const wrap = document.getElementById('globe-wrap');
 const tip = document.getElementById('globe-tip');
@@ -10,8 +11,8 @@ const tipArch = tip.querySelector('.ch-pin-tip-arch');
 const tipLoc = tip.querySelector('.ch-pin-tip-loc');
 
 const PALETTE = {
-  light: { pin: 0xB07A3E, pinHover: 0xC13574 },
-  dark:  { pin: 0xD8A66C, pinHover: 0xE8488F },
+  light: { fill: 0xF2F1EE, land: 0x8A5D2C, grid: 0xE3E1DB, pin: 0xB07A3E, pinHover: 0xC13574 },
+  dark:  { fill: 0x242220, land: 0xD8A66C, grid: 0x332F2B, pin: 0xD8A66C, pinHover: 0xE8488F },
 };
 function currentTheme(){
   return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
@@ -28,13 +29,9 @@ function latLonToVector3(lat, lon, r){
 }
 
 const R = 1;
-const DEFAULT_DIST = 2.6;
-const MIN_DIST = 1.5;
-const MAX_DIST = 4;
-
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-camera.position.set(0, 0, DEFAULT_DIST);
+camera.position.set(0, 0, 2.6);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -44,13 +41,13 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
 controls.enablePan = false;
-// zoom is handled by the +/- buttons below, not the wheel — scroll-to-zoom
-// on a globe embedded in a scrolling page fights the page's own scrolling
-controls.enableZoom = false;
+controls.minDistance = 1.5;
+controls.maxDistance = 4;
 controls.rotateSpeed = 0.5;
+controls.zoomSpeed = 0.4;
 
-scene.add(new THREE.AmbientLight(0xffffff, 1.1));
-const sunLight = new THREE.DirectionalLight(0xfff2e0, 1.4);
+scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+const sunLight = new THREE.DirectionalLight(0xfff2e0, 0.7);
 sunLight.position.set(3, 2, 4);
 scene.add(sunLight);
 
@@ -58,23 +55,38 @@ const globeGroup = new THREE.Group();
 scene.add(globeGroup);
 
 const sphere = new THREE.Mesh(
-  new THREE.SphereGeometry(R, 64, 48),
-  // dark ocean-blue fallback shows briefly while the texture streams in
-  new THREE.MeshStandardMaterial({ color: 0x0a1a2e, roughness: 0.85, metalness: 0 })
+  new THREE.SphereGeometry(R * 0.995, 64, 48),
+  new THREE.MeshLambertMaterial({ color: PALETTE[currentTheme()].fill })
 );
 globeGroup.add(sphere);
-new THREE.TextureLoader().load('assets/img/earth.jpg', (texture) => {
-  texture.colorSpace = THREE.SRGBColorSpace;
-  sphere.material.color.set(0xffffff);
-  sphere.material.map = texture;
-  sphere.material.needsUpdate = true;
-  renderer.render(scene, camera);
+
+// lat/lon graticule, one circle per line — cheap and gives the classic globe grid feel
+const graticule = new THREE.Group();
+const graticuleMat = new THREE.LineBasicMaterial({ color: PALETTE[currentTheme()].grid, transparent: true, opacity: 0.6 });
+for (let lat = -60; lat <= 60; lat += 30){
+  const pts = [];
+  for (let lon = -180; lon <= 180; lon += 4) pts.push(latLonToVector3(lat, lon, R * 1.001));
+  graticule.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), graticuleMat));
+}
+for (let lon = -180; lon < 180; lon += 30){
+  const pts = [];
+  for (let lat = -90; lat <= 90; lat += 4) pts.push(latLonToVector3(lat, lon, R * 1.001));
+  graticule.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), graticuleMat));
+}
+globeGroup.add(graticule);
+
+const landMat = new THREE.LineBasicMaterial({ color: PALETTE[currentTheme()].land });
+const landGroup = new THREE.Group();
+WORLD_LAND.forEach((ring) => {
+  const pts = ring.map(([lon, lat]) => latLonToVector3(lat, lon, R * 1.003));
+  landGroup.add(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(pts), landMat));
 });
+globeGroup.add(landGroup);
 
 const pinsGroup = new THREE.Group();
 const pinEntries = PROJECTS.map((project) => {
   const mesh = new THREE.Mesh(
-    new THREE.SphereGeometry(0.016, 14, 14),
+    new THREE.SphereGeometry(0.014, 14, 14),
     new THREE.MeshBasicMaterial({ color: PALETTE[currentTheme()].pin })
   );
   mesh.position.copy(latLonToVector3(project.lat, project.lon, R * 1.02));
@@ -85,6 +97,9 @@ globeGroup.add(pinsGroup);
 
 function applyTheme(){
   const p = PALETTE[currentTheme()];
+  sphere.material.color.setHex(p.fill);
+  graticuleMat.color.setHex(p.grid);
+  landMat.color.setHex(p.land);
   pinEntries.forEach(({ mesh }) => { if (mesh !== hovered?.mesh) mesh.material.color.setHex(p.pin); });
 }
 document.getElementById('theme-toggle').addEventListener('click', () => setTimeout(applyTheme, 0));
@@ -134,6 +149,7 @@ renderer.domElement.addEventListener('pointermove', (e) => {
   raycaster.setFromCamera(pointer, camera);
   const pinHit = raycaster.intersectObjects(pinEntries.map((p) => p.mesh))[0];
   const sphereHit = raycaster.intersectObject(sphere)[0];
+  // ignore a pin hit that's actually behind the opaque globe (far side)
   const valid = pinHit && (!sphereHit || pinHit.distance < sphereHit.distance);
   setHover(valid ? pinEntries.find((p) => p.mesh === pinHit.object) : null);
 });
@@ -146,22 +162,9 @@ wrap.style.cursor = 'grab';
 controls.domElement.addEventListener('pointerdown', () => { wrap.style.cursor = 'grabbing'; });
 window.addEventListener('pointerup', () => { wrap.style.cursor = hovered ? 'pointer' : 'grab'; });
 
-// zoom: dedicated buttons instead of the scroll wheel, smoothly eased in
-// the render loop rather than jumping straight to the target distance
-let zoomTarget = DEFAULT_DIST;
-function nudgeZoom(factor){
-  zoomTarget = THREE.MathUtils.clamp(zoomTarget * factor, MIN_DIST, MAX_DIST);
-}
-document.getElementById('globe-zoom-in').addEventListener('click', () => nudgeZoom(0.72));
-document.getElementById('globe-zoom-out').addEventListener('click', () => nudgeZoom(1 / 0.72));
-
 function animate(){
   requestAnimationFrame(animate);
   controls.update();
-  const dist = camera.position.length();
-  if (Math.abs(dist - zoomTarget) > 0.001) {
-    camera.position.setLength(THREE.MathUtils.lerp(dist, zoomTarget, 0.15));
-  }
   if (hovered) updateTipPosition(hovered);
   renderer.render(scene, camera);
 }

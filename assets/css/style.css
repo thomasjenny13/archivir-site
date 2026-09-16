@@ -865,27 +865,6 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   pointer-events: none;
   z-index: 20;
 }
-.globe-zoom{
-  position: absolute;
-  right: 12px; bottom: 12px;
-  display: flex; flex-direction: column; gap: 8px;
-  z-index: 10;
-}
-.globe-zoom-btn{
-  width: 34px; height: 34px;
-  display: flex; align-items: center; justify-content: center;
-  border-radius: 50%;
-  border: 1px solid var(--line);
-  background: color-mix(in srgb, var(--bg-2) 80%, transparent);
-  backdrop-filter: blur(6px);
-  color: var(--ink-soft);
-  font-family: var(--mono);
-  font-size: 1.1rem;
-  line-height: 1;
-  cursor: pointer;
-  transition: border-color .2s ease, color .2s ease;
-}
-.globe-zoom-btn:hover{ border-color: var(--rose-gold-deep); color: var(--rose-gold); }
 .ch-pin-tip-title{ display: block; font-size: 0.76rem; font-weight: 600; color: var(--ink); }
 .ch-pin-tip-arch{ display: block; font-size: 0.68rem; color: var(--ink-soft); margin-top: 2px; }
 .ch-pin-tip-loc{ display: block; font-size: 0.62rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--rose-gold); margin-top: 4px; }
