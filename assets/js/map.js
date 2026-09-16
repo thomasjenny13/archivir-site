@@ -228,6 +228,12 @@ function popupHtml(project){
 // to sit inside the OpenTopoMap contour range (kicks in at 13), so the
 // terrain around the pin actually shows relief instead of a flat tile
 const FOCUS_ZOOM = 16;
+// view to fly back to when a popup is dismissed — captured right before
+// the *first* zoom-in of a viewing session (not overwritten while
+// switching from one open popup straight to another), so closing after
+// checking several projects in a row returns to wherever the visitor
+// actually started, not a forced reset to the global overview
+let previousView = null;
 
 const markers = PROJECTS.map((project) => {
   const icon = L.divIcon({
@@ -249,6 +255,7 @@ const markers = PROJECTS.map((project) => {
   marker.on('mouseover', () => marker.getElement()?.classList.add('is-active'));
   marker.on('mouseout', () => marker.getElement()?.classList.remove('is-active'));
   marker.on('click', () => {
+    if (!previousView) previousView = { center: map.getCenter(), zoom: map.getZoom() };
     if (map.getZoom() < FOCUS_ZOOM) map.flyTo([project.lat, project.lon], FOCUS_ZOOM, { duration: 1.1 });
     else map.panTo([project.lat, project.lon], { animate: true });
   });
@@ -263,7 +270,27 @@ map.on('popupopen', (e) => {
   showPopupModel(project.glb, container);
   if (!popupSpinId) popupSpinId = requestAnimationFrame(popupSpinFrame);
 });
-map.on('popupclose', () => stopPopupSpin());
+// closing a popup flies back to wherever the visitor was looking before
+// this viewing session started — so checking several projects in a row
+// is close → look → close → close → look, not close → manually zoom
+// back out → click the next one. Deferred a tick: clicking a different
+// marker while one popup is open closes the old one and opens the new
+// one in the same call stack, and that case should NOT fly back — only
+// an actual dismissal (✕, Escape, clicking the map) leaves no popup
+// open by the time this runs.
+map.on('popupclose', () => {
+  stopPopupSpin();
+  setTimeout(() => {
+    // map._popup keeps referencing the last popup even after it's
+    // closed (Leaflet never nulls it out) — .isOpen() is what actually
+    // tells a real dismissal apart from a switch to a new marker
+    const stillOpen = map._popup && map._popup.isOpen();
+    if (!stillOpen && previousView) {
+      map.flyTo(previousView.center, previousView.zoom, { duration: 1.1 });
+      previousView = null;
+    }
+  }, 0);
+});
 
 if (markers.length) {
   map.fitBounds(L.featureGroup(markers.map((m) => m.marker)).getBounds().pad(0.35), { maxZoom: 9 });
