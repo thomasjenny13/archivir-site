@@ -62,11 +62,42 @@ const WHITE_ROAD_LAYERS = [
   'bridge-motorway-link', 'bridge-link', 'bridge-minor', 'bridge-secondary-tertiary',
   'bridge-trunk-primary', 'bridge-motorway',
 ];
+// "bright" tints its zoning categories with OSM-default candy colors —
+// hospitals pink, schools lavender, commercial reddish, industrial
+// yellow. None of that means anything on an architecture portfolio map
+// and it visibly clashes with the site's own warm/neutral palette, so
+// every one of those zone categories collapses into a single quiet
+// wash instead of keeping a rainbow of database categories. Buildings
+// go solid near-black, boundaries a plain warm gray — nothing left
+// that isn't either the site's own ink/line tones or a legible
+// natural feature (water, greenery).
+const BUILDING_COLOR = '#1c1a17';
+const ZONE_TINT = 'rgba(92, 86, 75, 0.07)';
+const BOUNDARY_COLOR = '#c9c4ba';
+const RECOLOR = {
+  'building': { 'fill-color': BUILDING_COLOR },
+  'building-top': { 'fill-color': BUILDING_COLOR, 'fill-outline-color': BUILDING_COLOR },
+  'landuse-residential': { 'fill-color': ZONE_TINT },
+  'landuse-suburb': { 'fill-color': ZONE_TINT },
+  'landuse-commercial': { 'fill-color': ZONE_TINT },
+  'landuse-industrial': { 'fill-color': ZONE_TINT },
+  'landuse-cemetery': { 'fill-color': ZONE_TINT },
+  'landuse-hospital': { 'fill-color': ZONE_TINT },
+  'landuse-school': { 'fill-color': ZONE_TINT },
+  'landuse-railway': { 'fill-color': ZONE_TINT },
+  'boundary_2': { 'line-color': BOUNDARY_COLOR },
+  'boundary_3': { 'line-color': BOUNDARY_COLOR },
+  'boundary_disputed': { 'line-color': BOUNDARY_COLOR },
+};
 map.on('style.load', () => {
   HIDE_LAYERS.forEach((id) => { if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none'); });
   // casing + main line both forced white so a road reads as a single
   // flat white stroke, not a colored line with a contrasting border
   WHITE_ROAD_LAYERS.forEach((id) => { if (map.getLayer(id)) map.setPaintProperty(id, 'line-color', '#ffffff'); });
+  Object.entries(RECOLOR).forEach(([id, props]) => {
+    if (!map.getLayer(id)) return;
+    Object.entries(props).forEach(([prop, value]) => map.setPaintProperty(id, prop, value));
+  });
 });
 
 document.getElementById('theme-toggle').addEventListener('click', () => {
