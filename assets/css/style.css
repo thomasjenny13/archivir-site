@@ -839,12 +839,6 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   z-index: 1;
   background: var(--bg);
 }
-/* OpenTopoMap ships full-color (green forest, blue water, brown
-   contours) — muted via the MapLibre raster layer's own paint
-   properties (raster-saturation/-contrast, set in map.js) rather than
-   a CSS filter over each tile image the way the old Leaflet raster
-   setup needed; MapLibre draws the whole map — vector base included —
-   into one shared canvas, so there's no separate tile <img> to filter. */
 .map-pin{ background: none; border: none; }
 .map-pin span{
   display: block;

@@ -30,31 +30,6 @@ const map = new maplibregl.Map({
 });
 map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
 
-// OpenMapTiles has no elevation data — contour lines still come from
-// OpenTopoMap as a raster overlay, added as a MapLibre raster
-// source/layer on top of the liberty base.
-map.on('style.load', () => {
-  if (map.getSource('topo')) return;
-  map.addSource('topo', {
-    type: 'raster',
-    tiles: [
-      'https://a.tile.opentopomap.org/{z}/{x}/{y}.png',
-      'https://b.tile.opentopomap.org/{z}/{x}/{y}.png',
-      'https://c.tile.opentopomap.org/{z}/{x}/{y}.png',
-    ],
-    tileSize: 256,
-    minzoom: 2,
-    maxzoom: 17,
-    attribution: 'Contours: &copy; <a href="https://opentopomap.org" target="_blank" rel="noopener">OpenTopoMap</a> (CC-BY-SA)',
-  });
-  map.addLayer({
-    id: 'topo',
-    type: 'raster',
-    source: 'topo',
-    paint: { 'raster-opacity': 0.55, 'raster-saturation': -0.35, 'raster-contrast': 0.15 },
-  });
-});
-
 document.getElementById('theme-toggle').addEventListener('click', () => {
   popupCache.forEach((entry) => entry.model.traverse(recolorMesh));
   if (popupRenderer) popupRenderer.render(popupScene, popupCamera);
@@ -196,9 +171,7 @@ function popupHtml(project){
   return wrap;
 }
 
-// how close "agrandir l'environnement" zooms in on click — close enough
-// to sit inside the OpenTopoMap contour range, so the terrain around
-// the pin actually shows relief instead of a flat tile
+// how close "agrandir l'environnement" zooms in on click
 const FOCUS_ZOOM = 16;
 // view to fly back to when a popup is dismissed — captured right before
 // the *first* zoom-in of a viewing session (not overwritten while
