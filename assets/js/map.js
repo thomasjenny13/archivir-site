@@ -9,24 +9,29 @@ const map = L.map('osm-map', {
 });
 L.control.zoom({ position: 'topright' }).addTo(map);
 
-// standard OpenStreetMap raster tiles — no API key needed, unlike the
-// CARTO basemaps this replaced (their free anonymous tier now blocks
-// unregistered domains and stamps "API KEY REQUIRED" across every tile)
-const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors';
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  subdomains: 'abc',
-  maxZoom: 19,
-  attribution: ATTRIBUTION,
-}).addTo(map);
+// Esri's free, no-key "Canvas" basemaps — abstract flat gray shapes
+// instead of a busy street map, with a real light/dark pair (each is a
+// Base fill layer plus a Reference layer of labels/borders on top)
+const ATTRIBUTION = 'Esri, HERE, Garmin, &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors';
+const CANVAS = {
+  light: ['World_Light_Gray_Base', 'World_Light_Gray_Reference'],
+  dark: ['World_Dark_Gray_Base', 'World_Dark_Gray_Reference'],
+};
 
-// OSM only ships one (light) style, so dark theme is approximated with a
-// CSS filter on the tile layer rather than swapping to a different,
-// possibly key-gated tile source
 function currentTheme(){
   return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
 }
+
+let canvasLayers = [];
 function applyTileTheme(){
-  map.getContainer().classList.toggle('map-dark-tiles', currentTheme() === 'dark');
+  canvasLayers.forEach((layer) => map.removeLayer(layer));
+  canvasLayers = CANVAS[currentTheme()].map((name) =>
+    L.tileLayer(`https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/${name}/MapServer/tile/{z}/{y}/{x}`, {
+      maxZoom: 19,
+      maxNativeZoom: 16,
+      attribution: ATTRIBUTION,
+    }).addTo(map)
+  );
 }
 applyTileTheme();
 document.getElementById('theme-toggle').addEventListener('click', () => setTimeout(applyTileTheme, 0));

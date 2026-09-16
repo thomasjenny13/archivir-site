@@ -839,11 +839,6 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   z-index: 1;
   background: var(--bg);
 }
-/* OSM only has a light style; dark theme inverts it rather than
-   switching to a different (possibly key-gated) tile source */
-.map-dark-tiles .leaflet-tile{
-  filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9) saturate(0.85);
-}
 .map-pin{ background: none; border: none; }
 .map-pin span{
   display: block;
