@@ -13,46 +13,25 @@ const map = L.map('osm-map', {
 });
 L.control.zoom({ position: 'topright' }).addTo(map);
 
-// CARTO's free, no-key Positron/Dark Matter basemaps — thin gray street
-// linework close to the "every street in the city" line-art look,
-// but with city/country name labels kept (split as its own layer so
-// theme toggles can swap Base + Reference independently). A hillshade
-// layer sits between the two so mountain terrain (ridges, glaciers,
-// valleys) reads at a glance — useful context for a pin like
-// Oberaletschhütte that can't be checked against a street address.
-// Explicit panes keep the stacking order fixed regardless of when each
-// layer is added/removed.
+// no street basemap and no hillshade: just contour lines (OpenTopoMap)
+// plus CARTO's label-only layer for city/country names. Explicit panes
+// keep the stacking order fixed regardless of when each layer is
+// added/removed (theme toggle swaps the Reference/labels layer only).
 const ATTRIBUTION = '&copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>, &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors';
-const CANVAS = {
-  light: ['light_nolabels', 'light_only_labels'],
-  dark: ['dark_nolabels', 'dark_only_labels'],
-};
+const LABELS = { light: 'light_only_labels', dark: 'dark_only_labels' };
 
-['paneBase', 'paneHillshade', 'paneReference', 'paneTopo'].forEach((name, i) => {
+['paneReference', 'paneTopo'].forEach((name, i) => {
   map.createPane(name);
   map.getPane(name).style.zIndex = 200 + i * 10;
 });
 
-L.tileLayer('https://services.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}', {
-  maxZoom: 19,
-  maxNativeZoom: 13,
-  opacity: 0.45,
-  pane: 'paneHillshade',
-  className: 'map-hillshade',
-  attribution: 'Esri, HERE, Garmin',
-}).addTo(map);
-
-// hillshade alone reads as terrain texture but has no traced elevation
-// lines; past a close zoom, switch over to OpenTopoMap, which bakes in
-// real contour lines (from SRTM data) — its own full style, so it
-// covers the abstract canvas/hillshade underneath rather than blending
-// with them, only within its own zoom range
 // OpenTopoMap's own style is full-color (green forest fill, blue water,
-// brown contours) — a CSS filter strips that down to grayscale linework
-// so it reads as an extension of the flat canvas basemap instead of a
-// completely different, busier map dropped on top
+// brown contours) — a CSS filter strips most of that to grayscale
+// linework, but keeps a muted, theme-consistent blue for water/glaciers
+// (see .map-topo in style.css) rather than flattening it to the same
+// gray as everything else, so lakes/rivers/ice stay legible
 L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-  minZoom: 13,
+  minZoom: 2,
   maxZoom: 19,
   maxNativeZoom: 17,
   subdomains: 'abc',
@@ -65,18 +44,12 @@ function currentTheme(){
   return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
 }
 
-let canvasLayers = [];
+let labelLayer = null;
 function applyTileTheme(){
-  canvasLayers.forEach((layer) => map.removeLayer(layer));
-  const [base, reference] = CANVAS[currentTheme()];
-  canvasLayers = [
-    L.tileLayer(`https://{s}.basemaps.cartocdn.com/${base}/{z}/{x}/{y}{r}.png`, {
-      subdomains: 'abcd', maxZoom: 19, maxNativeZoom: 20, pane: 'paneBase', attribution: ATTRIBUTION, detectRetina: true,
-    }).addTo(map),
-    L.tileLayer(`https://{s}.basemaps.cartocdn.com/${reference}/{z}/{x}/{y}{r}.png`, {
-      subdomains: 'abcd', maxZoom: 19, maxNativeZoom: 20, pane: 'paneReference', detectRetina: true,
-    }).addTo(map),
-  ];
+  if (labelLayer) map.removeLayer(labelLayer);
+  labelLayer = L.tileLayer(`https://{s}.basemaps.cartocdn.com/${LABELS[currentTheme()]}/{z}/{x}/{y}{r}.png`, {
+    subdomains: 'abcd', maxZoom: 19, maxNativeZoom: 20, pane: 'paneReference', attribution: ATTRIBUTION, detectRetina: true,
+  }).addTo(map);
 }
 applyTileTheme();
 document.getElementById('theme-toggle').addEventListener('click', () => {
