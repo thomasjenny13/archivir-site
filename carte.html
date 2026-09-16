@@ -9,17 +9,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=3">
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://unpkg.com/three@0.169.0/build/three.module.js",
-    "three/addons/": "https://unpkg.com/three@0.169.0/examples/jsm/"
-  }
-}
-</script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="assets/css/style.css?v=6">
 </head>
-<body>
+<body class="map-page">
 
 <header class="site-banner">
   <a class="site-logo" id="site-logo" href="index.html">
@@ -34,23 +27,12 @@
   </div>
 </header>
 
-<main class="carte-page">
-  <div class="globe-wrap" id="globe-wrap">
-    <div class="globe-tip" id="globe-tip" hidden>
-      <span class="ch-pin-tip-title"></span>
-      <span class="ch-pin-tip-arch"></span>
-      <span class="ch-pin-tip-loc"></span>
-    </div>
-  </div>
-  <p class="ch-empty" id="ch-empty" hidden>Aucun repère pour l'instant.</p>
-  <p class="ch-credit">Contours du monde d'après Natural Earth (domaine public)</p>
-</main>
+<div id="osm-map" class="osm-map"></div>
 
-<script src="assets/js/banner.js?v=3"></script>
-<script src="assets/js/world-land.js?v=5"></script>
-<script src="assets/js/swiss-cantons.js?v=1"></script>
-<script src="assets/js/carte.js?v=3"></script>
-<script type="module" src="assets/js/globe.js?v=9"></script>
+<script src="assets/js/banner.js?v=4"></script>
+<script src="assets/js/carte.js?v=4"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="assets/js/map.js?v=3"></script>
 
 <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "cd4dd3adc67b4e449e7528c57a0e43ba"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
