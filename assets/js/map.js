@@ -23,7 +23,7 @@ const CANVAS = {
   dark: ['World_Dark_Gray_Base', 'World_Dark_Gray_Reference'],
 };
 
-['paneBase', 'paneHillshade', 'paneReference'].forEach((name, i) => {
+['paneBase', 'paneHillshade', 'paneReference', 'paneTopo'].forEach((name, i) => {
   map.createPane(name);
   map.getPane(name).style.zIndex = 200 + i * 10;
 });
@@ -35,6 +35,20 @@ L.tileLayer('https://services.arcgisonline.com/arcgis/rest/services/Elevation/Wo
   pane: 'paneHillshade',
   className: 'map-hillshade',
   attribution: ATTRIBUTION,
+}).addTo(map);
+
+// hillshade alone reads as terrain texture but has no traced elevation
+// lines; past a close zoom, switch over to OpenTopoMap, which bakes in
+// real contour lines (from SRTM data) — its own full style, so it
+// covers the abstract canvas/hillshade underneath rather than blending
+// with them, only within its own zoom range
+L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+  minZoom: 13,
+  maxZoom: 19,
+  maxNativeZoom: 17,
+  subdomains: 'abc',
+  pane: 'paneTopo',
+  attribution: 'Contours: &copy; <a href="https://opentopomap.org" target="_blank" rel="noopener">OpenTopoMap</a> (CC-BY-SA)',
 }).addTo(map);
 
 function currentTheme(){
