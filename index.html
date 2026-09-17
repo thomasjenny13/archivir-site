@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=20">
+<link rel="stylesheet" href="assets/css/style.css?v=21">
 <script type="importmap">
 {
   "imports": {
@@ -38,7 +38,7 @@
 <main class="index-page">
   <header class="index-header">
     <p class="index-sub">Index des projets</p>
-    <button class="index-eglises-toggle" id="index-eglises-toggle" aria-label="Masquer les projets du master" title="Masquer les projets du master">
+    <button class="index-eglises-toggle" id="index-eglises-toggle" aria-label="Afficher les projets du master" title="Afficher les projets du master">
       <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
         <path d="M8 1v2.3M6.8 2.15h2.4"/>
         <path d="M2.5 14.5V8L8 4.5 13.5 8v6.5"/>
@@ -216,7 +216,7 @@
 <div id="index-thumb" class="index-thumb"></div>
 
 <script src="assets/js/banner.js?v=4"></script>
-<script src="assets/js/filter-sync.js?v=2"></script>
+<script src="assets/js/filter-sync.js?v=3"></script>
 <script>
   // model tint (satin black vs. warm stone) is a separate, independent
   // choice from the light/dark site theme — defaults to white/stone so
@@ -282,13 +282,15 @@
 
     // shared with the map's own "Lieu" filter (assets/js/filter-sync.js)
     // — col 1/2/4/5 are Auteur/Lieu/Catégorie d'ouvrage/Type de mandat.
-    // hideEglises is separate from the column filters: it toggles the
+    // showEglises is separate from the column filters: it toggles the
     // whole "Nouvelles églises" master's-thesis selection (rows tagged
-    // data-master="true") on/off, not a value within a column.
+    // data-master="true") on/off, not a value within a column — and
+    // defaults to hidden (false/absent) since it's a separate category,
+    // not part of Archivir's own portfolio.
     const COL_TO_KEY = { 1: 'auteur', 2: 'lieu', 4: 'typologie', 5: 'type' };
-    let hideEglises = !!window.ArchivirFilters.load().hideEglises;
+    let showEglises = !!window.ArchivirFilters.load().showEglises;
     function persistFilters(){
-      const filters = { hideEglises };
+      const filters = { showEglises };
       Object.entries(COL_TO_KEY).forEach(([col, key]) => { filters[key] = activeFilters[col] || ''; });
       window.ArchivirFilters.save(filters);
     }
@@ -299,7 +301,7 @@
       return useAttr ? cell.dataset[useAttr] : cell.textContent.trim();
     }
     function matchesFilters(row, excludeCol){
-      if (hideEglises && row.dataset.master === 'true') return false;
+      if (!showEglises && row.dataset.master === 'true') return false;
       return Object.entries(activeFilters).every(([col, value]) => {
         if (!value || Number(col) === excludeCol) return true;
         return cellValue(row, Number(col)) === value;
@@ -384,17 +386,18 @@
     setupFilterHeader('type-header');
 
     // église icon: hides/shows the "Nouvelles églises" master's-thesis
-    // rows as a block, independently of the column filters above
+    // rows as a block, independently of the column filters above —
+    // hidden by default, "checked" (active/rose-gold) once shown
     const eglisesToggle = document.getElementById('index-eglises-toggle');
     function updateEglisesToggle(){
-      eglisesToggle.classList.toggle('is-active', hideEglises);
-      const label = hideEglises ? 'Afficher les projets du master' : 'Masquer les projets du master';
+      eglisesToggle.classList.toggle('is-active', showEglises);
+      const label = showEglises ? 'Masquer les projets du master' : 'Afficher les projets du master';
       eglisesToggle.setAttribute('aria-label', label);
       eglisesToggle.title = label;
     }
     updateEglisesToggle();
     eglisesToggle.addEventListener('click', () => {
-      hideEglises = !hideEglises;
+      showEglises = !showEglises;
       updateEglisesToggle();
       applyFilters();
     });
@@ -407,7 +410,7 @@
       if (e.key !== window.ArchivirFilters.KEY) return;
       const updated = window.ArchivirFilters.load();
       Object.entries(COL_TO_KEY).forEach(([col, key]) => { activeFilters[col] = updated[key] || ''; });
-      hideEglises = !!updated.hideEglises;
+      showEglises = !!updated.showEglises;
       updateEglisesToggle();
       applyFilters();
     });
@@ -428,7 +431,7 @@
       originalOrder.forEach((row) => tbody.appendChild(row));
 
       Object.keys(activeFilters).forEach((col) => { activeFilters[col] = ''; });
-      hideEglises = false;
+      showEglises = false;
       updateEglisesToggle();
       applyFilters();
     });

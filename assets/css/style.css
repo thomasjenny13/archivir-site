@@ -230,7 +230,11 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   transition: border-color .2s ease, color .2s ease;
 }
 .index-eglises-toggle:hover{ border-color: var(--rose-gold-deep); color: var(--rose-gold); }
-.index-eglises-toggle.is-active{ color: var(--rose-gold); border-color: var(--rose-gold-deep); }
+.index-eglises-toggle.is-active{
+  color: var(--rose-gold);
+  border-color: var(--rose-gold-deep);
+  background: color-mix(in srgb, var(--rose-gold) 20%, transparent);
+}
 .index-sub{
   margin: 0;
   font-size: 0.9rem;
@@ -983,7 +987,10 @@ html[data-theme="dark"] .maplibregl-ctrl-icon{ filter: invert(1); }
   color: var(--ink-soft);
 }
 .map-ctrl-eglises:hover{ color: var(--rose-gold); }
-.map-ctrl-eglises.is-active{ color: var(--rose-gold); }
+.map-ctrl-eglises.is-active{
+  color: var(--rose-gold);
+  background: color-mix(in srgb, var(--rose-gold) 20%, transparent);
+}
 
 /* "Lieu" filter control, top-left — same look as the nav control
    group but sized to fit a text label instead of a 38px icon square,
