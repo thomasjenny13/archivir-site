@@ -3,6 +3,9 @@
 // "Allemagne" in one place is reflected in the other. Keys mirror the
 // index table's filter columns: auteur, lieu (country), typologie
 // (Catégorie d'ouvrage), type (Type de mandat) — each '' means "Tous".
+// hideEglises (boolean) is separate: it toggles the whole "Nouvelles
+// églises" master's-thesis selection (project.master / row
+// data-master="true") on/off as a block, not a value within a column.
 window.ArchivirFilters = (function(){
   const KEY = 'archivir-filters';
   function load(){

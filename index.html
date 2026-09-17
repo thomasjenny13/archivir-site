@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=19">
+<link rel="stylesheet" href="assets/css/style.css?v=20">
 <script type="importmap">
 {
   "imports": {
@@ -38,6 +38,14 @@
 <main class="index-page">
   <header class="index-header">
     <p class="index-sub">Index des projets</p>
+    <button class="index-eglises-toggle" id="index-eglises-toggle" aria-label="Masquer les projets du master" title="Masquer les projets du master">
+      <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 1v2.3M6.8 2.15h2.4"/>
+        <path d="M2.5 14.5V8L8 4.5 13.5 8v6.5"/>
+        <path d="M2 14.5h12"/>
+        <path d="M6.6 14.5v-4h2.8v4"/>
+      </svg>
+    </button>
     <button class="index-reset" id="index-reset" aria-label="Réinitialiser le tri et les filtres" title="Réinitialiser">↻</button>
   </header>
 
@@ -86,7 +94,7 @@
         <td>Refuge de montagne</td>
         <td>Concours</td>
       </tr>
-      <tr>
+      <tr data-master="true">
         <td><span class="index-pending" title="Maquette 3D à venir">St. Paulus</span></td>
         <td>Alfons et Florian Leitl</td>
         <td data-country="Allemagne">Bochum</td>
@@ -94,7 +102,7 @@
         <td>Culte</td>
         <td>Nouvelle construction</td>
       </tr>
-      <tr>
+      <tr data-master="true">
         <td><span class="index-pending" title="Maquette 3D à venir">Hl. Familie (Heimkehrer Dankeskirche)</span></td>
         <td>Kurt Hubert Vieth</td>
         <td data-country="Allemagne">Bochum</td>
@@ -102,7 +110,7 @@
         <td>Culte</td>
         <td>Nouvelle construction</td>
       </tr>
-      <tr>
+      <tr data-master="true">
         <td><span class="index-pending" title="Maquette 3D à venir">St. Johannes (WAT-Leithe)</span></td>
         <td>Josef Franke</td>
         <td data-country="Allemagne">Bochum</td>
@@ -110,7 +118,7 @@
         <td>Culte</td>
         <td>Nouvelle construction</td>
       </tr>
-      <tr>
+      <tr data-master="true">
         <td><span class="index-pending" title="Maquette 3D à venir">Heilig Geist</span></td>
         <td>Karl Hellrung</td>
         <td data-country="Allemagne">Bochum</td>
@@ -118,7 +126,7 @@
         <td>Culte</td>
         <td>Nouvelle construction</td>
       </tr>
-      <tr>
+      <tr data-master="true">
         <td><span class="index-pending" title="Maquette 3D à venir">St. Albertus Magnus</span></td>
         <td>Gottfried Böhm</td>
         <td data-country="Allemagne">Bochum</td>
@@ -126,7 +134,7 @@
         <td>Culte</td>
         <td>Nouvelle construction</td>
       </tr>
-      <tr>
+      <tr data-master="true">
         <td><span class="index-pending" title="Maquette 3D à venir">St. Antonius</span></td>
         <td>Rudolf Schwarz</td>
         <td data-country="Allemagne">Essen</td>
@@ -134,7 +142,7 @@
         <td>Culte</td>
         <td>Nouvelle construction</td>
       </tr>
-      <tr>
+      <tr data-master="true">
         <td><span class="index-pending" title="Maquette 3D à venir">Heilig Geist</span></td>
         <td>Emil Steffann</td>
         <td data-country="Allemagne">Mülheim an der Ruhr</td>
@@ -142,7 +150,7 @@
         <td>Culte</td>
         <td>Nouvelle construction</td>
       </tr>
-      <tr>
+      <tr data-master="true">
         <td><span class="index-pending" title="Maquette 3D à venir">St. Franziskus</span></td>
         <td>Ernst A. Burghartz</td>
         <td data-country="Allemagne">Bottrop</td>
@@ -150,7 +158,7 @@
         <td>Culte</td>
         <td>Nouvelle construction</td>
       </tr>
-      <tr>
+      <tr data-master="true">
         <td><span class="index-pending" title="Maquette 3D à venir">Heilige Familie (Tafel-Kirche)</span></td>
         <td>Rudolf Schwarz et Josef Bernard</td>
         <td data-country="Allemagne">Oberhausen</td>
@@ -158,7 +166,7 @@
         <td>Culte</td>
         <td>Nouvelle construction</td>
       </tr>
-      <tr>
+      <tr data-master="true">
         <td><span class="index-pending" title="Maquette 3D à venir">St. Bonifatius</span></td>
         <td>Ernst von Rudloff</td>
         <td data-country="Allemagne">Gelsenkirchen</td>
@@ -166,7 +174,7 @@
         <td>Culte</td>
         <td>Nouvelle construction</td>
       </tr>
-      <tr>
+      <tr data-master="true">
         <td><span class="index-pending" title="Maquette 3D à venir">Heilig Kreuz (Kulturkirche)</span></td>
         <td>Rudolf Schwarz</td>
         <td data-country="Allemagne">Bottrop</td>
@@ -174,7 +182,7 @@
         <td>Culte</td>
         <td>Nouvelle construction</td>
       </tr>
-      <tr>
+      <tr data-master="true">
         <td><span class="index-pending" title="Maquette 3D à venir">St. Andreas</span></td>
         <td>Rudolf Schwarz</td>
         <td data-country="Allemagne">Essen</td>
@@ -182,7 +190,7 @@
         <td>Culte</td>
         <td>Nouvelle construction</td>
       </tr>
-      <tr>
+      <tr data-master="true">
         <td><span class="index-pending" title="Maquette 3D à venir">St. Martin</span></td>
         <td>Nikolaus Rosiny</td>
         <td data-country="Allemagne">Bochum</td>
@@ -190,7 +198,7 @@
         <td>Culte</td>
         <td>Nouvelle construction</td>
       </tr>
-      <tr>
+      <tr data-master="true">
         <td><span class="index-pending" title="Maquette 3D à venir">Christ-König (Steinring 34)</span></td>
         <td>Franz Schneider</td>
         <td data-country="Allemagne">Bochum</td>
@@ -208,7 +216,7 @@
 <div id="index-thumb" class="index-thumb"></div>
 
 <script src="assets/js/banner.js?v=4"></script>
-<script src="assets/js/filter-sync.js?v=1"></script>
+<script src="assets/js/filter-sync.js?v=2"></script>
 <script>
   // model tint (satin black vs. warm stone) is a separate, independent
   // choice from the light/dark site theme — defaults to white/stone so
@@ -273,10 +281,14 @@
     const filterConfigs = []; // { header, col, useAttr, dropdown }
 
     // shared with the map's own "Lieu" filter (assets/js/filter-sync.js)
-    // — col 1/2/4/5 are Auteur/Lieu/Catégorie d'ouvrage/Type de mandat
+    // — col 1/2/4/5 are Auteur/Lieu/Catégorie d'ouvrage/Type de mandat.
+    // hideEglises is separate from the column filters: it toggles the
+    // whole "Nouvelles églises" master's-thesis selection (rows tagged
+    // data-master="true") on/off, not a value within a column.
     const COL_TO_KEY = { 1: 'auteur', 2: 'lieu', 4: 'typologie', 5: 'type' };
+    let hideEglises = !!window.ArchivirFilters.load().hideEglises;
     function persistFilters(){
-      const filters = {};
+      const filters = { hideEglises };
       Object.entries(COL_TO_KEY).forEach(([col, key]) => { filters[key] = activeFilters[col] || ''; });
       window.ArchivirFilters.save(filters);
     }
@@ -287,6 +299,7 @@
       return useAttr ? cell.dataset[useAttr] : cell.textContent.trim();
     }
     function matchesFilters(row, excludeCol){
+      if (hideEglises && row.dataset.master === 'true') return false;
       return Object.entries(activeFilters).every(([col, value]) => {
         if (!value || Number(col) === excludeCol) return true;
         return cellValue(row, Number(col)) === value;
@@ -369,6 +382,23 @@
     setupFilterHeader('lieu-header', { useAttr: 'country' });
     setupFilterHeader('typologie-header');
     setupFilterHeader('type-header');
+
+    // église icon: hides/shows the "Nouvelles églises" master's-thesis
+    // rows as a block, independently of the column filters above
+    const eglisesToggle = document.getElementById('index-eglises-toggle');
+    function updateEglisesToggle(){
+      eglisesToggle.classList.toggle('is-active', hideEglises);
+      const label = hideEglises ? 'Afficher les projets du master' : 'Masquer les projets du master';
+      eglisesToggle.setAttribute('aria-label', label);
+      eglisesToggle.title = label;
+    }
+    updateEglisesToggle();
+    eglisesToggle.addEventListener('click', () => {
+      hideEglises = !hideEglises;
+      updateEglisesToggle();
+      applyFilters();
+    });
+
     applyFilters();
 
     // live sync: if the map (or another tab on this page) changes the
@@ -377,6 +407,8 @@
       if (e.key !== window.ArchivirFilters.KEY) return;
       const updated = window.ArchivirFilters.load();
       Object.entries(COL_TO_KEY).forEach(([col, key]) => { activeFilters[col] = updated[key] || ''; });
+      hideEglises = !!updated.hideEglises;
+      updateEglisesToggle();
       applyFilters();
     });
 
@@ -396,6 +428,8 @@
       originalOrder.forEach((row) => tbody.appendChild(row));
 
       Object.keys(activeFilters).forEach((col) => { activeFilters[col] = ''; });
+      hideEglises = false;
+      updateEglisesToggle();
       applyFilters();
     });
   })();

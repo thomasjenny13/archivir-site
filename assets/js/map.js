@@ -89,6 +89,7 @@ map.addControl(new MapControls(), 'top-right');
 // a country here narrows the index back the same way.
 let activeFilters = window.ArchivirFilters.load();
 function matchesFilters(project){
+  if (activeFilters.hideEglises && project.master) return false;
   return (!activeFilters.auteur || project.architecte === activeFilters.auteur)
     && (!activeFilters.lieu || countryOf(project) === activeFilters.lieu)
     && (!activeFilters.typologie || project.categorie === activeFilters.typologie)
@@ -166,6 +167,44 @@ class FilterControl {
 const filterControl = new FilterControl();
 map.addControl(filterControl, 'top-left');
 
+// église icon — hides/shows the "Nouvelles églises" master's-thesis
+// selection (project.master === true) as a block, a separate category
+// from Archivir's own projects rather than another Lieu/Auteur value
+class EglisesToggleControl {
+  onAdd(mapInstance){
+    this._map = mapInstance;
+    const el = document.createElement('div');
+    el.className = 'maplibregl-ctrl maplibregl-ctrl-group';
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'map-ctrl-eglises';
+    btn.innerHTML = '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1v2.3M6.8 2.15h2.4"/><path d="M2.5 14.5V8L8 4.5 13.5 8v6.5"/><path d="M2 14.5h12"/><path d="M6.6 14.5v-4h2.8v4"/></svg>';
+    const update = () => {
+      btn.classList.toggle('is-active', !!activeFilters.hideEglises);
+      const label = activeFilters.hideEglises ? 'Afficher les projets du master' : 'Masquer les projets du master';
+      btn.setAttribute('aria-label', label);
+      btn.title = label;
+    };
+    btn.addEventListener('click', () => {
+      activeFilters = { ...activeFilters, hideEglises: !activeFilters.hideEglises };
+      window.ArchivirFilters.save(activeFilters);
+      update();
+      applyFilters();
+    });
+
+    update();
+    el.appendChild(btn);
+    this._el = el;
+    this._update = update;
+    return el;
+  }
+  onRemove(){ this._el.parentNode.removeChild(this._el); this._map = undefined; }
+  refresh(){ this._update(); }
+}
+const eglisesToggleControl = new EglisesToggleControl();
+map.addControl(eglisesToggleControl, 'top-left');
+
 function applyFilters(duration = 900){
   markers.forEach(({ marker, project, popup, tip }) => {
     const visible = matchesFilters(project);
@@ -186,6 +225,7 @@ window.addEventListener('storage', (e) => {
   if (e.key !== window.ArchivirFilters.KEY) return;
   activeFilters = window.ArchivirFilters.load();
   filterControl.refresh();
+  eglisesToggleControl.refresh();
   applyFilters();
 });
 

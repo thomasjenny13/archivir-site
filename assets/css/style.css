@@ -214,6 +214,23 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 }
 .index-reset:hover{ border-color: var(--rose-gold-deep); color: var(--rose-gold); }
 .index-reset.spin{ transform: rotate(-360deg); }
+/* toggles the "Nouvelles églises" master's-thesis selection on/off —
+   a separate category from Archivir's own projects, not just another
+   column filter */
+.index-eglises-toggle{
+  position: fixed; top: 72px; right: 84px; z-index: 10;
+  width: 48px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg-2) 75%, transparent);
+  backdrop-filter: blur(6px);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: border-color .2s ease, color .2s ease;
+}
+.index-eglises-toggle:hover{ border-color: var(--rose-gold-deep); color: var(--rose-gold); }
+.index-eglises-toggle.is-active{ color: var(--rose-gold); border-color: var(--rose-gold-deep); }
 .index-sub{
   margin: 0;
   font-size: 0.9rem;
@@ -779,6 +796,7 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   .index-page{ padding: 76px 16px 40px; }
   .index-header{ margin-bottom: 24px; }
   .index-reset{ top: 58px; right: 16px; width: 38px; height: 38px; font-size: 1rem; }
+  .index-eglises-toggle{ top: 58px; right: 62px; width: 38px; height: 38px; }
 
   .compass{ top: 58px; right: 16px; width: 54px; height: 54px; }
   .compass-pt{ font-size: 0.5rem; }
@@ -958,6 +976,14 @@ html[data-theme="dark"] .maplibregl-ctrl-icon{ filter: invert(1); }
   color: var(--ink-soft);
 }
 .map-ctrl-fit:hover{ color: var(--rose-gold); }
+/* toggles the "Nouvelles églises" master's-thesis selection on/off —
+   a separate category from Archivir's own projects */
+.map-ctrl-eglises{
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink-soft);
+}
+.map-ctrl-eglises:hover{ color: var(--rose-gold); }
+.map-ctrl-eglises.is-active{ color: var(--rose-gold); }
 
 /* "Lieu" filter control, top-left — same look as the nav control
    group but sized to fit a text label instead of a 38px icon square,
