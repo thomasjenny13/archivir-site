@@ -940,10 +940,17 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 }
 .maplibregl-ctrl-group button + button{ border-top: 1px solid var(--line); }
 .maplibregl-ctrl-group button:hover{ background: var(--bg-2); }
-/* the +/- icons are baked-in dark SVGs (background-image) — fine as-is
+/* the + icon is a baked-in dark SVG (background-image) — fine as-is
    against the light theme's pale control, inverted to read as light
    icons against the dark theme's dark control */
 html[data-theme="dark"] .maplibregl-ctrl-icon{ filter: invert(1); }
+/* replaces the default "-" zoom-out button: a currentColor SVG icon
+   needs no theme-swapped filter like the baked-in +/- ones do */
+.map-ctrl-fit{
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink-soft);
+}
+.map-ctrl-fit:hover{ color: var(--rose-gold); }
 .maplibregl-ctrl-attrib{
   background: color-mix(in srgb, var(--bg-2) 80%, transparent) !important;
   font-family: var(--mono);

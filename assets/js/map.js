@@ -11,6 +11,15 @@ function currentTheme(){
   return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
 }
 
+function themeColor(name){
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function projectBounds(){
+  const lons = PROJECTS.map((p) => p.lon), lats = PROJECTS.map((p) => p.lat);
+  return [[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]];
+}
+
 // OpenFreeMap, free/no-key vector tiles via MapLibre GL — "bright" is
 // one of OpenFreeMap's own ready-made styles (alongside liberty,
 // positron, dark). One style regardless of the site's light/dark
@@ -28,7 +37,40 @@ const map = new maplibregl.Map({
   maxZoom: 19,
   attributionControl: { compact: false },
 });
-map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+// custom control: same look as MapLibre's own zoom pair, but the
+// bottom "-" button is replaced with a "vue globale" button that fits
+// every project into view instead of a single zoom-out step
+class MapControls {
+  onAdd(mapInstance){
+    this._map = mapInstance;
+    const el = document.createElement('div');
+    el.className = 'maplibregl-ctrl maplibregl-ctrl-group';
+
+    const zoomIn = document.createElement('button');
+    zoomIn.type = 'button';
+    zoomIn.className = 'maplibregl-ctrl-zoom-in';
+    zoomIn.setAttribute('aria-label', 'Zoomer');
+    zoomIn.innerHTML = '<span class="maplibregl-ctrl-icon" aria-hidden="true"></span>';
+    zoomIn.addEventListener('click', () => mapInstance.zoomIn());
+
+    const fitAll = document.createElement('button');
+    fitAll.type = 'button';
+    fitAll.className = 'map-ctrl-fit';
+    fitAll.setAttribute('aria-label', 'Vue globale des projets');
+    fitAll.title = 'Vue globale des projets';
+    fitAll.innerHTML = '<svg viewBox="0 0 15 15" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1.5 5.5v-4h4M13.5 5.5v-4h-4M1.5 9.5v4h4M13.5 9.5v4h-4"/></svg>';
+    fitAll.addEventListener('click', () => {
+      if (PROJECTS.length) mapInstance.fitBounds(projectBounds(), { padding: 60, maxZoom: 9, duration: 900 });
+    });
+
+    el.appendChild(zoomIn);
+    el.appendChild(fitAll);
+    this._el = el;
+    return el;
+  }
+  onRemove(){ this._el.parentNode.removeChild(this._el); this._map = undefined; }
+}
+map.addControl(new MapControls(), 'top-right');
 
 // strip "bright" down to just city names on a plain white-roads base —
 // no POI icons, no route-number shields, no street/water names, no
@@ -89,6 +131,9 @@ const RECOLOR = {
   'boundary_3': { 'line-color': BOUNDARY_COLOR },
   'boundary_disputed': { 'line-color': BOUNDARY_COLOR },
 };
+const HIGHLIGHT_SOURCE = 'project-highlight';
+function emptyFC(){ return { type: 'FeatureCollection', features: [] }; }
+
 map.on('style.load', () => {
   HIDE_LAYERS.forEach((id) => { if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none'); });
   // casing + main line both forced white so a road reads as a single
@@ -98,11 +143,46 @@ map.on('style.load', () => {
     if (!map.getLayer(id)) return;
     Object.entries(props).forEach(([prop, value]) => map.setPaintProperty(id, prop, value));
   });
+
+  // highlight layer for the cadastral footprint of whichever project's
+  // popup is open — an empty source until a marker is clicked
+  map.addSource(HIGHLIGHT_SOURCE, { type: 'geojson', data: emptyFC() });
+  map.addLayer({
+    id: 'project-highlight-fill', type: 'fill', source: HIGHLIGHT_SOURCE,
+    paint: { 'fill-color': themeColor('--rose-gold'), 'fill-opacity': 0.35 },
+  });
+  map.addLayer({
+    id: 'project-highlight-line', type: 'line', source: HIGHLIGHT_SOURCE,
+    paint: { 'line-color': themeColor('--rose-gold'), 'line-width': 2 },
+  });
 });
+
+function clearHighlight(){
+  const src = map.getSource(HIGHLIGHT_SOURCE);
+  if (src) src.setData(emptyFC());
+}
+
+// finds the building footprint under a project's marker (once its tiles
+// are actually loaded) and paints it in the theme's accent color — a
+// quiet "here's the plot" cue instead of just a dot. Silently does
+// nothing if the geocoded point doesn't land on a rendered building.
+function highlightBuildingAt(lon, lat){
+  const src = map.getSource(HIGHLIGHT_SOURCE);
+  if (!src || !map.getLayer('building')) return;
+  const point = map.project([lon, lat]);
+  const features = map.queryRenderedFeatures(point, { layers: ['building'] });
+  if (!features.length) { clearHighlight(); return; }
+  src.setData({ type: 'FeatureCollection', features: [{ type: 'Feature', geometry: features[0].geometry, properties: {} }] });
+}
 
 document.getElementById('theme-toggle').addEventListener('click', () => {
   popupCache.forEach((entry) => entry.model.traverse(recolorMesh));
   if (popupRenderer) popupRenderer.render(popupScene, popupCamera);
+  if (map.getLayer('project-highlight-fill')) {
+    const color = themeColor('--rose-gold');
+    map.setPaintProperty('project-highlight-fill', 'fill-color', color);
+    map.setPaintProperty('project-highlight-line', 'line-color', color);
+  }
 });
 
 // ---------- click popup: closer zoom + a fixed (non-spinning) 3D
@@ -247,16 +327,19 @@ function popupHtml(project){
 
 // how close "agrandir l'environnement" zooms in on click
 const FOCUS_ZOOM = 16;
-// view to fly back to when a popup is dismissed — captured right before
-// the *first* zoom-in of a viewing session (not overwritten while
-// switching from one open popup straight to another), so closing after
-// checking several projects in a row returns to wherever the visitor
-// actually started, not a forced reset to the global overview
-let previousView = null;
 
 function anyPopupOpen(){
   return markers.some((m) => m.popup && m.popup.isOpen());
 }
+
+// offset the card away from the marker regardless of which side MapLibre
+// ends up anchoring it on, so the pin (and the plot underneath it) stays
+// visible next to the card instead of tucked directly under it
+const POPUP_OFFSET = {
+  top: [0, 24], 'top-left': [16, 16], 'top-right': [-16, 16],
+  bottom: [0, -24], 'bottom-left': [16, -16], 'bottom-right': [-16, -16],
+  left: [24, 0], right: [-24, 0],
+};
 
 const markers = [];
 PROJECTS.forEach((project) => {
@@ -280,7 +363,7 @@ PROJECTS.forEach((project) => {
 
   // every project gets the popup — glb-less ones just show the "à
   // venir" bubble from popupHtml() instead of loading a model
-  const popup = new maplibregl.Popup({ closeButton: true, className: 'map-popup-wrap', maxWidth: '240px' })
+  const popup = new maplibregl.Popup({ closeButton: true, className: 'map-popup-wrap', maxWidth: '240px', offset: POPUP_OFFSET })
     .setDOMContent(popupHtml(project));
   marker.setPopup(popup);
   popup.on('open', () => {
@@ -288,38 +371,26 @@ PROJECTS.forEach((project) => {
     const container = popup.getElement()?.querySelector('.map-popup-3d');
     if (container) showPopupModel(project.glb, container);
   });
-  // closing a popup flies back to wherever the visitor was looking
-  // before this viewing session started — so checking several
-  // projects in a row is close → look → close → close → look, not
-  // close → manually zoom back out → click the next one. Deferred a
-  // tick: switching straight from one marker's popup to another
-  // closes the old one and opens the new one in the same call stack,
-  // and that case should NOT fly back — only an actual dismissal (✕,
-  // Escape, clicking the map) leaves no popup open by the time this runs.
+  // dismissing a popup (✕, Escape, clicking the map) no longer flies the
+  // view back anywhere — it just clears the cadastral highlight once no
+  // popup is left open. Deferred a tick: switching straight from one
+  // marker's popup to another closes the old one and opens the new one
+  // in the same call stack, and that case should keep the highlight.
   popup.on('close', () => {
-    setTimeout(() => {
-      if (!anyPopupOpen() && previousView) {
-        map.flyTo({ center: previousView.center, zoom: previousView.zoom, duration: 1100 });
-        previousView = null;
-      }
-    }, 0);
+    setTimeout(() => { if (!anyPopupOpen()) clearHighlight(); }, 0);
   });
 
   el.addEventListener('click', () => {
     tip.remove();
     markers.forEach((m) => { if (m.popup && m.popup !== popup && m.popup.isOpen()) m.popup.remove(); });
-    if (!previousView) previousView = { center: map.getCenter(), zoom: map.getZoom() };
     if (map.getZoom() < FOCUS_ZOOM) map.flyTo({ center: [project.lon, project.lat], zoom: FOCUS_ZOOM, duration: 1100 });
     else map.panTo([project.lon, project.lat]);
+    map.once('idle', () => highlightBuildingAt(project.lon, project.lat));
   });
 
   markers.push({ marker, project, popup });
 });
 
 if (PROJECTS.length) {
-  const lons = PROJECTS.map((p) => p.lon), lats = PROJECTS.map((p) => p.lat);
-  map.fitBounds(
-    [[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]],
-    { padding: 60, maxZoom: 9, duration: 0 }
-  );
+  map.fitBounds(projectBounds(), { padding: 60, maxZoom: 9, duration: 0 });
 }
