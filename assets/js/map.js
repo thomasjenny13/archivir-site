@@ -328,17 +328,42 @@ function clearHighlight(){
   if (src) src.setData(emptyFC());
 }
 
+// rough "largest side" of a building polygon in meters, used only to
+// compare candidates against each other — doesn't need to be a precise
+// area calculation, just consistent enough to rank small vs. large
+function geometryExtentMeters(geometry){
+  const rings = geometry.type === 'Polygon' ? geometry.coordinates : geometry.coordinates.flat();
+  let minLon = Infinity, maxLon = -Infinity, minLat = Infinity, maxLat = -Infinity;
+  rings.forEach((ring) => ring.forEach(([lon, lat]) => {
+    if (lon < minLon) minLon = lon;
+    if (lon > maxLon) maxLon = lon;
+    if (lat < minLat) minLat = lat;
+    if (lat > maxLat) maxLat = lat;
+  }));
+  const midLat = (minLat + maxLat) / 2;
+  const dx = (maxLon - minLon) * 111320 * Math.cos(midLat * Math.PI / 180);
+  const dy = (maxLat - minLat) * 111320;
+  return Math.max(dx, dy);
+}
+
 // finds the building footprint under a project's marker (once its tiles
 // are actually loaded) and paints it in the theme's accent color — a
-// quiet "here's the plot" cue instead of just a dot. Silently does
-// nothing if the geocoded point doesn't land on a rendered building.
+// quiet "here's the plot" cue instead of just a dot. Queries a small
+// box around the point rather than the exact pixel: OpenMapTiles'
+// "building" layer sometimes merges an entire housing block into one
+// polygon, and a single-point query can land on that merged neighbor
+// instead of the modest single building we actually want — picking the
+// smallest candidate in the box favors the real building over it.
+// Silently does nothing if no building renders near the geocoded point.
 function highlightBuildingAt(lon, lat){
   const src = map.getSource(HIGHLIGHT_SOURCE);
   if (!src || !map.getLayer('building')) return;
   const point = map.project([lon, lat]);
-  const features = map.queryRenderedFeatures(point, { layers: ['building'] });
+  const box = [[point.x - 6, point.y - 6], [point.x + 6, point.y + 6]];
+  const features = map.queryRenderedFeatures(box, { layers: ['building'] });
   if (!features.length) { clearHighlight(); return; }
-  src.setData({ type: 'FeatureCollection', features: [{ type: 'Feature', geometry: features[0].geometry, properties: {} }] });
+  const best = features.reduce((a, b) => geometryExtentMeters(a.geometry) <= geometryExtentMeters(b.geometry) ? a : b);
+  src.setData({ type: 'FeatureCollection', features: [{ type: 'Feature', geometry: best.geometry, properties: {} }] });
 }
 
 document.getElementById('theme-toggle').addEventListener('click', () => {
