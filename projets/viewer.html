@@ -524,16 +524,101 @@
       },
       variantOrder: ['base', 'prix1', 'prix2', 'prix3'],
     },
+    // "Nouvelles églises" — Atelier Menzel & Esquivié, JMA - HEIA
+    // Fribourg SA 2026: Ruhr valley reconversion candidates, none with
+    // a glb yet — getRig() falls back to buildPlaceholderRig(), and
+    // applyProjectUI() shows the "Maquette 3D à venir" label
     stpaulus: {
-      // no glb yet — getRig() falls back to buildPlaceholderRig(), and
-      // applyProjectUI() shows the "Maquette 3D à venir" label
       title: 'St. Paulus — Archivir',
       creditHtml: '<strong>St. Paulus</strong>Alfons et Florian Leitl',
       creditMeta: '1970–72 · Bochum (Allemagne) · Culte · Reconversion',
       hasPlans: false,
     },
+    hlfamilie: {
+      title: 'Hl. Familie (Heimkehrer Dankeskirche) — Archivir',
+      creditHtml: '<strong>Hl. Familie (Heimkehrer Dankeskirche)</strong>Kurt Hubert Vieth',
+      creditMeta: '1958–59 · Bochum-Weitmar-Mark (Allemagne) · Culte · Reconversion',
+      hasPlans: false,
+    },
+    stjohannes: {
+      title: 'St. Johannes (WAT-Leithe) — Archivir',
+      creditHtml: '<strong>St. Johannes (WAT-Leithe)</strong>Josef Franke',
+      creditMeta: '1913–1914 · Bochum-Leithe (Allemagne) · Culte · Reconversion',
+      hasPlans: false,
+    },
+    heiliggeistharpen: {
+      title: 'Heilig Geist — Archivir',
+      creditHtml: '<strong>Heilig Geist</strong>Karl Hellrung',
+      creditMeta: '1953–54 · Bochum-Harpen (Allemagne) · Culte · Reconversion',
+      hasPlans: false,
+    },
+    albertusmagnus: {
+      title: 'St. Albertus Magnus — Archivir',
+      creditHtml: '<strong>St. Albertus Magnus</strong>Gottfried Böhm',
+      creditMeta: '1960–1964 · Bochum-Wiemelhausen (Allemagne) · Culte · Reconversion',
+      hasPlans: false,
+    },
+    stantonius: {
+      title: 'St. Antonius — Archivir',
+      creditHtml: '<strong>St. Antonius</strong>Rudolf Schwarz',
+      creditMeta: '1959 · Essen-Frohnhausen (Allemagne) · Culte · Reconversion',
+      hasPlans: false,
+    },
+    heiliggeistmuelheim: {
+      title: 'Heilig Geist — Archivir',
+      creditHtml: '<strong>Heilig Geist</strong>Emil Steffann',
+      creditMeta: 'Mülheim an der Ruhr (Allemagne) · Culte · Reconversion',
+      hasPlans: false,
+    },
+    stfranziskus: {
+      title: 'St. Franziskus — Archivir',
+      creditHtml: '<strong>St. Franziskus</strong>Ernst A. Burghartz',
+      creditMeta: '1961–62 · Bottrop-Welheim (Allemagne) · Culte · Reconversion',
+      hasPlans: false,
+    },
+    heiligefamilie: {
+      title: 'Heilige Familie (Tafel-Kirche) — Archivir',
+      creditHtml: '<strong>Heilige Familie (Tafel-Kirche)</strong>Rudolf Schwarz et Josef Bernard',
+      creditMeta: '1955–58 · Oberhausen (Allemagne) · Culte · Reconversion',
+      hasPlans: false,
+    },
+    stbonifatius: {
+      title: 'St. Bonifatius — Archivir',
+      creditHtml: '<strong>St. Bonifatius</strong>Ernst von Rudloff',
+      creditMeta: '1964 · Gelsenkirchen (Allemagne) · Culte · Reconversion',
+      hasPlans: false,
+    },
+    heiligkreuz: {
+      title: 'Heilig Kreuz (Kulturkirche) — Archivir',
+      creditHtml: '<strong>Heilig Kreuz (Kulturkirche)</strong>Rudolf Schwarz',
+      creditMeta: 'Bottrop (Allemagne) · Culte · Reconversion',
+      hasPlans: false,
+    },
+    standreas: {
+      title: 'St. Andreas — Archivir',
+      creditHtml: '<strong>St. Andreas</strong>Rudolf Schwarz',
+      creditMeta: '1954–1957 · Essen-Rüttenscheid (Allemagne) · Culte · Reconversion',
+      hasPlans: false,
+    },
+    stmartin: {
+      title: 'St. Martin — Archivir',
+      creditHtml: '<strong>St. Martin</strong>Nikolaus Rosiny',
+      creditMeta: '1972–74 · Bochum-Steinkuhl (Allemagne) · Culte · Reconversion',
+      hasPlans: false,
+    },
+    christkoenig: {
+      title: 'Christ-König (Steinring 34) — Archivir',
+      creditHtml: '<strong>Christ-König (Steinring 34)</strong>Franz Schneider',
+      creditMeta: '1931–32 · Bochum-Innenstadt (Allemagne) · Culte · Reconversion',
+      hasPlans: false,
+    },
   };
-  const ORDER = ['pavillon', 'tupi', 'haus', 'oberaletsch', 'stpaulus'];
+  const ORDER = [
+    'pavillon', 'tupi', 'haus', 'oberaletsch', 'stpaulus', 'hlfamilie', 'stjohannes',
+    'heiliggeistharpen', 'albertusmagnus', 'stantonius', 'heiliggeistmuelheim',
+    'stfranziskus', 'heiligefamilie', 'stbonifatius', 'heiligkreuz', 'standreas',
+    'stmartin', 'christkoenig',
+  ];
 
   // model tint is a user choice, independent of the light/dark site
   // theme: warm stone + dark hairlines, or matte black + white hairlines
