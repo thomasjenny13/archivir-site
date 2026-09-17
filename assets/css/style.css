@@ -342,17 +342,6 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 /* no glb yet — plain, non-interactive text instead of a link into a
    viewer page that would only show the "à venir" placeholder */
 .index-pending{ color: var(--ink-faint); cursor: default; }
-/* small pin icon next to every project name — jumps to that project's
-   marker on the map instead of the 3D viewer, so it works even for
-   the master's-thesis rows above that have no viewer link at all */
-.index-table a.index-map-link{
-  display: inline-flex; align-items: center; justify-content: center;
-  margin-left: 6px;
-  color: var(--ink-faint);
-  border-bottom: none;
-  vertical-align: middle;
-}
-.index-table a.index-map-link:hover{ color: var(--rose-gold); }
 
 .index-thumb{
   position: fixed;

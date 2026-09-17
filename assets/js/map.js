@@ -29,13 +29,12 @@ function countryOf(project){
   return m ? m[1] : '';
 }
 
-// same slug used as the ?p= viewer param (project.url) and as the
-// ?p= param this page itself accepts to deep-link from the index
-// straight to a project's marker (see the deep-link handling at the
-// bottom of this file, after markers are built)
-function projectSlug(project){
-  const m = project.url.match(/[?&]p=([^&]+)/);
-  return m ? m[1] : '';
+// the index's Lieu column shows a simplified city label (district
+// dropped — "Bochum-Weitmar-Mark (Allemagne)" reads as just "Bochum"),
+// so matching this page's own ?lieu=<label> deep link is a startsWith,
+// not an equality: "Bochum" catches every Bochum-area church at once
+function matchesCity(project, label){
+  return project.lieu.startsWith(label);
 }
 
 // OpenFreeMap, free/no-key vector tiles via MapLibre GL — "bright" is
@@ -500,11 +499,11 @@ function anyPopupOpen(){
   return markers.some((m) => m.popup && m.popup.isOpen());
 }
 
-// shared by the marker click handler and the ?p= deep link from the
-// index: zoom onto the project, highlight its footprint once the view
-// settles, and open its popup if it isn't already (a real click has
-// already opened it via MapLibre's own marker binding by the time this
-// runs, so the isOpen() check keeps this a no-op there)
+// shared by the marker click handler and a single-match ?lieu= deep
+// link from the index: zoom onto the project, highlight its footprint
+// once the view settles, and open its popup if it isn't already (a
+// real click has already opened it via MapLibre's own marker binding
+// by the time this runs, so the isOpen() check keeps this a no-op there)
 function focusMarker(marker, project, popup, tip){
   tip.remove();
   markers.forEach((m) => { if (m.popup && m.popup !== popup && m.popup.isOpen()) m.popup.remove(); });
@@ -569,21 +568,25 @@ PROJECTS.forEach((project) => {
 
 if (PROJECTS.length) applyFilters(0);
 
-// deep link from the index (or anywhere else): "carte.html?p=<slug>"
-// flies straight to that project and opens its popup, exactly like
-// clicking its marker. Whatever filters were previously in force are
-// cleared first — showEglises forced back on if the target is a
-// master's-thesis project — so the link always actually shows it
-// instead of silently landing on a hidden marker.
-const deepLinkSlug = new URLSearchParams(location.search).get('p');
-if (deepLinkSlug) {
-  const entry = markers.find((m) => projectSlug(m.project) === deepLinkSlug);
-  if (entry) {
-    activeFilters = entry.project.master ? { showEglises: true } : {};
+// deep link from the index's Lieu column: "carte.html?lieu=Bochum"
+// zooms to every project in that city at once (a single match also
+// opens its popup, same as clicking its marker). Whatever filters were
+// previously in force are cleared first — showEglises forced back on
+// if any match is a master's-thesis project — so the link always
+// actually shows its targets instead of landing on hidden markers.
+const cityParam = new URLSearchParams(location.search).get('lieu');
+if (cityParam) {
+  const matches = markers.filter((m) => matchesCity(m.project, cityParam));
+  if (matches.length) {
+    activeFilters = matches.some((m) => m.project.master) ? { showEglises: true } : {};
     window.ArchivirFilters.save(activeFilters);
     filterControl.refresh();
     eglisesToggleControl.refresh();
     applyFilters(0);
-    focusMarker(entry.marker, entry.project, entry.popup, entry.tip);
+    if (matches.length === 1) {
+      focusMarker(matches[0].marker, matches[0].project, matches[0].popup, matches[0].tip);
+    } else {
+      map.fitBounds(projectBounds(matches.map((m) => m.project)), { padding: 60, maxZoom: 15, duration: 1100 });
+    }
   }
 }
