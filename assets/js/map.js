@@ -29,6 +29,15 @@ function countryOf(project){
   return m ? m[1] : '';
 }
 
+// same slug used as the ?p= viewer param (project.url) and as the
+// ?p= param this page itself accepts to deep-link from the index
+// straight to a project's marker (see the deep-link handling at the
+// bottom of this file, after markers are built)
+function projectSlug(project){
+  const m = project.url.match(/[?&]p=([^&]+)/);
+  return m ? m[1] : '';
+}
+
 // OpenFreeMap, free/no-key vector tiles via MapLibre GL — "bright" is
 // one of OpenFreeMap's own ready-made styles (alongside liberty,
 // positron, dark). One style regardless of the site's light/dark
@@ -491,6 +500,20 @@ function anyPopupOpen(){
   return markers.some((m) => m.popup && m.popup.isOpen());
 }
 
+// shared by the marker click handler and the ?p= deep link from the
+// index: zoom onto the project, highlight its footprint once the view
+// settles, and open its popup if it isn't already (a real click has
+// already opened it via MapLibre's own marker binding by the time this
+// runs, so the isOpen() check keeps this a no-op there)
+function focusMarker(marker, project, popup, tip){
+  tip.remove();
+  markers.forEach((m) => { if (m.popup && m.popup !== popup && m.popup.isOpen()) m.popup.remove(); });
+  if (map.getZoom() < FOCUS_ZOOM) map.flyTo({ center: [project.lon, project.lat], zoom: FOCUS_ZOOM, duration: 1100 });
+  else map.panTo([project.lon, project.lat]);
+  map.once('idle', () => highlightBuildingAt(project.lon, project.lat));
+  if (!popup.isOpen()) marker.togglePopup();
+}
+
 // offset the card away from the marker regardless of which side MapLibre
 // ends up anchoring it on, so the pin (and the plot underneath it) stays
 // visible next to the card instead of tucked directly under it
@@ -539,15 +562,28 @@ PROJECTS.forEach((project) => {
     setTimeout(() => { if (!anyPopupOpen()) clearHighlight(); }, 0);
   });
 
-  el.addEventListener('click', () => {
-    tip.remove();
-    markers.forEach((m) => { if (m.popup && m.popup !== popup && m.popup.isOpen()) m.popup.remove(); });
-    if (map.getZoom() < FOCUS_ZOOM) map.flyTo({ center: [project.lon, project.lat], zoom: FOCUS_ZOOM, duration: 1100 });
-    else map.panTo([project.lon, project.lat]);
-    map.once('idle', () => highlightBuildingAt(project.lon, project.lat));
-  });
+  el.addEventListener('click', () => focusMarker(marker, project, popup, tip));
 
   markers.push({ marker, project, popup, tip });
 });
 
 if (PROJECTS.length) applyFilters(0);
+
+// deep link from the index (or anywhere else): "carte.html?p=<slug>"
+// flies straight to that project and opens its popup, exactly like
+// clicking its marker. Whatever filters were previously in force are
+// cleared first — showEglises forced back on if the target is a
+// master's-thesis project — so the link always actually shows it
+// instead of silently landing on a hidden marker.
+const deepLinkSlug = new URLSearchParams(location.search).get('p');
+if (deepLinkSlug) {
+  const entry = markers.find((m) => projectSlug(m.project) === deepLinkSlug);
+  if (entry) {
+    activeFilters = entry.project.master ? { showEglises: true } : {};
+    window.ArchivirFilters.save(activeFilters);
+    filterControl.refresh();
+    eglisesToggleControl.refresh();
+    applyFilters(0);
+    focusMarker(entry.marker, entry.project, entry.popup, entry.tip);
+  }
+}
