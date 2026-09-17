@@ -208,6 +208,7 @@
 <div id="index-thumb" class="index-thumb"></div>
 
 <script src="assets/js/banner.js?v=4"></script>
+<script src="assets/js/filter-sync.js?v=1"></script>
 <script>
   // model tint (satin black vs. warm stone) is a separate, independent
   // choice from the light/dark site theme — defaults to white/stone so
@@ -271,6 +272,15 @@
     const colAttr = {}; // col -> useAttr, so any column can be checked generically
     const filterConfigs = []; // { header, col, useAttr, dropdown }
 
+    // shared with the map's own "Lieu" filter (assets/js/filter-sync.js)
+    // — col 1/2/4/5 are Auteur/Lieu/Catégorie d'ouvrage/Type de mandat
+    const COL_TO_KEY = { 1: 'auteur', 2: 'lieu', 4: 'typologie', 5: 'type' };
+    function persistFilters(){
+      const filters = {};
+      Object.entries(COL_TO_KEY).forEach(([col, key]) => { filters[key] = activeFilters[col] || ''; });
+      window.ArchivirFilters.save(filters);
+    }
+
     function cellValue(row, col){
       const cell = row.children[col];
       const useAttr = colAttr[col];
@@ -292,6 +302,7 @@
         row.style.display = matchesFilters(row, null) ? '' : 'none';
       });
       filterConfigs.forEach(rebuildDropdown);
+      persistFilters();
     }
     function rebuildDropdown(config){
       const { header, col, dropdown } = config;
@@ -343,6 +354,14 @@
       rebuildDropdown(config);
     }
 
+    // pick up whatever's already filtered on the map (or was left
+    // filtered here on a previous visit) before the dropdowns first
+    // render, so index and carte agree from the start
+    const persisted = window.ArchivirFilters.load();
+    Object.entries(COL_TO_KEY).forEach(([col, key]) => {
+      if (persisted[key]) activeFilters[col] = persisted[key];
+    });
+
     // if a column's own text is already the right label to filter by
     // (Catégorie d'ouvrage, Type de mandat), no data attribute needed —
     // Lieu is the exception, since it filters by country, not city text
@@ -350,6 +369,16 @@
     setupFilterHeader('lieu-header', { useAttr: 'country' });
     setupFilterHeader('typologie-header');
     setupFilterHeader('type-header');
+    applyFilters();
+
+    // live sync: if the map (or another tab on this page) changes the
+    // shared filters, reflect it here without needing a reload
+    window.addEventListener('storage', (e) => {
+      if (e.key !== window.ArchivirFilters.KEY) return;
+      const updated = window.ArchivirFilters.load();
+      Object.entries(COL_TO_KEY).forEach(([col, key]) => { activeFilters[col] = updated[key] || ''; });
+      applyFilters();
+    });
 
     // reset button: restore the original row order and clear every
     // sort/filter back to their defaults

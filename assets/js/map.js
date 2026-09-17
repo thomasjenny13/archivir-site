@@ -81,11 +81,26 @@ class MapControls {
 }
 map.addControl(new MapControls(), 'top-right');
 
-// "Lieu" filter — same country grouping as the index table's own Lieu
-// filter, restricted to the map instead of the table rows. Picking a
-// country hides every other marker (and its tooltip/popup) and reframes
-// the view on what's left; "Tous" restores everything.
-let activeCountry = '';
+// filters are shared with the index table (assets/js/filter-sync.js,
+// same localStorage key) across all four of its filter columns —
+// Auteur, Lieu (country), Catégorie d'ouvrage, Type de mandat — even
+// though the map only exposes its own UI for Lieu below. Whatever's
+// filtered on the index already narrows the map on load, and picking
+// a country here narrows the index back the same way.
+let activeFilters = window.ArchivirFilters.load();
+function matchesFilters(project){
+  return (!activeFilters.auteur || project.architecte === activeFilters.auteur)
+    && (!activeFilters.lieu || countryOf(project) === activeFilters.lieu)
+    && (!activeFilters.typologie || project.categorie === activeFilters.typologie)
+    && (!activeFilters.type || project.type === activeFilters.type);
+}
+
+// "Lieu" filter control — same country grouping as the index table's
+// own Lieu filter, restricted to the map instead of the table rows.
+// Picking a country hides every other marker (and its tooltip/popup)
+// and reframes the view on what's left; "Tous" clears just this
+// dimension (Auteur/Catégorie/Type filters set from the index, if any,
+// still apply).
 class FilterControl {
   onAdd(mapInstance){
     this._map = mapInstance;
@@ -95,19 +110,23 @@ class FilterControl {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'map-filter-btn';
-    btn.textContent = 'Lieu';
 
     const dropdown = document.createElement('div');
     dropdown.className = 'filter-dropdown';
 
     const countries = Array.from(new Set(PROJECTS.map(countryOf).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'fr'));
 
+    const updateButton = () => {
+      btn.textContent = activeFilters.lieu || 'Lieu';
+      btn.classList.toggle('is-filtered', !!activeFilters.lieu);
+    };
+
     const setCountry = (value) => {
-      activeCountry = value;
-      btn.textContent = value || 'Lieu';
-      btn.classList.toggle('is-filtered', !!value);
+      activeFilters = { ...activeFilters, lieu: value };
+      window.ArchivirFilters.save(activeFilters);
+      updateButton();
       buildOptions();
-      applyCountryFilter();
+      applyFilters();
       dropdown.classList.remove('open');
     };
 
@@ -116,14 +135,14 @@ class FilterControl {
       const allBtn = document.createElement('button');
       allBtn.type = 'button';
       allBtn.textContent = 'Tous';
-      allBtn.classList.toggle('active', !activeCountry);
+      allBtn.classList.toggle('active', !activeFilters.lieu);
       allBtn.addEventListener('click', (e) => { e.stopPropagation(); setCountry(''); });
       dropdown.appendChild(allBtn);
       countries.forEach((country) => {
         const optBtn = document.createElement('button');
         optBtn.type = 'button';
         optBtn.textContent = country;
-        optBtn.classList.toggle('active', activeCountry === country);
+        optBtn.classList.toggle('active', activeFilters.lieu === country);
         optBtn.addEventListener('click', (e) => { e.stopPropagation(); setCountry(country); });
         dropdown.appendChild(optBtn);
       });
@@ -132,19 +151,24 @@ class FilterControl {
     btn.addEventListener('click', (e) => { e.stopPropagation(); dropdown.classList.toggle('open'); });
     document.addEventListener('click', () => dropdown.classList.remove('open'));
 
+    updateButton();
     buildOptions();
     el.appendChild(btn);
     el.appendChild(dropdown);
     this._el = el;
+    this._updateButton = updateButton;
+    this._buildOptions = buildOptions;
     return el;
   }
   onRemove(){ this._el.parentNode.removeChild(this._el); this._map = undefined; }
+  refresh(){ this._updateButton(); this._buildOptions(); }
 }
-map.addControl(new FilterControl(), 'top-left');
+const filterControl = new FilterControl();
+map.addControl(filterControl, 'top-left');
 
-function applyCountryFilter(){
+function applyFilters(duration = 900){
   markers.forEach(({ marker, project, popup, tip }) => {
-    const visible = !activeCountry || countryOf(project) === activeCountry;
+    const visible = matchesFilters(project);
     marker.getElement().style.display = visible ? '' : 'none';
     if (!visible) {
       if (popup.isOpen()) popup.remove();
@@ -152,9 +176,18 @@ function applyCountryFilter(){
     }
   });
   clearHighlight();
-  const visibleProjects = PROJECTS.filter((p) => !activeCountry || countryOf(p) === activeCountry);
-  if (visibleProjects.length) map.fitBounds(projectBounds(visibleProjects), { padding: 60, maxZoom: 9, duration: 900 });
+  const visibleProjects = PROJECTS.filter(matchesFilters);
+  if (visibleProjects.length) map.fitBounds(projectBounds(visibleProjects), { padding: 60, maxZoom: 9, duration });
 }
+
+// live sync: a filter change on the index tab (or another tab on this
+// page) is reflected here without a reload
+window.addEventListener('storage', (e) => {
+  if (e.key !== window.ArchivirFilters.KEY) return;
+  activeFilters = window.ArchivirFilters.load();
+  filterControl.refresh();
+  applyFilters();
+});
 
 // strip "bright" down to just city names on a plain white-roads base —
 // no POI icons, no route-number shields, no street/water names, no
@@ -476,6 +509,4 @@ PROJECTS.forEach((project) => {
   markers.push({ marker, project, popup, tip });
 });
 
-if (PROJECTS.length) {
-  map.fitBounds(projectBounds(), { padding: 60, maxZoom: 9, duration: 0 });
-}
+if (PROJECTS.length) applyFilters(0);
