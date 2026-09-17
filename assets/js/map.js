@@ -393,10 +393,11 @@ function popupHtml(project){
   // the whole card is the link — a round, static 3D bubble up top, the
   // project text anchored bottom-left underneath it in the same card.
   // No glb yet: the bubble shows a plain "à venir" label instead of
-  // trying (and failing) to load a model.
-  const wrap = document.createElement('a');
-  wrap.className = 'map-popup';
-  wrap.href = project.url;
+  // trying (and failing) to load a model, and the card itself isn't a
+  // link — there's no 3D viewer page worth clicking through to.
+  const wrap = document.createElement(project.glb ? 'a' : 'div');
+  wrap.className = project.glb ? 'map-popup' : 'map-popup map-popup-pending';
+  if (project.glb) wrap.href = project.url;
   wrap.innerHTML =
     (project.glb
       ? `<div class="map-popup-3d"></div>`

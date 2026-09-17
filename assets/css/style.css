@@ -318,6 +318,9 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   padding-bottom: 1px;
 }
 .index-table a:hover{ color: var(--rose-gold); border-bottom-color: var(--rose-gold); }
+/* no glb yet — plain, non-interactive text instead of a link into a
+   viewer page that would only show the "à venir" placeholder */
+.index-pending{ color: var(--ink-faint); cursor: default; }
 
 .index-thumb{
   position: fixed;
@@ -902,6 +905,10 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 }
 .map-popup:hover{ background: color-mix(in srgb, var(--rose-gold) 8%, transparent); }
 .map-popup:hover .map-popup-3d{ border-color: var(--rose-gold); }
+/* no glb yet — a plain card, not a link into a placeholder page */
+.map-popup-pending{ cursor: default; }
+.map-popup-pending:hover{ background: none; }
+.map-popup-pending:hover .map-popup-3d{ border-color: var(--line); }
 /* fixed, non-spinning render — a single static frame, not a live turntable */
 .map-popup-3d{
   width: 108px; height: 108px; margin: 0 auto;

@@ -613,12 +613,11 @@
       hasPlans: false,
     },
   };
-  const ORDER = [
-    'pavillon', 'tupi', 'haus', 'oberaletsch', 'stpaulus', 'hlfamilie', 'stjohannes',
-    'heiliggeistharpen', 'albertusmagnus', 'stantonius', 'heiliggeistmuelheim',
-    'stfranziskus', 'heiligefamilie', 'stbonifatius', 'heiligkreuz', 'standreas',
-    'stmartin', 'christkoenig',
-  ];
+  // only projects with an actual glb are browsable via the prev/next
+  // arrows — a glb-less project (still reachable directly by URL) has
+  // nothing to show there beyond the "à venir" placeholder, so cycling
+  // through it would just be a dead end
+  const ORDER = Object.keys(PROJECTS).filter((slug) => PROJECTS[slug].glb);
 
   // model tint is a user choice, independent of the light/dark site
   // theme: warm stone + dark hairlines, or matte black + white hairlines
