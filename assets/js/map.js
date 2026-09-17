@@ -15,9 +15,18 @@ function themeColor(name){
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
 
-function projectBounds(){
-  const lons = PROJECTS.map((p) => p.lon), lats = PROJECTS.map((p) => p.lat);
+function projectBounds(list = PROJECTS){
+  const lons = list.map((p) => p.lon), lats = list.map((p) => p.lat);
   return [[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]];
+}
+
+// the "Lieu" column on the index table filters by the country in
+// parentheses at the end of a project's lieu string (e.g. "Bochum
+// (Allemagne)") — same convention reused here so a country picked on
+// the map means the same thing it does in the index
+function countryOf(project){
+  const m = project.lieu.match(/\(([^)]+)\)\s*$/);
+  return m ? m[1] : '';
 }
 
 // OpenFreeMap, free/no-key vector tiles via MapLibre GL — "bright" is
@@ -71,6 +80,81 @@ class MapControls {
   onRemove(){ this._el.parentNode.removeChild(this._el); this._map = undefined; }
 }
 map.addControl(new MapControls(), 'top-right');
+
+// "Lieu" filter — same country grouping as the index table's own Lieu
+// filter, restricted to the map instead of the table rows. Picking a
+// country hides every other marker (and its tooltip/popup) and reframes
+// the view on what's left; "Tous" restores everything.
+let activeCountry = '';
+class FilterControl {
+  onAdd(mapInstance){
+    this._map = mapInstance;
+    const el = document.createElement('div');
+    el.className = 'maplibregl-ctrl map-filter-ctrl';
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'map-filter-btn';
+    btn.textContent = 'Lieu';
+
+    const dropdown = document.createElement('div');
+    dropdown.className = 'filter-dropdown';
+
+    const countries = Array.from(new Set(PROJECTS.map(countryOf).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'fr'));
+
+    const setCountry = (value) => {
+      activeCountry = value;
+      btn.textContent = value || 'Lieu';
+      btn.classList.toggle('is-filtered', !!value);
+      buildOptions();
+      applyCountryFilter();
+      dropdown.classList.remove('open');
+    };
+
+    const buildOptions = () => {
+      dropdown.innerHTML = '';
+      const allBtn = document.createElement('button');
+      allBtn.type = 'button';
+      allBtn.textContent = 'Tous';
+      allBtn.classList.toggle('active', !activeCountry);
+      allBtn.addEventListener('click', (e) => { e.stopPropagation(); setCountry(''); });
+      dropdown.appendChild(allBtn);
+      countries.forEach((country) => {
+        const optBtn = document.createElement('button');
+        optBtn.type = 'button';
+        optBtn.textContent = country;
+        optBtn.classList.toggle('active', activeCountry === country);
+        optBtn.addEventListener('click', (e) => { e.stopPropagation(); setCountry(country); });
+        dropdown.appendChild(optBtn);
+      });
+    };
+
+    btn.addEventListener('click', (e) => { e.stopPropagation(); dropdown.classList.toggle('open'); });
+    document.addEventListener('click', () => dropdown.classList.remove('open'));
+
+    buildOptions();
+    el.appendChild(btn);
+    el.appendChild(dropdown);
+    this._el = el;
+    return el;
+  }
+  onRemove(){ this._el.parentNode.removeChild(this._el); this._map = undefined; }
+}
+map.addControl(new FilterControl(), 'top-left');
+
+function applyCountryFilter(){
+  markers.forEach(({ marker, project, popup, tip }) => {
+    const visible = !activeCountry || countryOf(project) === activeCountry;
+    marker.getElement().style.display = visible ? '' : 'none';
+    if (!visible) {
+      if (popup.isOpen()) popup.remove();
+      tip.remove();
+    }
+  });
+  clearHighlight();
+  const visibleProjects = PROJECTS.filter((p) => !activeCountry || countryOf(p) === activeCountry);
+  if (visibleProjects.length) map.fitBounds(projectBounds(visibleProjects), { padding: 60, maxZoom: 9, duration: 900 });
+}
 
 // strip "bright" down to just city names on a plain white-roads base —
 // no POI icons, no route-number shields, no street/water names, no
@@ -388,7 +472,7 @@ PROJECTS.forEach((project) => {
     map.once('idle', () => highlightBuildingAt(project.lon, project.lat));
   });
 
-  markers.push({ marker, project, popup });
+  markers.push({ marker, project, popup, tip });
 });
 
 if (PROJECTS.length) {
