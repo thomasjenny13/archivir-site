@@ -530,6 +530,11 @@
       creditHtml: '<strong>Caserne de Bernex</strong>bunq',
       creditMeta: '2011 · Bernex (GE) · Équipement public · Concours',
       hasPlans: false,
+      // "Geometry7" sits ~500m away from the rest of the model in the
+      // source export (a leftover object never moved to match the
+      // recentered building) — including it in the bounding box was
+      // wrecking the camera framing and hiding the ground shadow
+      excludeMeshes: ['Geometry7'],
     },
     // "Nouvelles églises" — Atelier Menzel & Esquivié, JMA - HEIA
     // Fribourg SA 2026: Ruhr valley reconversion candidates, none with
@@ -1068,7 +1073,7 @@
   // so it can be positioned/scaled/disposed as a unit ----------
   const loader = new GLTFLoader();
 
-  function loadRig(glbPath, clipNormal = DEFAULT_CLIP_NORMAL, extraGlbPath = null) {
+  function loadRig(glbPath, clipNormal = DEFAULT_CLIP_NORMAL, extraGlbPath = null, excludeMeshes = null) {
     return (async () => {
       const gltf = await loader.loadAsync(glbPath);
       const model = gltf.scene;
@@ -1079,6 +1084,18 @@
         // as one combined volume instead of two separate rigs
         const extraGltf = await loader.loadAsync(extraGlbPath);
         model.add(extraGltf.scene);
+      }
+      if (excludeMeshes && excludeMeshes.length) {
+        // some exports carry a stray object left far from the rest of
+        // the building (a leftover reference mesh, not moved along when
+        // the real geometry was recentered in the source file) — it
+        // never shows on its own, but including it in the model's
+        // bounding box blows up centering, camera framing and the
+        // shadow-map frustum for everything else. Drop it before any
+        // of that gets computed rather than trying to render around it.
+        const toRemove = [];
+        model.traverse((child) => { if (excludeMeshes.includes(child.name)) toRemove.push(child); });
+        toRemove.forEach((child) => child.parent && child.parent.remove(child));
       }
       {
         const group = new THREE.Group();
@@ -1300,7 +1317,7 @@
     // a prize variant's own glb is just the added volumetry, not a full
     // scene — load it merged onto the project's base so the section cut,
     // edges and cap all read the combined base + extension as one piece
-    const rig = await loadRig(cfg.glb, cfg.clipNormal, cfg.variants[variantKey].glb);
+    const rig = await loadRig(cfg.glb, cfg.clipNormal, cfg.variants[variantKey].glb, cfg.excludeMeshes);
     variantRigCache.set(key, rig);
     return rig;
   }
@@ -1377,7 +1394,7 @@
   async function getRig(slug){
     if (rigCache.has(slug)) return rigCache.get(slug);
     const cfg = PROJECTS[slug];
-    const rig = cfg.glb ? await loadRig(cfg.glb, cfg.clipNormal) : buildPlaceholderRig(cfg.clipNormal);
+    const rig = cfg.glb ? await loadRig(cfg.glb, cfg.clipNormal, null, cfg.excludeMeshes) : buildPlaceholderRig(cfg.clipNormal);
     rigCache.set(slug, rig);
     return rig;
   }

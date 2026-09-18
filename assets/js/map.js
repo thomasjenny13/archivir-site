@@ -471,6 +471,13 @@ function applyPopupModel(entry){
   popupRenderer.render(popupScene, popupCamera);
 }
 
+// same fix as loadRig() in viewer.html: some exports carry a stray
+// object left far from the rest of the building in the source file,
+// which wrecks the popup's own centering/framing if left in
+const EXCLUDE_MESHES = {
+  'projets/bunq/caserne bernex/blend.glb': ['Geometry7'],
+};
+
 function showPopupModel(glbPath, container){
   ensurePopupViewer(container);
   if (popupModel) { popupScene.remove(popupModel); popupModel = null; }
@@ -482,6 +489,12 @@ function showPopupModel(glbPath, container){
 
   popupLoader.load(glbPath, (gltf) => {
     const model = gltf.scene;
+    const exclude = EXCLUDE_MESHES[glbPath];
+    if (exclude && exclude.length) {
+      const toRemove = [];
+      model.traverse((child) => { if (exclude.includes(child.name)) toRemove.push(child); });
+      toRemove.forEach((child) => child.parent && child.parent.remove(child));
+    }
     model.traverse((child) => {
       if (child.isMesh) {
         child.castShadow = true;

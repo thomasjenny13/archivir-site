@@ -556,6 +556,16 @@
 
     loader.load(glbPath, (gltf) => {
       const model = gltf.scene;
+      // some exports carry a stray object left far from the rest of the
+      // building in the source file — including it in the bounding box
+      // wrecks this preview's centering/framing the same way it did in
+      // the main viewer and the map popup (see EXCLUDE_MESHES there)
+      const exclude = { 'projets/bunq/caserne bernex/blend.glb': ['Geometry7'] }[glbPath];
+      if (exclude && exclude.length) {
+        const toRemove = [];
+        model.traverse((child) => { if (exclude.includes(child.name)) toRemove.push(child); });
+        toRemove.forEach((child) => child.parent && child.parent.remove(child));
+      }
       model.traverse((child) => {
         if (child.isMesh) {
           child.castShadow = true;
