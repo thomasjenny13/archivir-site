@@ -87,7 +87,11 @@ class MapControls {
     fitAll.title = 'Vue globale des projets';
     fitAll.innerHTML = '<svg viewBox="0 0 15 15" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1.5 5.5v-4h4M13.5 5.5v-4h-4M1.5 9.5v4h4M13.5 9.5v4h-4"/></svg>';
     fitAll.addEventListener('click', () => {
-      if (PROJECTS.length) mapInstance.fitBounds(projectBounds(), { padding: 60, maxZoom: 9, duration: 900 });
+      // "vue globale" should mean every *visible* project, not every
+      // project regardless of the active filters — otherwise it
+      // silently undoes whatever the index/map filters just narrowed
+      const visible = PROJECTS.filter(matchesFilters);
+      if (visible.length) mapInstance.fitBounds(projectBounds(visible), { padding: 60, maxZoom: 9, duration: 900 });
     });
 
     el.appendChild(zoomIn);
