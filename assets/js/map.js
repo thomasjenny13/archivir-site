@@ -54,6 +54,16 @@ const map = new maplibregl.Map({
   maxZoom: 19,
   attributionControl: { compact: false },
 });
+// iOS Safari resizes the *visible* viewport (address bar / keyboard
+// show-hide, rotation) without always firing a plain window resize in
+// time for MapLibre's own container-size tracking to catch it before
+// the next fitBounds/flyTo — stale canvas dimensions there show up as
+// a map that's zoomed/centered wrong right after picking a project.
+// Forcing a resize on every viewport-shape signal keeps the canvas
+// synced with what's actually on screen.
+window.addEventListener('resize', () => map.resize());
+window.addEventListener('orientationchange', () => map.resize());
+if (window.visualViewport) window.visualViewport.addEventListener('resize', () => map.resize());
 // custom control: same look as MapLibre's own zoom pair, but the
 // bottom "-" button is replaced with a "vue globale" button that fits
 // every project into view instead of a single zoom-out step
@@ -497,18 +507,22 @@ function showPopupModel(glbPath, container){
 }
 
 function popupHtml(project){
-  // the whole card is the link — a round, static 3D bubble up top, the
-  // project text anchored bottom-left underneath it in the same card.
-  // No glb yet: the bubble shows a plain "à venir" label instead of
-  // trying (and failing) to load a model, and the card itself isn't a
-  // link — there's no 3D viewer page worth clicking through to.
+  // the whole card is the link — a round bubble up top, the project
+  // text anchored bottom-left underneath it in the same card. No glb
+  // yet: the bubble shows a historical photo when one is available
+  // (project.photo), otherwise a plain "à venir" label instead of
+  // trying (and failing) to load a model — and the card itself isn't a
+  // link either way, since there's no 3D viewer page worth clicking
+  // through to.
   const wrap = document.createElement(project.glb ? 'a' : 'div');
   wrap.className = project.glb ? 'map-popup' : 'map-popup map-popup-pending';
   if (project.glb) wrap.href = project.url;
+  let bubble;
+  if (project.glb) bubble = `<div class="map-popup-3d"></div>`;
+  else if (project.photo) bubble = `<div class="map-popup-3d map-popup-3d-photo"><img src="${project.photo}" alt="${project.nom}" loading="lazy"></div>`;
+  else bubble = `<div class="map-popup-3d map-popup-3d-pending"><span>À venir</span></div>`;
   wrap.innerHTML =
-    (project.glb
-      ? `<div class="map-popup-3d"></div>`
-      : `<div class="map-popup-3d map-popup-3d-pending"><span>À venir</span></div>`) +
+    bubble +
     `<div class="map-popup-info">` +
     `<p class="map-popup-title">${project.nom}</p>` +
     `<p class="map-popup-arch">${project.architecte}</p>` +

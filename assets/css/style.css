@@ -939,7 +939,10 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   transition: border-color .2s ease;
 }
 .map-popup-3d canvas{ display: block; width: 100%; height: 100%; }
-/* no glb yet — a plain label in the same bubble instead of a render */
+/* no glb yet — a historical photo fills the same round bubble instead
+   of a render, cropped to it rather than distorted */
+.map-popup-3d-photo img{ display: block; width: 100%; height: 100%; object-fit: cover; }
+/* no glb and no photo either — a plain label in the bubble */
 .map-popup-3d-pending{
   display: flex; align-items: center; justify-content: center;
 }
@@ -1029,4 +1032,8 @@ html[data-theme="dark"] .maplibregl-ctrl-icon{ filter: invert(1); }
 html[data-theme="dark"] .maplibregl-ctrl-attrib-button{ filter: invert(1); }
 @media (max-width: 640px){
   .maplibregl-ctrl-top-right{ top: 58px; }
+  /* the Lieu filter + église toggle (top-left) need the same offset as
+     the zoom/vue-globale group (top-right) — without it they sit under
+     the fixed site banner on narrow screens and are unreachable */
+  .maplibregl-ctrl-top-left{ top: 58px; }
 }
