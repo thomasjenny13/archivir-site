@@ -849,7 +849,12 @@
   const keyLight = new THREE.DirectionalLight(0xfff2e0, 3.4);
   keyLight.position.set(5, 8, 3);
   keyLight.castShadow = true;
-  keyLight.shadow.mapSize.set(1024, 1024);
+  // the shadow camera's frustum is resized to each project's own
+  // maxDim (see switchProject below), so texel density — and how
+  // crisp the shadow reads — depends on model size vs. this fixed
+  // resolution; 2048 keeps larger buildings (Caserne de Bernex etc.)
+  // from reading as a blurry smear the way 1024 did
+  keyLight.shadow.mapSize.set(2048, 2048);
   keyLight.shadow.bias = -0.0005;
   scene.add(keyLight);
 

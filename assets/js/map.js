@@ -432,7 +432,10 @@ function ensurePopupViewer(container){
     popupKeyLight = new THREE.DirectionalLight(0xfff2e0, 3.2);
     popupKeyLight.position.set(5, 8, 3);
     popupKeyLight.castShadow = true;
-    popupKeyLight.shadow.mapSize.set(1024, 1024);
+    // matches the main viewer's 2048 — frustum size scales with each
+    // project's maxDim, so a fixed resolution reads blurrier on larger
+    // buildings unless it's generous enough to begin with
+    popupKeyLight.shadow.mapSize.set(2048, 2048);
     popupScene.add(popupKeyLight);
     popupScene.add(new THREE.HemisphereLight(0x5fc7e3, 0x1b1a18, 0.28));
 

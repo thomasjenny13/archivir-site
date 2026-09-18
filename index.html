@@ -508,7 +508,10 @@
     keyLight = new THREE.DirectionalLight(0xfff2e0, 3.2);
     keyLight.position.set(5, 8, 3);
     keyLight.castShadow = true;
-    keyLight.shadow.mapSize.set(1024, 1024);
+    // matches the main viewer's 2048 — frustum size scales with each
+    // project's maxDim, so a fixed resolution reads blurrier on larger
+    // buildings unless it's generous enough to begin with
+    keyLight.shadow.mapSize.set(2048, 2048);
     scene.add(keyLight);
 
     scene.add(new THREE.HemisphereLight(0x5fc7e3, 0x1b1a18, 0.28));
