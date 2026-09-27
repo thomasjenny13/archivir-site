@@ -8,7 +8,7 @@
 <meta name="description" content="Maquettes 3D des projets Archivir.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Grenze:wght@700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
 <script type="importmap">
 {
@@ -535,94 +535,6 @@
       // recentered building) — including it in the bounding box was
       // wrecking the camera framing and hiding the ground shadow
       excludeMeshes: ['Geometry7'],
-    },
-    // "Nouvelles églises" — Atelier Menzel & Esquivié, JMA - HEIA
-    // Fribourg SA 2026: Ruhr valley reconversion candidates, none with
-    // a glb yet — getRig() falls back to buildPlaceholderRig(), and
-    // applyProjectUI() shows the "Maquette 3D à venir" label
-    stpaulus: {
-      title: 'St. Paulus — Archivir',
-      creditHtml: '<strong>St. Paulus</strong>Alfons et Florian Leitl',
-      creditMeta: '1970–72 · Bochum (Allemagne) · Culte · Nouvelle construction',
-      hasPlans: false,
-    },
-    hlfamilie: {
-      title: 'Hl. Familie (Heimkehrer Dankeskirche) — Archivir',
-      creditHtml: '<strong>Hl. Familie (Heimkehrer Dankeskirche)</strong>Kurt Hubert Vieth',
-      creditMeta: '1958–59 · Bochum-Weitmar-Mark (Allemagne) · Culte · Nouvelle construction',
-      hasPlans: false,
-    },
-    stjohannes: {
-      title: 'St. Johannes (WAT-Leithe) — Archivir',
-      creditHtml: '<strong>St. Johannes (WAT-Leithe)</strong>Josef Franke',
-      creditMeta: '1913–1914 · Bochum-Leithe (Allemagne) · Culte · Nouvelle construction',
-      hasPlans: false,
-    },
-    heiliggeistharpen: {
-      title: 'Heilig Geist — Archivir',
-      creditHtml: '<strong>Heilig Geist</strong>Karl Hellrung',
-      creditMeta: '1953–54 · Bochum-Harpen (Allemagne) · Culte · Nouvelle construction',
-      hasPlans: false,
-    },
-    albertusmagnus: {
-      title: 'St. Albertus Magnus — Archivir',
-      creditHtml: '<strong>St. Albertus Magnus</strong>Gottfried Böhm',
-      creditMeta: '1960–1964 · Bochum-Wiemelhausen (Allemagne) · Culte · Nouvelle construction',
-      hasPlans: false,
-    },
-    stantonius: {
-      title: 'St. Antonius — Archivir',
-      creditHtml: '<strong>St. Antonius</strong>Rudolf et Maria Schwarz',
-      creditMeta: '1956–1959 · Essen-Frohnhausen (Allemagne) · Culte · Reconstruction',
-      hasPlans: false,
-    },
-    heiliggeistmuelheim: {
-      title: 'Heilig Geist — Archivir',
-      creditHtml: '<strong>Heilig Geist</strong>Emil Steffann et Gisberth Hülsman',
-      creditMeta: '1966–1967 · Mülheim an der Ruhr (Allemagne) · Culte · Nouvelle construction',
-      hasPlans: false,
-    },
-    stfranziskus: {
-      title: 'St. Franziskus — Archivir',
-      creditHtml: '<strong>St. Franziskus</strong>Ernst Burghartz',
-      creditMeta: '1961–62 · Bottrop-Welheim (Allemagne) · Culte · Nouvelle construction',
-      hasPlans: false,
-    },
-    heiligefamilie: {
-      title: 'Heilige Familie (Tafel-Kirche) — Archivir',
-      creditHtml: '<strong>Heilige Familie (Tafel-Kirche)</strong>Rudolf Schwarz et Josef Bernard',
-      creditMeta: '1955–58 · Oberhausen (Allemagne) · Culte · Nouvelle construction',
-      hasPlans: false,
-    },
-    stbonifatius: {
-      title: 'St. Bonifatius — Archivir',
-      creditHtml: '<strong>St. Bonifatius</strong>Ernst von Rudloff',
-      creditMeta: '1963–1964 · Gelsenkirchen (Allemagne) · Culte · Nouvelle construction',
-      hasPlans: false,
-    },
-    heiligkreuz: {
-      title: 'Heilig Kreuz (Kulturkirche) — Archivir',
-      creditHtml: '<strong>Heilig Kreuz (Kulturkirche)</strong>Rudolf Schwarz',
-      creditMeta: 'Bottrop (Allemagne) · Culte · Nouvelle construction',
-      hasPlans: false,
-    },
-    standreas: {
-      title: 'St. Andreas — Archivir',
-      creditHtml: '<strong>St. Andreas</strong>Rudolf Schwarz',
-      creditMeta: '1954–1957 · Essen-Rüttenscheid (Allemagne) · Culte · Nouvelle construction',
-      hasPlans: false,
-    },
-    stmartin: {
-      title: 'St. Martin — Archivir',
-      creditHtml: '<strong>St. Martin</strong>Nikolaus Rosiny',
-      creditMeta: '1972–74 · Bochum-Steinkuhl (Allemagne) · Culte · Nouvelle construction',
-      hasPlans: false,
-    },
-    christkoenig: {
-      title: 'Christ-König (Steinring 34) — Archivir',
-      creditHtml: '<strong>Christ-König (Steinring 34)</strong>Franz Schneider',
-      creditMeta: '1931–32 · Bochum-Innenstadt (Allemagne) · Culte · Nouvelle construction',
-      hasPlans: false,
     },
   };
   // only projects with an actual glb are browsable via the prev/next
@@ -1432,6 +1344,16 @@
       // not an assumed 1, or it pops the instant the slide starts.
       const oldStartScale = oldRig.group.scale.x;
 
+      // each project has its own height, so its vertical center sits at a
+      // different world-space Y once scale-corrected — the camera and
+      // target are re-aimed by that difference (same distance, same
+      // angle) *during* the slide, so the incoming model arrives already
+      // centered instead of jumping up or down once it has landed
+      const endEyeY = newRig.fitCenter.y * scaleCorrection;
+      const startCamY = camera.position.y;
+      const startTargetY = controls.target.y;
+      const targetDeltaY = endEyeY - startTargetY;
+
       scene.add(newRig.group);
       newRig.group.visible = true;
       newRig.group.position.copy(offsetVec);
@@ -1446,6 +1368,8 @@
           oldRig.group.scale.setScalar(oldStartScale * (1 - 0.75 * e));
           newRig.group.position.copy(offsetVec).multiplyScalar(1 - e);
           newRig.group.scale.setScalar(scaleCorrection * (0.25 + 0.75 * e));
+          camera.position.y = startCamY + targetDeltaY * e;
+          controls.target.y = startTargetY + targetDeltaY * e;
           requestRender();
           if (t < 1) requestAnimationFrame(step);
           else resolve();
@@ -1461,15 +1385,7 @@
       // apparent size (currentDistance === newRig.fitDistance *
       // scaleCorrection, i.e. exactly where the camera already is)
       viewDistance = currentDistance;
-      viewEyeY = newRig.fitCenter.y * scaleCorrection;
-      // each project has its own height, so its vertical center sits at a
-      // different world-space Y once scale-corrected — shift the camera
-      // and target together by that difference (same distance, same
-      // angle, just re-aimed) so the incoming model lands centered
-      // instead of drifting up or down out of frame
-      const targetDeltaY = viewEyeY - controls.target.y;
-      camera.position.y += targetDeltaY;
-      controls.target.y = viewEyeY;
+      viewEyeY = endEyeY;
       camera.near = currentDistance / 100;
       camera.far = currentDistance * 100;
       camera.updateProjectionMatrix();

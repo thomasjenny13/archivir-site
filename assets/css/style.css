@@ -19,15 +19,7 @@
 
   --display: 'Bebas Neue', 'Oswald', Impact, sans-serif;
   --mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
-  --logo: 'Arcane Nine', 'Bebas Neue', Impact, sans-serif;
-}
-
-@font-face{
-  font-family: 'Arcane Nine';
-  src: url('../fonts/ArcaneNine.woff2') format('woff2');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
+  --logo: 'Grenze', Georgia, serif;
 }
 
 :root[data-theme="light"]{
@@ -214,27 +206,6 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 }
 .index-reset:hover{ border-color: var(--rose-gold-deep); color: var(--rose-gold); }
 .index-reset.spin{ transform: rotate(-360deg); }
-/* toggles the "Nouvelles églises" master's-thesis selection on/off —
-   a separate category from Archivir's own projects, not just another
-   column filter */
-.index-eglises-toggle{
-  position: fixed; top: 72px; right: 84px; z-index: 10;
-  width: 48px; height: 48px;
-  display: flex; align-items: center; justify-content: center;
-  border-radius: 50%;
-  border: 1px solid var(--line);
-  background: color-mix(in srgb, var(--bg-2) 75%, transparent);
-  backdrop-filter: blur(6px);
-  color: var(--ink-soft);
-  cursor: pointer;
-  transition: border-color .2s ease, color .2s ease;
-}
-.index-eglises-toggle:hover{ border-color: var(--rose-gold-deep); color: var(--rose-gold); }
-.index-eglises-toggle.is-active{
-  color: var(--rose-gold);
-  border-color: var(--rose-gold-deep);
-  background: color-mix(in srgb, var(--rose-gold) 20%, transparent);
-}
 .index-sub{
   margin: 0;
   font-size: 0.9rem;
@@ -371,7 +342,7 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 .site-logo{
   display: inline-block;
   font-family: var(--logo);
-  font-weight: 400;
+  font-weight: 700;
   font-size: 1.3rem;
   letter-spacing: 0.03em;
   text-transform: lowercase;
@@ -800,7 +771,6 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   .index-page{ padding: 76px 16px 40px; }
   .index-header{ margin-bottom: 24px; }
   .index-reset{ top: 58px; right: 16px; width: 38px; height: 38px; font-size: 1rem; }
-  .index-eglises-toggle{ top: 58px; right: 62px; width: 38px; height: 38px; }
 
   .compass{ top: 58px; right: 16px; width: 54px; height: 54px; }
   .compass-pt{ font-size: 0.5rem; }
@@ -983,16 +953,12 @@ html[data-theme="dark"] .maplibregl-ctrl-icon{ filter: invert(1); }
   color: var(--ink-soft);
 }
 .map-ctrl-fit:hover{ color: var(--rose-gold); }
-/* toggles the "Nouvelles églises" master's-thesis selection on/off —
-   a separate category from Archivir's own projects */
-.map-ctrl-eglises{
-  display: flex; align-items: center; justify-content: center;
-  color: var(--ink-soft);
-}
-.map-ctrl-eglises:hover{ color: var(--rose-gold); }
-.map-ctrl-eglises.is-active{
-  color: var(--rose-gold);
-  background: color-mix(in srgb, var(--rose-gold) 20%, transparent);
+/* visitor position (GeolocateControl): site rose-gold instead of
+   MapLibre's default blue */
+.maplibregl-user-location-dot,
+.maplibregl-user-location-dot::before{ background-color: var(--rose-gold); }
+.maplibregl-user-location-accuracy-circle{
+  background-color: color-mix(in srgb, var(--rose-gold) 18%, transparent);
 }
 
 /* "Lieu" filter control, top-left — same look as the nav control
@@ -1032,7 +998,7 @@ html[data-theme="dark"] .maplibregl-ctrl-icon{ filter: invert(1); }
 html[data-theme="dark"] .maplibregl-ctrl-attrib-button{ filter: invert(1); }
 @media (max-width: 640px){
   .maplibregl-ctrl-top-right{ top: 58px; }
-  /* the Lieu filter + église toggle (top-left) need the same offset as
+  /* the Lieu filter (top-left) need the same offset as
      the zoom/vue-globale group (top-right) — without it they sit under
      the fixed site banner on narrow screens and are unreachable */
   .maplibregl-ctrl-top-left{ top: 58px; }

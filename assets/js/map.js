@@ -102,6 +102,14 @@ class MapControls {
   onRemove(){ this._el.parentNode.removeChild(this._el); this._map = undefined; }
 }
 map.addControl(new MapControls(), 'top-right');
+// visitor's own position — only asks the browser for location access
+// when the button is clicked, never on page load
+map.addControl(new maplibregl.GeolocateControl({
+  positionOptions: { enableHighAccuracy: true },
+  fitBoundsOptions: { maxZoom: 14 },
+  trackUserLocation: true,
+  showAccuracyCircle: true,
+}), 'top-right');
 
 // filters are shared with the index table (assets/js/filter-sync.js,
 // same localStorage key) across all four of its filter columns —
@@ -111,7 +119,6 @@ map.addControl(new MapControls(), 'top-right');
 // a country here narrows the index back the same way.
 let activeFilters = window.ArchivirFilters.load();
 function matchesFilters(project){
-  if (!activeFilters.showEglises && project.master) return false;
   return (!activeFilters.auteur || project.architecte === activeFilters.auteur)
     && (!activeFilters.lieu || countryOf(project) === activeFilters.lieu)
     && (!activeFilters.typologie || project.categorie === activeFilters.typologie)
@@ -189,45 +196,6 @@ class FilterControl {
 const filterControl = new FilterControl();
 map.addControl(filterControl, 'top-left');
 
-// église icon — hides/shows the "Nouvelles églises" master's-thesis
-// selection (project.master === true) as a block, a separate category
-// from Archivir's own projects rather than another Lieu/Auteur value.
-// Hidden by default; "checked" (active/rose-gold) once shown.
-class EglisesToggleControl {
-  onAdd(mapInstance){
-    this._map = mapInstance;
-    const el = document.createElement('div');
-    el.className = 'maplibregl-ctrl maplibregl-ctrl-group';
-
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'map-ctrl-eglises';
-    btn.innerHTML = '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1v2.3M6.8 2.15h2.4"/><path d="M2.5 14.5V8L8 4.5 13.5 8v6.5"/><path d="M2 14.5h12"/><path d="M6.6 14.5v-4h2.8v4"/></svg>';
-    const update = () => {
-      btn.classList.toggle('is-active', !!activeFilters.showEglises);
-      const label = activeFilters.showEglises ? 'Masquer les projets du master' : 'Afficher les projets du master';
-      btn.setAttribute('aria-label', label);
-      btn.title = label;
-    };
-    btn.addEventListener('click', () => {
-      activeFilters = { ...activeFilters, showEglises: !activeFilters.showEglises };
-      window.ArchivirFilters.save(activeFilters);
-      update();
-      applyFilters();
-    });
-
-    update();
-    el.appendChild(btn);
-    this._el = el;
-    this._update = update;
-    return el;
-  }
-  onRemove(){ this._el.parentNode.removeChild(this._el); this._map = undefined; }
-  refresh(){ this._update(); }
-}
-const eglisesToggleControl = new EglisesToggleControl();
-map.addControl(eglisesToggleControl, 'top-left');
-
 function applyFilters(duration = 900){
   markers.forEach(({ marker, project, popup, tip }) => {
     const visible = matchesFilters(project);
@@ -248,7 +216,6 @@ window.addEventListener('storage', (e) => {
   if (e.key !== window.ArchivirFilters.KEY) return;
   activeFilters = window.ArchivirFilters.load();
   filterControl.refresh();
-  eglisesToggleControl.refresh();
   applyFilters();
 });
 
@@ -630,17 +597,15 @@ if (PROJECTS.length) applyFilters(0);
 // deep link from the index's Lieu column: "carte.html?lieu=Bochum"
 // zooms to every project in that city at once (a single match also
 // opens its popup, same as clicking its marker). Whatever filters were
-// previously in force are cleared first — showEglises forced back on
-// if any match is a master's-thesis project — so the link always
+// previously in force are cleared first so the link always
 // actually shows its targets instead of landing on hidden markers.
 const cityParam = new URLSearchParams(location.search).get('lieu');
 if (cityParam) {
   const matches = markers.filter((m) => matchesCity(m.project, cityParam));
   if (matches.length) {
-    activeFilters = matches.some((m) => m.project.master) ? { showEglises: true } : {};
+    activeFilters = {};
     window.ArchivirFilters.save(activeFilters);
     filterControl.refresh();
-    eglisesToggleControl.refresh();
     applyFilters(0);
     if (matches.length === 1) {
       focusMarker(matches[0].marker, matches[0].project, matches[0].popup, matches[0].tip);
