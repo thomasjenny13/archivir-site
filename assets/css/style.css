@@ -20,6 +20,7 @@
   --display: 'Bebas Neue', 'Oswald', Impact, sans-serif;
   --mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
   --logo: 'Grenze', Georgia, serif;
+  --title: 'Syne', 'Helvetica Neue', Arial, sans-serif;
 }
 
 :root[data-theme="light"]{
@@ -208,10 +209,9 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 .index-reset.spin{ transform: rotate(-360deg); }
 .index-sub{
   margin: 0;
-  font-size: 0.9rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-family: var(--title);
+  font-size: 1.4rem;
+  font-weight: 700;
   color: var(--ink);
 }
 .index-table-scroll{
@@ -225,10 +225,9 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 }
 .index-table th{
   text-align: left;
-  font-weight: 700;
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-family: var(--title);
+  font-weight: 600;
+  font-size: 0.8rem;
   color: var(--ink);
   padding: 0 12px 10px 0;
   border-bottom: 2px solid var(--ink);
@@ -409,11 +408,10 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   display: flex; align-items: center; gap: 16px;
 }
 .site-nav-link{
-  font-family: var(--mono);
-  font-size: 0.68rem;
+  font-family: var(--title);
+  font-size: 0.9rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  text-transform: lowercase;
   color: var(--ink-soft);
   text-decoration: none;
   padding-bottom: 2px;
@@ -511,7 +509,7 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   line-height: 1.4;
   pointer-events: none;
 }
-.viewer-credit strong{ display: block; font-size: 1.05em; color: var(--ink-soft); font-weight: 500; }
+.viewer-credit strong{ display: block; font-family: var(--title); font-size: 1.15em; color: var(--ink-soft); font-weight: 600; }
 /* no glb yet — the empty 3D scene still frames/orbits normally
    (compass, cut toggle), this is just a plain label centered over it */
 .viewer-pending{
@@ -872,7 +870,7 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   padding: 0;
 }
 .map-tip-wrap .maplibregl-popup-content{ padding: 8px 10px; font-family: var(--mono); }
-.map-tip-title{ display: block; font-size: 0.76rem; font-weight: 600; color: var(--ink); }
+.map-tip-title{ display: block; font-family: var(--title); font-size: 0.82rem; font-weight: 600; color: var(--ink); }
 .map-tip-arch{ display: block; font-size: 0.68rem; color: var(--ink-soft); margin-top: 2px; }
 .map-tip-loc{ display: block; font-size: 0.62rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--rose-gold); margin-top: 4px; }
 
@@ -923,7 +921,7 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 /* caption plate: same rectangle as the card, text anchored bottom-left
    under the medallion rather than centered */
 .map-popup-info{ margin-top: 12px; text-align: left; }
-.map-popup-title{ font-size: 0.76rem; font-weight: 600; color: var(--ink); margin: 0; }
+.map-popup-title{ font-family: var(--title); font-size: 0.82rem; font-weight: 600; color: var(--ink); margin: 0; }
 .map-popup-arch{ font-size: 0.68rem; color: var(--ink-soft); margin: 2px 0 0; }
 .map-popup-loc{ font-size: 0.62rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--rose-gold); margin: 4px 0 0; }
 
