@@ -597,6 +597,7 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   background: color-mix(in srgb, var(--bg-2) 85%, transparent);
   backdrop-filter: blur(8px);
 }
+.prize-picker[hidden]{ display: none; } /* else display:flex wins and an empty pill shows */
 .prize-btn{
   padding: 6px 14px;
   border-radius: 999px;
@@ -843,13 +844,20 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   .plans-menu{ bottom: 18px; right: 62px; padding: 0; }
   .plans-menu-toggle{ width: 40px; height: 40px; font-size: 1rem; }
 
+  /* on a phone the bottom edge is already taken by the project credit
+     (left) and the button column (right) — the variant picker moves up
+     under the banner, left of the compass, instead of landing on them */
   .prize-picker{
-    bottom: 68px;
-    max-width: calc(100vw - 32px);
+    top: 58px; bottom: auto;
+    left: 12px; transform: none;
+    max-width: calc(100vw - 96px);
+    gap: 2px; padding: 4px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* still swipeable if it ever overflows, just no bar */
   }
-  .prize-btn{ padding: 5px 10px; font-size: 0.62rem; }
+  .prize-picker::-webkit-scrollbar{ display: none; }
+  .prize-btn{ padding: 5px 8px; font-size: 0.62rem; letter-spacing: 0.02em; }
 
   /* dropdown -> a fixed strip along the bottom, item list -> horizontal
      scroll of icon-only tiles instead of a tall column of full-width rows */
