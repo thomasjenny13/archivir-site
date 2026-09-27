@@ -19,7 +19,7 @@
 
   --display: 'Bebas Neue', 'Oswald', Impact, sans-serif;
   --mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
-  --logo: 'Sarpanch', 'Arial Black', sans-serif;
+  --logo: 'Sora', 'Arial Black', sans-serif;
   --title: 'Syne', 'Helvetica Neue', Arial, sans-serif;
 }
 
@@ -343,7 +343,7 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   font-family: var(--logo);
   font-weight: 800;
   font-size: 1.3rem;
-  letter-spacing: 0.01em;
+  letter-spacing: -0.02em;
   text-transform: lowercase;
   color: var(--ink);
   text-decoration: none;
