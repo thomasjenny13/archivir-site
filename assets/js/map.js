@@ -265,7 +265,6 @@ const ZONE_TINT = 'rgba(92, 86, 75, 0.07)';
 const BOUNDARY_COLOR = '#c9c4ba';
 const RECOLOR = {
   'building': { 'fill-color': BUILDING_COLOR },
-  'building-top': { 'fill-color': BUILDING_COLOR, 'fill-outline-color': BUILDING_COLOR },
   'landuse-residential': { 'fill-color': ZONE_TINT },
   'landuse-suburb': { 'fill-color': ZONE_TINT },
   'landuse-commercial': { 'fill-color': ZONE_TINT },
@@ -283,6 +282,11 @@ function emptyFC(){ return { type: 'FeatureCollection', features: [] }; }
 
 map.on('style.load', () => {
   HIDE_LAYERS.forEach((id) => { if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none'); });
+  // "bright" fakes a 3D roof with a second copy of every building
+  // ('building-top') shifted 2px up-left from z16 — in its own two
+  // beiges that reads as relief, but with both painted solid black it
+  // just looks like every building is drawn twice, slightly offset
+  if (map.getLayer('building-top')) map.setLayoutProperty('building-top', 'visibility', 'none');
   // casing + main line both forced white so a road reads as a single
   // flat white stroke, not a colored line with a contrasting border
   WHITE_ROAD_LAYERS.forEach((id) => { if (map.getLayer(id)) map.setPaintProperty(id, 'line-color', '#ffffff'); });
@@ -527,16 +531,19 @@ function anyPopupOpen(){
 
 // shared by the marker click handler and a single-match ?lieu= deep
 // link from the index: zoom onto the project, highlight its footprint
-// once the view settles, and open its popup if it isn't already (a
-// real click has already opened it via MapLibre's own marker binding
-// by the time this runs, so the isOpen() check keeps this a no-op there)
+// once the view settles, and open its popup if it isn't already
 function focusMarker(marker, project, popup, tip){
   tip.remove();
   markers.forEach((m) => { if (m.popup && m.popup !== popup && m.popup.isOpen()) m.popup.remove(); });
   if (map.getZoom() < FOCUS_ZOOM) map.flyTo({ center: [project.lon, project.lat], zoom: FOCUS_ZOOM, duration: 1100 });
   else map.panTo([project.lon, project.lat]);
   map.once('idle', () => highlightBuildingAt(project.lon, project.lat));
-  if (!popup.isOpen()) marker.togglePopup();
+  // deferred: on a real click this handler runs *before* MapLibre's own
+  // marker click binding (which toggles the popup too) — opening it here
+  // synchronously meant MapLibre's toggle immediately closed it again,
+  // so no card ever appeared. One tick later, MapLibre has already
+  // opened it (no-op here); for the ?lieu= deep link, this opens it.
+  setTimeout(() => { if (!popup.isOpen()) popup.addTo(map); }, 0);
 }
 
 // offset the card away from the marker regardless of which side MapLibre
