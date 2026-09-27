@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lexend:wght@800&family=Syne:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/style.css?v=33">
+<link rel="stylesheet" href="../assets/css/style.css?v=34">
 <script type="importmap">
 {
   "imports": {
@@ -49,6 +49,18 @@
   </nav>
 
   <button id="cut-toggle" class="cut-fab" aria-label="Vue en coupe">◐</button>
+  <button id="axo-toggle" class="view-fab axo-fab" aria-label="Vue axonométrique" title="Vue axonométrique">
+    <svg viewBox="0 0 16 16" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"><path d="M8 1.5 14 5v6l-6 3.5L2 11V5z"/><path d="M2 5l6 3.5L14 5M8 8.5v6"/></svg>
+  </button>
+  <div class="export-menu">
+    <button id="export-toggle" class="view-fab export-fab" aria-label="Exporter la vue" title="Exporter la vue" aria-expanded="false">
+      <svg viewBox="0 0 16 16" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 11v2.5h11V11"/></svg>
+    </button>
+    <div id="export-dropdown" class="export-dropdown" hidden>
+      <button class="export-item" data-export="png">Image PNG</button>
+      <button class="export-item" data-export="svg">Dessin SVG</button>
+    </div>
+  </div>
 
   <div class="material-picker" aria-label="Matériaux">
     <button class="swatch" data-preset="platre" style="background:#9E9689" aria-label="Plâtre"></button>
@@ -674,7 +686,8 @@
     samples: 4,
   });
   const composer = new EffectComposer(renderer, composerTarget);
-  composer.addPass(new RenderPass(scene, camera));
+  const renderPass = new RenderPass(scene, camera);
+  composer.addPass(renderPass);
   const outlinePass = new OutlinePass(
     new THREE.Vector2(container.clientWidth, container.clientHeight),
     scene, camera
@@ -984,6 +997,273 @@
     applySectionView(currentRig, sectionView);
     cutToggle.classList.toggle('active', sectionView);
     requestRender();
+  });
+
+  // ---------- axonometric view ----------
+  // an orthographic camera that shadows the perspective one: OrbitControls,
+  // the compass presets, project switching and the zoom limits all keep
+  // driving the perspective camera exactly as before, and every frame the
+  // ortho camera just copies its orientation and derives its frustum from
+  // the orbit distance (same apparent size at the target), so toggling
+  // only changes the projection, never the framing
+  let axoView = false;
+  const axoCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.01, 1000);
+  function viewCamera(){ return axoView ? axoCamera : camera; }
+  function syncAxoCamera(){
+    const offset = camera.position.clone().sub(controls.target);
+    const distance = offset.length();
+    const halfH = distance * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    axoCamera.left = -halfH * camera.aspect;
+    axoCamera.right = halfH * camera.aspect;
+    axoCamera.top = halfH;
+    axoCamera.bottom = -halfH;
+    // backed off beyond the model so zooming in close never slices it —
+    // an ortho camera's distance doesn't change the image, only clipping
+    const reach = currentRig ? currentRig.maxDim * currentRig.group.scale.x * 2 : distance;
+    axoCamera.position.copy(controls.target).addScaledVector(offset.normalize(), distance + reach);
+    axoCamera.quaternion.copy(camera.quaternion);
+    axoCamera.near = reach * 0.001;
+    axoCamera.far = distance + reach * 4;
+    axoCamera.updateProjectionMatrix();
+    axoCamera.updateMatrixWorld();
+  }
+  const axoToggle = document.getElementById('axo-toggle');
+  function setAxoView(on){
+    axoView = on;
+    if (on) syncAxoCamera();
+    const cam = viewCamera();
+    renderPass.camera = cam;
+    outlinePass.renderCamera = cam;
+    // OutlinePass bakes its depth → view-Z conversion into the shader for
+    // the camera type it was built with; swap it along with the camera or
+    // its occlusion test reads orthographic depth as perspective
+    const mask = outlinePass.prepareMaskMaterial;
+    mask.fragmentShader = on
+      ? mask.fragmentShader.replace(/perspectiveDepthToViewZ/g, 'orthographicDepthToViewZ')
+      : mask.fragmentShader.replace(/orthographicDepthToViewZ/g, 'perspectiveDepthToViewZ');
+    mask.needsUpdate = true;
+    axoToggle.classList.toggle('active', on);
+    const label = on ? 'Vue en perspective' : 'Vue axonométrique';
+    axoToggle.setAttribute('aria-label', label);
+    axoToggle.title = label;
+    requestRender();
+  }
+  axoToggle.addEventListener('click', () => setAxoView(!axoView));
+
+  // ---------- export: PNG screenshot / SVG line drawing ----------
+  function exportName(ext){
+    return 'archivir-' + (currentSlug || 'vue') + '-' + (axoView ? 'axonometrie' : 'perspective') + '.' + ext;
+  }
+  function downloadBlob(blob, filename){
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  // the WebGL canvas is transparent (the page background shows through),
+  // so the capture is flattened onto the current theme's background
+  function exportPNG(){
+    if (axoView) syncAxoCamera();
+    composer.render(); // read back in the same task, before the buffer is cleared
+    const src = renderer.domElement;
+    const out = document.createElement('canvas');
+    out.width = src.width;
+    out.height = src.height;
+    const ctx = out.getContext('2d');
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#ffffff';
+    ctx.fillRect(0, 0, out.width, out.height);
+    ctx.drawImage(src, 0, 0);
+    out.toBlob((blob) => downloadBlob(blob, exportName('png')), 'image/png');
+  }
+
+  // Vector export of the model's edge lines as seen right now, hidden
+  // lines removed. The on-screen edges are fat lines (LineSegments2),
+  // which three's SVGRenderer can't draw, and its painter's-sort hiding
+  // mangles lines lying on faces — so instead: render the model's
+  // view-space depth into an offscreen buffer, then walk every edge
+  // segment in small screen-space steps and keep only the stretches
+  // that aren't behind that depth.
+  const SVG_DEPTH_SCALE = 2; // depth buffer resolution vs CSS pixels
+  const depthExportMaterial = new THREE.ShaderMaterial({
+    uniforms: { uNear: { value: 0 }, uFar: { value: 1 } },
+    vertexShader: `
+      #include <common>
+      #include <clipping_planes_pars_vertex>
+      varying float vDepth;
+      void main(){
+        #include <begin_vertex>
+        #include <project_vertex>
+        #include <clipping_planes_vertex>
+        vDepth = -mvPosition.z;
+      }`,
+    fragmentShader: `
+      #include <clipping_planes_pars_fragment>
+      uniform float uNear;
+      uniform float uFar;
+      varying float vDepth;
+      void main(){
+        #include <clipping_planes_fragment>
+        // linear depth packed into 24 bits of an ordinary RGBA8 target
+        float v = floor(clamp((vDepth - uNear) / (uFar - uNear), 0.0, 1.0) * 16777215.0);
+        float r = floor(v / 65536.0);
+        float g = floor((v - r * 65536.0) / 256.0);
+        float b = v - r * 65536.0 - g * 256.0;
+        gl_FragColor = vec4(r, g, b, 255.0) / 255.0;
+      }`,
+    side: THREE.DoubleSide,
+    clipping: true,
+  });
+
+  function exportSVG(){
+    const rig = currentRig;
+    if (!rig || !rig.innerEdges) return;
+    if (axoView) syncAxoCamera();
+    const cam = viewCamera();
+    cam.updateMatrixWorld();
+    const W = container.clientWidth, H = container.clientHeight;
+    const dw = Math.round(W * SVG_DEPTH_SCALE), dh = Math.round(H * SVG_DEPTH_SCALE);
+
+    // depth range tight around the model, for the most precision
+    const sphere = new THREE.Box3().setFromObject(rig.model).getBoundingSphere(new THREE.Sphere());
+    const centerDepth = -sphere.center.clone().applyMatrix4(cam.matrixWorldInverse).z;
+    const near = Math.max(1e-4, centerDepth - sphere.radius * 1.05);
+    const far = centerDepth + sphere.radius * 1.05;
+    const eps = sphere.radius * 0.004;
+    depthExportMaterial.uniforms.uNear.value = near;
+    depthExportMaterial.uniforms.uFar.value = far;
+    depthExportMaterial.clippingPlanes = sectionView ? [rig.clipPlane] : [];
+
+    // depth pass over the model's meshes only — no edges, section cap,
+    // ground/shadow plane or outline helper
+    const target = new THREE.WebGLRenderTarget(dw, dh);
+    const swapped = [];
+    rig.model.traverse((o) => {
+      if (o.isMesh && o.visible) { swapped.push([o, o.material]); o.material = depthExportMaterial; }
+    });
+    const prevTarget = renderer.getRenderTarget();
+    const prevClear = renderer.getClearColor(new THREE.Color());
+    const prevAlpha = renderer.getClearAlpha();
+    renderer.setRenderTarget(target);
+    renderer.setClearColor(0xffffff, 1);
+    renderer.clear();
+    renderer.render(rig.model, cam);
+    const pixels = new Uint8Array(dw * dh * 4);
+    renderer.readRenderTargetPixels(target, 0, 0, dw, dh, pixels);
+    renderer.setRenderTarget(prevTarget);
+    renderer.setClearColor(prevClear, prevAlpha);
+    swapped.forEach(([o, m]) => { o.material = m; });
+    target.dispose();
+
+    const range = far - near;
+    function bufferDepth(px, py){
+      const i = ((dh - 1 - py) * dw + px) * 4; // readPixels rows start at the bottom
+      return near + ((pixels[i] * 65536 + pixels[i + 1] * 256 + pixels[i + 2]) / 16777215) * range;
+    }
+    // lenient 3×3 test: an edge lying exactly on a silhouette or on its
+    // own face must not flicker hidden because of a one-pixel miss
+    function isVisible(sx, sy, depth){
+      const cx = Math.floor(sx * SVG_DEPTH_SCALE), cy = Math.floor(sy * SVG_DEPTH_SCALE);
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          const x = cx + dx, y = cy + dy;
+          if (x < 0 || y < 0 || x >= dw || y >= dh) continue;
+          if (depth <= bufferDepth(x, y) + eps) return true;
+        }
+      }
+      return false;
+    }
+
+    const clipPlane = sectionView ? rig.clipPlane : null;
+    const tmp = new THREE.Vector3();
+    function toScreen(p){
+      tmp.copy(p).project(cam);
+      return [(tmp.x + 1) / 2 * W, (1 - tmp.y) / 2 * H, tmp.z];
+    }
+    function viewDepth(p){ return -tmp.copy(p).applyMatrix4(cam.matrixWorldInverse).z; }
+
+    // visible runs of every segment of one LineSegments2, as SVG path data
+    function traceEdges(lines, respectClip){
+      if (!lines) return '';
+      const data = lines.geometry.attributes.instanceStart.data;
+      const arr = data.array, stride = data.stride;
+      lines.updateMatrixWorld();
+      const m = lines.matrixWorld;
+      const a = new THREE.Vector3(), b = new THREE.Vector3(), p = new THREE.Vector3();
+      let d = '';
+      for (let i = 0; i + 5 < arr.length; i += stride) {
+        a.set(arr[i], arr[i + 1], arr[i + 2]).applyMatrix4(m);
+        b.set(arr[i + 3], arr[i + 4], arr[i + 5]).applyMatrix4(m);
+        if (respectClip && clipPlane) {
+          // same side three's clipping keeps: signed distance >= 0
+          const da = clipPlane.distanceToPoint(a), db = clipPlane.distanceToPoint(b);
+          if (da < 0 && db < 0) continue;
+          if (da < 0) a.lerp(b, da / (da - db));
+          else if (db < 0) b.lerpVectors(a, b, da / (da - db));
+        }
+        const sa = toScreen(a), sb = toScreen(b);
+        const len = Math.hypot(sb[0] - sa[0], sb[1] - sa[1]);
+        const steps = Math.max(2, Math.ceil(len / 1.5));
+        let runStart = null, last = null;
+        for (let k = 0; k <= steps; k++) {
+          p.lerpVectors(a, b, k / steps);
+          const s = toScreen(p);
+          const onScreen = s[0] >= 0 && s[0] < W && s[1] >= 0 && s[1] < H && s[2] >= -1 && s[2] <= 1;
+          const vis = onScreen && isVisible(s[0], s[1], viewDepth(p));
+          if (vis) {
+            if (!runStart) runStart = s;
+            last = s;
+          }
+          if ((!vis || k === steps) && runStart) {
+            if (Math.hypot(last[0] - runStart[0], last[1] - runStart[1]) >= 0.75) {
+              d += 'M' + runStart[0].toFixed(2) + ' ' + runStart[1].toFixed(2) + 'L' + last[0].toFixed(2) + ' ' + last[1].toFixed(2);
+            }
+            runStart = null;
+          }
+        }
+      }
+      return d;
+    }
+
+    const inner = traceEdges(rig.innerEdges, true);
+    const glass = traceEdges(rig.glassEdges, true);
+    const cut = sectionView ? traceEdges(rig.cutBoundaryEdges, false) : '';
+    const title = (PROJECTS[currentSlug] && PROJECTS[currentSlug].title || 'Archivir').replace(/[<&]/g, '');
+    const svg =
+      '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">\n` +
+      `<title>${title} — ${axoView ? 'axonométrie' : 'perspective'}</title>\n` +
+      '<g fill="none" stroke="#1c1a17" stroke-linecap="round" stroke-linejoin="round">\n' +
+      (inner ? `<path id="aretes" stroke-width="1" d="${inner}"/>\n` : '') +
+      (glass ? `<path id="vitrages" stroke-width="0.5" d="${glass}"/>\n` : '') +
+      (cut ? `<path id="coupe" stroke-width="1.8" d="${cut}"/>\n` : '') +
+      '</g>\n</svg>\n';
+    downloadBlob(new Blob([svg], { type: 'image/svg+xml' }), exportName('svg'));
+  }
+
+  const exportToggle = document.getElementById('export-toggle');
+  const exportDropdown = document.getElementById('export-dropdown');
+  function closeExportMenu(){ exportDropdown.hidden = true; exportToggle.setAttribute('aria-expanded', 'false'); }
+  exportToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    exportDropdown.hidden = !exportDropdown.hidden;
+    exportToggle.setAttribute('aria-expanded', String(!exportDropdown.hidden));
+    // no model yet ("à venir") → nothing to draw as vectors
+    exportDropdown.querySelector('[data-export="svg"]').disabled = !(currentRig && currentRig.innerEdges);
+  });
+  exportDropdown.addEventListener('click', (e) => {
+    const item = e.target.closest('[data-export]');
+    if (!item || item.disabled) return;
+    closeExportMenu();
+    if (item.dataset.export === 'png') exportPNG();
+    else exportSVG();
+  });
+  document.addEventListener('click', (e) => {
+    if (!exportDropdown.hidden && !e.target.closest('.export-menu')) closeExportMenu();
   });
 
   // ---------- rig: everything belonging to one loaded project, grouped
@@ -1488,6 +1768,7 @@
     }
     controls.update();
     if (needsRender || performance.now() < dampingSettleUntil) {
+      if (axoView) syncAxoCamera();
       composer.render();
       needsRender = false;
     }
