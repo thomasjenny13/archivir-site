@@ -513,6 +513,8 @@
     },
     oberaletsch: {
       glb: 'concours/oberaletsch/base.glb',
+      // the site model's terrain block — outline only, see terrainOutlinePositions
+      terrainMeshes: ['Geometry214'],
       title: 'Oberaletschhütte — Archivir',
       creditHtml: '<strong>Oberaletschhütte</strong>Transformation et extension — SAC section Chasseral',
       creditMeta: '2024 · Belalp (VS) · Refuge de montagne · Concours',
@@ -1270,7 +1272,7 @@
   // so it can be positioned/scaled/disposed as a unit ----------
   const loader = new GLTFLoader();
 
-  function loadRig(glbPath, clipNormal = DEFAULT_CLIP_NORMAL, extraGlbPath = null, excludeMeshes = null) {
+  function loadRig(glbPath, clipNormal = DEFAULT_CLIP_NORMAL, extraGlbPath = null, excludeMeshes = null, terrainMeshes = null) {
     return (async () => {
       const gltf = await loader.loadAsync(glbPath);
       const model = gltf.scene;
@@ -1384,12 +1386,66 @@
         const glassMeshes = sectionMeshes.filter((mesh) => mesh.material.name === 'Transparent plastic');
         const solidMeshes = sectionMeshes.filter((mesh) => mesh.material.name !== 'Transparent plastic');
 
-        function buildEdges(meshes, widthScale) {
-          if (!meshes.length) return null;
+        // crease lines between faces meeting at more than `angle` degrees
+        function edgePositions(meshes, angle) {
+          if (!meshes.length) return [];
           const geoms = meshes.map((mesh) => positionOnlyGeometry(mesh));
           const welded = mergeVertices(mergeGeometries(geoms, false), maxDim * 0.001);
-          const edgesGeom = new THREE.EdgesGeometry(welded, 22);
-          const fatEdgesGeom = new LineSegmentsGeometry().fromEdgesGeometry(edgesGeom);
+          return Array.from(new THREE.EdgesGeometry(welded, angle).attributes.position.array);
+        }
+        // A site model's terrain is a triangulated ground surface on top
+        // of a block with vertically cut sides. Crease detection on the
+        // ground surface draws stray strokes all over it (thin sliver
+        // triangles flip past any angle threshold), so for terrain only
+        // the block's own outline is kept: edges where a vertical cut side
+        // meets a non-vertical face (the rims along the ground surface and
+        // the base), the block's vertical corners, and open borders.
+        function terrainOutlinePositions(meshes) {
+          if (!meshes.length) return [];
+          const geoms = meshes.map((mesh) => positionOnlyGeometry(mesh));
+          const welded = mergeVertices(mergeGeometries(geoms, false), maxDim * 0.001);
+          const pos = welded.attributes.position;
+          const index = welded.index.array;
+          const va = new THREE.Vector3(), vb = new THREE.Vector3(), vc = new THREE.Vector3();
+          const normals = [];
+          for (let i = 0; i < index.length; i += 3) {
+            va.fromBufferAttribute(pos, index[i]);
+            vb.fromBufferAttribute(pos, index[i + 1]);
+            vc.fromBufferAttribute(pos, index[i + 2]);
+            const n = new THREE.Vector3().crossVectors(vb.sub(va), vc.sub(va));
+            normals.push(n.lengthSq() > 0 ? n.normalize() : null);
+          }
+          const edges = new Map();
+          for (let f = 0; f < normals.length; f++) {
+            if (!normals[f]) continue;
+            for (let k = 0; k < 3; k++) {
+              const a = index[f * 3 + k], b = index[f * 3 + (k + 1) % 3];
+              if (a === b) continue;
+              const key = a < b ? a + '_' + b : b + '_' + a;
+              if (!edges.has(key)) edges.set(key, { a, b, faces: [] });
+              edges.get(key).faces.push(f);
+            }
+          }
+          const VERTICAL = 0.01; // |normal.y| below this = a cut side
+          const cornerCos = Math.cos(22 * Math.PI / 180);
+          const out = [];
+          edges.forEach(({ a, b, faces }) => {
+            let keep = faces.length !== 2; // open border / non-manifold
+            if (!keep) {
+              const n1 = normals[faces[0]], n2 = normals[faces[1]];
+              const v1 = Math.abs(n1.y) < VERTICAL, v2 = Math.abs(n2.y) < VERTICAL;
+              keep = v1 !== v2 || (v1 && v2 && n1.dot(n2) < cornerCos);
+            }
+            if (keep) out.push(pos.getX(a), pos.getY(a), pos.getZ(a), pos.getX(b), pos.getY(b), pos.getZ(b));
+          });
+          return out;
+        }
+        function buildEdges(meshes, widthScale) {
+          if (!meshes.length) return null;
+          const terrain = meshes.filter((mesh) => terrainMeshes && terrainMeshes.includes(mesh.name));
+          const rest = meshes.filter((mesh) => !terrain.includes(mesh));
+          const positions = edgePositions(rest, 22).concat(terrainOutlinePositions(terrain));
+          const fatEdgesGeom = new LineSegmentsGeometry().setPositions(positions);
           const lines = new LineSegments2(
             fatEdgesGeom,
             new LineMaterial({ color: tintStyle().edgeColor, linewidth: tintStyle().lineWidth * widthScale, worldUnits: false })
@@ -1514,7 +1570,7 @@
     // a prize variant's own glb is just the added volumetry, not a full
     // scene — load it merged onto the project's base so the section cut,
     // edges and cap all read the combined base + extension as one piece
-    const rig = await loadRig(cfg.glb, cfg.clipNormal, cfg.variants[variantKey].glb, cfg.excludeMeshes);
+    const rig = await loadRig(cfg.glb, cfg.clipNormal, cfg.variants[variantKey].glb, cfg.excludeMeshes, cfg.terrainMeshes);
     variantRigCache.set(key, rig);
     return rig;
   }
@@ -1591,7 +1647,7 @@
   async function getRig(slug){
     if (rigCache.has(slug)) return rigCache.get(slug);
     const cfg = PROJECTS[slug];
-    const rig = cfg.glb ? await loadRig(cfg.glb, cfg.clipNormal, null, cfg.excludeMeshes) : buildPlaceholderRig(cfg.clipNormal);
+    const rig = cfg.glb ? await loadRig(cfg.glb, cfg.clipNormal, null, cfg.excludeMeshes, cfg.terrainMeshes) : buildPlaceholderRig(cfg.clipNormal);
     rigCache.set(slug, rig);
     return rig;
   }
