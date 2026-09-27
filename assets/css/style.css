@@ -996,10 +996,11 @@ html[data-theme="dark"] .maplibregl-ctrl-icon{ filter: invert(1); }
 .maplibregl-ctrl-attrib a{ color: var(--ink-soft) !important; }
 .maplibregl-ctrl-attrib-button{ filter: var(--icon-filter, none); }
 html[data-theme="dark"] .maplibregl-ctrl-attrib-button{ filter: invert(1); }
+/* the map fills the whole viewport behind the fixed site banner, so
+   both corner control groups (zoom/vue globale/position top-right,
+   Lieu filter top-left) are pushed below it — otherwise their first
+   button sits under the banner and is unreachable */
+.maplibregl-ctrl-top-right, .maplibregl-ctrl-top-left{ top: 52px; }
 @media (max-width: 640px){
-  .maplibregl-ctrl-top-right{ top: 58px; }
-  /* the Lieu filter (top-left) need the same offset as
-     the zoom/vue-globale group (top-right) — without it they sit under
-     the fixed site banner on narrow screens and are unreachable */
-  .maplibregl-ctrl-top-left{ top: 58px; }
+  .maplibregl-ctrl-top-right, .maplibregl-ctrl-top-left{ top: 44px; }
 }
