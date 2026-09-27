@@ -87,7 +87,7 @@
         <td>Concours</td>
       </tr>
       <tr>
-        <td><a href="projets/viewer.html?p=casernebernex" data-glb="projets/bunq/caserne bernex/blend.glb">Caserne de Bernex</a></td>
+        <td><a href="projets/viewer.html?p=casernebernex" data-glb="projets/concours/caserne bernex/blend.glb">Caserne de Bernex</a></td>
         <td>bunq</td>
         <td data-country="Suisse"><a href="carte.html?lieu=Bernex%20%28GE%29" title="Voir sur la carte">Bernex (GE)</a></td>
         <td>2011</td>
@@ -415,7 +415,7 @@
       // building in the source file — including it in the bounding box
       // wrecks this preview's centering/framing the same way it did in
       // the main viewer and the map popup (see EXCLUDE_MESHES there)
-      const exclude = { 'projets/bunq/caserne bernex/blend.glb': ['Geometry7'] }[glbPath];
+      const exclude = { 'projets/concours/caserne bernex/blend.glb': ['Geometry7'] }[glbPath];
       if (exclude && exclude.length) {
         const toRemove = [];
         model.traverse((child) => { if (exclude.includes(child.name)) toRemove.push(child); });
@@ -438,12 +438,19 @@
       model.position.z -= center.z;
       model.position.y -= box.min.y;
 
-      const fitBox = new THREE.Box3().setFromObject(model);
+      // the spin rotates this pivot, not the model itself: the model's
+      // own origin is wherever the export put it (for some files, far
+      // from the building), so spinning the model directly would swing
+      // it around that point instead of turning it on its own center
+      const pivot = new THREE.Group();
+      pivot.add(model);
+
+      const fitBox = new THREE.Box3().setFromObject(pivot);
       const sphere = new THREE.Sphere();
       fitBox.getBoundingSphere(sphere);
       const maxDim = sphere.radius * 2;
 
-      const entry = { model, sphere, maxDim };
+      const entry = { model: pivot, sphere, maxDim };
       cache.set(glbPath, entry);
       if (thumb.dataset.active === glbPath) applyModel(entry);
     });

@@ -445,7 +445,7 @@ function applyPopupModel(entry){
 // object left far from the rest of the building in the source file,
 // which wrecks the popup's own centering/framing if left in
 const EXCLUDE_MESHES = {
-  'projets/bunq/caserne bernex/blend.glb': ['Geometry7'],
+  'projets/concours/caserne bernex/blend.glb': ['Geometry7'],
 };
 
 function showPopupModel(glbPath, container){
