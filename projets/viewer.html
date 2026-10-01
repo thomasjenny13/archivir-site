@@ -520,10 +520,17 @@
       // slab buried flush with the terrain — its outline drew a stray line
       // across the ground between the hut and the path; surface kept
       edgelessMeshes: ['Geometry213'],
-      // the two small annexes (walls + inset roof) shown as solid blocks
+      // the two small annexes (walls + inset roof) and the path's low wall
+      // shown as solid blocks
       blockGroups: [
         ['Geometry225', 'Geometry226', 'Geometry232', 'Geometry233', 'Geometry231'],
         ['Geometry227', 'Geometry228', 'Geometry229', 'Geometry230', 'Geometry215'],
+        // the path's low wall, one block per straight piece (a single
+        // envelope would fill the bend with a wedge)
+        ['Geometry211'],
+        ['Geometry204'],
+        ['Geometry209', 'Geometry210', 'Geometry239'],
+        ['Geometry238'],
       ],
       title: 'Oberaletschhütte — Archivir',
       creditHtml: '<strong>Oberaletschhütte</strong>Transformation et extension — SAC section Chasseral',
