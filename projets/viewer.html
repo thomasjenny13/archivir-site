@@ -625,6 +625,11 @@
   controls.maxDistance = 20;
   controls.target.set(0, 0.6, 0);
   controls.mouseButtons.MIDDLE = THREE.MOUSE.ROTATE;
+  // orbit stops at the horizon: the target sits at the model's mid-height,
+  // so the camera always stays above ground — seen from below, a site
+  // plot showed the building's footprint lines through it, and the
+  // ground shadow made no sense from underneath anyway
+  controls.maxPolarAngle = Math.PI / 2;
   controls.update();
 
   // on-demand rendering: this is a mostly-static scene, so redrawing
@@ -666,7 +671,7 @@
       const spherical = new THREE.Spherical().setFromVector3(offset);
       spherical.theta += e.deltaX * ORBIT_WHEEL_SPEED;
       spherical.phi += e.deltaY * ORBIT_WHEEL_SPEED;
-      spherical.phi = Math.max(0.05, Math.min(Math.PI - 0.05, spherical.phi));
+      spherical.phi = Math.max(0.05, Math.min(controls.maxPolarAngle, spherical.phi));
       offset.setFromSpherical(spherical);
       camera.position.copy(controls.target).add(offset);
       camera.lookAt(controls.target);
