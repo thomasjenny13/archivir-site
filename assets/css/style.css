@@ -420,6 +420,24 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 }
 .site-nav-link:hover{ color: var(--rose-gold); }
 .site-nav-link.is-active{ color: var(--ink); border-bottom-color: var(--rose-gold); }
+/* round "3D" tab between index and carte — the logo's own typeface, and
+   filled rose-gold when on the 3D viewer, the way the text tabs get their
+   underline */
+.site-nav-3d{
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink);
+  font-family: var(--logo);
+  font-weight: 800;
+  font-size: 0.78rem;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-decoration: none;
+  transition: color .2s ease, border-color .2s ease, background .2s ease;
+}
+.site-nav-3d:hover{ color: var(--rose-gold); border-color: var(--rose-gold); }
+.site-nav-3d.is-active{ background: var(--rose-gold); border-color: var(--rose-gold); color: var(--bg); }
 .back-link{
   position: fixed; top: 72px; left: 24px; z-index: 5;
   font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase;
@@ -808,6 +826,7 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   .site-logo{ font-size: 1.05rem; }
   .site-nav{ gap: 18px; }
   .site-nav-link{ font-size: 0.95rem; }
+  .site-nav-3d{ width: 28px; height: 28px; font-size: 0.66rem; }
   .site-banner-right{ gap: 10px; }
   .theme-toggle{ width: 30px; height: 30px; font-size: 0.82rem; }
 
