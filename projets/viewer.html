@@ -526,8 +526,7 @@
         ['Geometry227', 'Geometry228', 'Geometry229', 'Geometry230', 'Geometry215'],
         // the path's low wall, one block per straight piece (a single
         // envelope would fill the bend with a wedge)
-        ['Geometry211'],
-        ['Geometry204'],
+        ['Geometry211', 'Geometry204'], // long wall + its in-line left head
         ['Geometry209', 'Geometry210', 'Geometry239'],
         ['Geometry238'],
       ],
@@ -1359,11 +1358,26 @@
       }
     }
     const minY = Math.min(...pts.map((p) => p.y)) - BLOCK_SINK;
-    const tops = hull.map(([x, z]) => {
+    const cornerTops = hull.map(([x, z]) => {
       let best = -Infinity;
       pts.forEach((p) => { if (Math.hypot(p.x - x, p.z - z) < 0.3 && p.y > best) best = p.y; });
       return best;
     });
+    // one flat (possibly sloped) top: least-squares plane y = a·x + b·z + c
+    // through the corner heights, so the top and every side stay planar —
+    // per-corner heights alone twisted small pieces into skewed shapes
+    const fit = (() => {
+      let sxx = 0, sxz = 0, szz = 0, sx = 0, sz = 0, sxy = 0, szy = 0, sy = 0;
+      hull.forEach(([x, z], i) => { const y = cornerTops[i]; sxx += x * x; sxz += x * z; szz += z * z; sx += x; sz += z; sxy += x * y; szy += z * y; sy += y; });
+      const m = [[sxx, sxz, sx], [sxz, szz, sz], [sx, sz, hull.length]], r = [sxy, szy, sy];
+      const det = (a) => a[0][0] * (a[1][1] * a[2][2] - a[1][2] * a[2][1]) - a[0][1] * (a[1][0] * a[2][2] - a[1][2] * a[2][0]) + a[0][2] * (a[1][0] * a[2][1] - a[1][1] * a[2][0]);
+      const D = det(m);
+      if (Math.abs(D) < 1e-9) { const avg = sy / hull.length; return () => avg; }
+      const col = (k) => det(m.map((row, i) => row.map((v, j) => (j === k ? r[i] : v))));
+      const a = col(0) / D, b = col(1) / D, c = col(2) / D;
+      return (x, z) => a * x + b * z + c;
+    })();
+    const tops = hull.map(([x, z]) => fit(x, z));
     const n = hull.length, v = [];
     const tri = (a, b, c) => v.push(...a, ...b, ...c);
     const T = (i) => [hull[i][0], tops[i], hull[i][1]], B = (i) => [hull[i][0], minY, hull[i][1]];
@@ -1580,7 +1594,10 @@
             if (!keep) {
               const n1 = normals[faces[0]], n2 = normals[faces[1]];
               const v1 = Math.abs(n1.y) < VERTICAL, v2 = Math.abs(n2.y) < VERTICAL;
-              keep = v1 !== v2;
+              // a rim separates a cut side from the ground or the base —
+              // not from a slightly tilted sliver on the same flank (that
+              // drew a doubled seam line down the side of the block)
+              keep = (v1 && Math.abs(n2.y) > 0.3) || (v2 && Math.abs(n1.y) > 0.3);
             }
             if (keep) out.push(pos.getX(a), pos.getY(a), pos.getZ(a), pos.getX(b), pos.getY(b), pos.getZ(b));
           });
