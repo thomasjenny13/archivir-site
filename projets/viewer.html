@@ -542,7 +542,7 @@
     casernebernex: {
       glb: 'concours/caserne bernex/blend.glb',
       title: 'Caserne de Bernex — Archivir',
-      creditHtml: '<strong>Caserne de Bernex</strong>bunq',
+      creditHtml: '<strong>Caserne de Bernex</strong><a class="credit-author" href="https://www.bunq.ch/" target="_blank" rel="noopener noreferrer">bunq</a>',
       creditMeta: '2011 · Bernex (GE) · Équipement public · Concours',
       hasPlans: false,
       // "Geometry7" sits ~500m away from the rest of the model in the
@@ -554,14 +554,14 @@
     hansaallee: {
       glb: 'herzog de meuron/atelier hansaallee/atelier.glb',
       title: 'Atelier Hansaallee 94 — Archivir',
-      creditHtml: '<strong>Atelier Hansaallee 94</strong>Herzog &amp; de Meuron',
+      creditHtml: '<strong>Atelier Hansaallee 94</strong><a class="credit-author" href="https://www.herzogdemeuron.com/" target="_blank" rel="noopener noreferrer">Herzog &amp; de Meuron</a>',
       creditMeta: '2015 · Düsseldorf (Allemagne) · Atelier · Nouvelle construction',
       hasPlans: false,
     },
     plywood: {
       glb: 'herzog de meuron/plywood house/plywood.glb',
       title: 'Plywood House — Archivir',
-      creditHtml: '<a class="credit-link" href="https://www.herzogdemeuron.com/projects/027-plywood-house/" target="_blank" rel="noopener noreferrer"><strong>Plywood House</strong></a>Herzog &amp; de Meuron',
+      creditHtml: '<a class="credit-link" href="https://www.herzogdemeuron.com/projects/027-plywood-house/" target="_blank" rel="noopener noreferrer"><strong>Plywood House</strong></a><a class="credit-author" href="https://www.herzogdemeuron.com/" target="_blank" rel="noopener noreferrer">Herzog &amp; de Meuron</a>',
       creditMeta: '1985 · Bottmingen (BL) · Habitation · Nouvelle construction',
       hasPlans: false,
       // cut across the house instead of along it (same setup as Oberaletsch)
@@ -1322,13 +1322,15 @@
     return (async () => {
       const gltf = await loader.loadAsync(glbPath);
       const model = gltf.scene;
+      let extraScene = null;
       if (extraGlbPath) {
         // the extension shares the base export's coordinate system —
         // parent it directly onto the base model so everything below
         // (centering, welding, section cap, edges) treats base + extension
         // as one combined volume instead of two separate rigs
         const extraGltf = await loader.loadAsync(extraGlbPath);
-        model.add(extraGltf.scene);
+        extraScene = extraGltf.scene;
+        model.add(extraScene);
       }
       if (excludeMeshes && excludeMeshes.length) {
         // some exports carry a stray object left far from the rest of
@@ -1383,7 +1385,13 @@
           }
         });
 
+        // centered on the base model alone, never on base + extension:
+        // a competition entry's added volume would shift the combined box,
+        // and the same building would jump sideways or up/down when
+        // switching between Existant and a prize variant
+        if (extraScene) model.remove(extraScene);
         const box = new THREE.Box3().setFromObject(model);
+        if (extraScene) model.add(extraScene);
         const center = new THREE.Vector3();
         box.getCenter(center);
         model.position.x -= center.x;
@@ -1639,8 +1647,12 @@
 
     scene.add(newRig.group);
     newRig.group.visible = true;
-    newRig.group.position.set(0, 0, 0);
-    newRig.group.scale.setScalar(1);
+    // same placement as the version it replaces — the outgoing rig may
+    // still carry the scale correction from a project-switch slide
+    // (arriving here via the arrows), and resetting to 1 made the model
+    // visibly grow or shrink on some switches but not others
+    newRig.group.position.copy(oldRig ? oldRig.group.position : new THREE.Vector3());
+    newRig.group.scale.copy(oldRig ? oldRig.group.scale : new THREE.Vector3(1, 1, 1));
     if (oldRig && oldRig !== newRig) oldRig.group.visible = false;
 
     currentRig = newRig;
