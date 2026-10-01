@@ -488,7 +488,6 @@
   import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
   import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
   import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
-  import { ConvexGeometry } from 'three/addons/geometries/ConvexGeometry.js';
 
   // ---------- per-project config ----------
   const PROJECTS = {
@@ -1335,6 +1334,46 @@
   const loader = new GLTFLoader();
 
   const BLOCK_SINK = 3;
+  // A clean prism around a group of pieces: the plan-view convex outline,
+  // simplified (corners closer than 15 cm merged, near-straight turns
+  // dropped) so slightly misaligned wall corners give one crisp vertical
+  // edge instead of sliver faces with doubled lines; each corner keeps the
+  // real top height found there, so a sloped roof stays sloped; the base
+  // sits BLOCK_SINK below the lowest point.
+  function blockPrism(pts) {
+    const xz = pts.map((p) => [p.x, p.z]).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+    const lower = [], upper = [];
+    xz.forEach((p) => { while (lower.length > 1 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) lower.pop(); lower.push(p); });
+    xz.slice().reverse().forEach((p) => { while (upper.length > 1 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) upper.pop(); upper.push(p); });
+    let hull = lower.slice(0, -1).concat(upper.slice(0, -1));
+    let changed = true;
+    while (changed && hull.length > 3) {
+      changed = false;
+      for (let i = 0; i < hull.length && hull.length > 3; i++) {
+        const a = hull[(i - 1 + hull.length) % hull.length], b = hull[i], c = hull[(i + 1) % hull.length];
+        const ab = Math.hypot(b[0] - a[0], b[1] - a[1]), bc = Math.hypot(c[0] - b[0], c[1] - b[1]);
+        const turn = Math.abs(Math.atan2(cross(a, b, c), (b[0] - a[0]) * (c[0] - b[0]) + (b[1] - a[1]) * (c[1] - b[1])));
+        if (bc < 0.15 || turn < 8 * Math.PI / 180) { hull.splice(i, 1); changed = true; i--; }
+        else if (ab < 0.15) { hull.splice(i, 1); changed = true; i--; }
+      }
+    }
+    const minY = Math.min(...pts.map((p) => p.y)) - BLOCK_SINK;
+    const tops = hull.map(([x, z]) => {
+      let best = -Infinity;
+      pts.forEach((p) => { if (Math.hypot(p.x - x, p.z - z) < 0.3 && p.y > best) best = p.y; });
+      return best;
+    });
+    const n = hull.length, v = [];
+    const tri = (a, b, c) => v.push(...a, ...b, ...c);
+    const T = (i) => [hull[i][0], tops[i], hull[i][1]], B = (i) => [hull[i][0], minY, hull[i][1]];
+    for (let i = 1; i < n - 1; i++) { tri(T(0), T(i + 1), T(i)); tri(B(0), B(i), B(i + 1)); }
+    for (let i = 0; i < n; i++) { const j = (i + 1) % n; tri(T(i), T(j), B(j)); tri(T(i), B(j), B(i)); }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(v, 3));
+    g.computeVertexNormals();
+    return g;
+  }
   function loadRig(glbPath, clipNormal = DEFAULT_CLIP_NORMAL, extraGlbPath = null, excludeMeshes = null, terrainMeshes = null, edgelessMeshes = null, blockGroups = null) {
     return (async () => {
       const gltf = await loader.loadAsync(glbPath);
@@ -1382,7 +1421,7 @@
               pts.push(v.clone(), v.clone().setY(v.y - BLOCK_SINK));
             }
           });
-          const block = new THREE.Mesh(new ConvexGeometry(pts), members[0].material);
+          const block = new THREE.Mesh(blockPrism(pts), members[0].material);
           block.name = names.join('+');
           blockMeshes.push(block);
           members.forEach((mesh) => mesh.parent.remove(mesh));
