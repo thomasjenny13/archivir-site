@@ -488,6 +488,7 @@
   import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
   import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
   import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
+  import { ConvexGeometry } from 'three/addons/geometries/ConvexGeometry.js';
 
   // ---------- per-project config ----------
   const PROJECTS = {
@@ -519,6 +520,11 @@
       // slab buried flush with the terrain — its outline drew a stray line
       // across the ground between the hut and the path; surface kept
       edgelessMeshes: ['Geometry213'],
+      // the two small annexes (walls + inset roof) shown as solid blocks
+      blockGroups: [
+        ['Geometry225', 'Geometry226', 'Geometry232', 'Geometry233', 'Geometry231'],
+        ['Geometry227', 'Geometry228', 'Geometry229', 'Geometry230', 'Geometry215'],
+      ],
       title: 'Oberaletschhütte — Archivir',
       creditHtml: '<strong>Oberaletschhütte</strong>Transformation et extension — SAC section Chasseral',
       creditMeta: '2024 · Belalp (VS) · Refuge de montagne · Concours',
@@ -1321,7 +1327,8 @@
   // so it can be positioned/scaled/disposed as a unit ----------
   const loader = new GLTFLoader();
 
-  function loadRig(glbPath, clipNormal = DEFAULT_CLIP_NORMAL, extraGlbPath = null, excludeMeshes = null, terrainMeshes = null, edgelessMeshes = null) {
+  const BLOCK_SINK = 3;
+  function loadRig(glbPath, clipNormal = DEFAULT_CLIP_NORMAL, extraGlbPath = null, excludeMeshes = null, terrainMeshes = null, edgelessMeshes = null, blockGroups = null) {
     return (async () => {
       const gltf = await loader.loadAsync(glbPath);
       const model = gltf.scene;
@@ -1346,6 +1353,32 @@
         const toRemove = [];
         model.traverse((child) => { if (excludeMeshes.includes(child.name)) toRemove.push(child); });
         toRemove.forEach((child) => child.parent && child.parent.remove(child));
+      }
+      if (blockGroups) {
+        // a small annex modeled as four walls with a roof set between them
+        // reads as a hollow box with visible wall thicknesses — each group
+        // is replaced by one solid: the convex envelope of its pieces,
+        // pushed BLOCK_SINK below their base so it stays anchored in the
+        // terrain where the ground dips between the wall feet
+        model.updateMatrixWorld(true);
+        blockGroups.forEach((names) => {
+          const members = [];
+          model.traverse((child) => { if (child.isMesh && names.includes(child.name)) members.push(child); });
+          if (!members.length) return;
+          const pts = [];
+          const v = new THREE.Vector3();
+          members.forEach((mesh) => {
+            const pos = mesh.geometry.attributes.position;
+            for (let i = 0; i < pos.count; i++) {
+              v.fromBufferAttribute(pos, i).applyMatrix4(mesh.matrixWorld);
+              pts.push(v.clone(), v.clone().setY(v.y - BLOCK_SINK));
+            }
+          });
+          const block = new THREE.Mesh(new ConvexGeometry(pts), members[0].material);
+          block.name = names.join('+');
+          members.forEach((mesh) => mesh.parent.remove(mesh));
+          model.add(block);
+        });
       }
       {
         const group = new THREE.Group();
@@ -1635,7 +1668,7 @@
     // a prize variant's own glb is just the added volumetry, not a full
     // scene — load it merged onto the project's base so the section cut,
     // edges and cap all read the combined base + extension as one piece
-    const rig = await loadRig(cfg.glb, cfg.clipNormal, cfg.variants[variantKey].glb, cfg.excludeMeshes, cfg.terrainMeshes, cfg.edgelessMeshes);
+    const rig = await loadRig(cfg.glb, cfg.clipNormal, cfg.variants[variantKey].glb, cfg.excludeMeshes, cfg.terrainMeshes, cfg.edgelessMeshes, cfg.blockGroups);
     variantRigCache.set(key, rig);
     return rig;
   }
@@ -1711,7 +1744,7 @@
   async function getRig(slug){
     if (rigCache.has(slug)) return rigCache.get(slug);
     const cfg = PROJECTS[slug];
-    const rig = cfg.glb ? await loadRig(cfg.glb, cfg.clipNormal, null, cfg.excludeMeshes, cfg.terrainMeshes, cfg.edgelessMeshes) : buildPlaceholderRig(cfg.clipNormal);
+    const rig = cfg.glb ? await loadRig(cfg.glb, cfg.clipNormal, null, cfg.excludeMeshes, cfg.terrainMeshes, cfg.edgelessMeshes, cfg.blockGroups) : buildPlaceholderRig(cfg.clipNormal);
     rigCache.set(slug, rig);
     return rig;
   }
