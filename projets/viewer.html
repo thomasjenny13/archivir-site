@@ -800,6 +800,9 @@
     new THREE.ShadowMaterial({ opacity: 0.35 })
   );
   ground.rotation.x = -Math.PI / 2;
+  // a hair below 0: a model's own flat ground (a site plot) sits exactly
+  // at 0, and two coplanar surfaces fight over which one shows
+  ground.position.y = -0.01;
   ground.receiveShadow = true;
   scene.add(ground);
 
@@ -1309,7 +1312,9 @@
 
         model.traverse((child) => {
           if (child.isMesh) {
-            child.castShadow = true;
+            // a perfectly flat surface (a site plot at ground level) shadowing
+            // itself only speckles — it still receives the building's shadows
+            child.castShadow = new THREE.Box3().setFromObject(child).getSize(new THREE.Vector3()).y > 0.01;
             child.receiveShadow = true;
             // some exports carry a KHR_materials_specular extension, which makes
             // GLTFLoader build a MeshPhysicalMaterial instead of a plain

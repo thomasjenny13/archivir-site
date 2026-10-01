@@ -412,6 +412,7 @@ function ensurePopupViewer(container){
 
     const ground = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.ShadowMaterial({ opacity: 0.3 }));
     ground.rotation.x = -Math.PI / 2;
+    ground.position.y = -0.01; // below a model's own flat ground, see viewer
     ground.receiveShadow = true;
     popupScene.add(ground);
   }
@@ -471,7 +472,9 @@ function showPopupModel(glbPath, container){
     }
     model.traverse((child) => {
       if (child.isMesh) {
-        child.castShadow = true;
+        // a perfectly flat surface (a site plot at ground level) shadowing
+        // itself only speckles — it still receives the building's shadows
+        child.castShadow = new THREE.Box3().setFromObject(child).getSize(new THREE.Vector3()).y > 0.01;
         child.receiveShadow = true;
         recolorMesh(child);
         child.material.metalness = 0;
