@@ -355,7 +355,7 @@
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 0.95;
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.type = THREE.PCFShadowMap; // see viewer
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     thumb.appendChild(renderer.domElement);
 
@@ -368,11 +368,11 @@
     keyLight = new THREE.DirectionalLight(0xfff2e0, 3.2);
     keyLight.position.set(5, 8, 3);
     keyLight.castShadow = true;
-    // matches the main viewer's 2048 — frustum size scales with each
-    // project's maxDim, so a fixed resolution reads blurrier on larger
-    // buildings unless it's generous enough to begin with
+    // frustum fitted to the model (fitShadow) — plenty for a small thumbnail
     keyLight.shadow.mapSize.set(2048, 2048);
+    keyLight.shadow.bias = -0.0005;
     scene.add(keyLight);
+    scene.add(keyLight.target);
 
     scene.add(new THREE.HemisphereLight(0x5fc7e3, 0x1b1a18, 0.28));
 
@@ -384,6 +384,25 @@
     ground.position.y = -0.01; // below a model's own flat ground, see viewer
     ground.receiveShadow = true;
     scene.add(ground);
+  }
+
+  // Shadow frustum fitted tight around the model instead of a loose ±2-radius
+  // box around the ground origin: the light's shadow camera is aimed at the
+  // model's bounding-sphere center, so everything that can cast (and every
+  // ground point it shades — same light ray) lies within one radius of the
+  // axis, and the whole shadow map's resolution lands on the model.
+  const SHADOW_DIR = new THREE.Vector3(0.8, 1.4, 0.5).normalize();
+  function fitShadow(light, center, radius){
+    light.target.position.copy(center);
+    light.target.updateMatrixWorld();
+    light.position.copy(center).addScaledVector(SHADOW_DIR, radius * 3);
+    const cam = light.shadow.camera;
+    const r = radius * 1.05;
+    cam.left = -r; cam.right = r; cam.top = r; cam.bottom = -r;
+    cam.near = radius * 0.5;
+    cam.far = radius * 8; // far enough for a long shadow cast by a tall model
+    cam.updateProjectionMatrix();
+    light.shadow.normalBias = radius * 0.0015;
   }
 
   function applyModel(entry){
@@ -399,12 +418,7 @@
     camera.lookAt(entry.sphere.center);
     camera.updateProjectionMatrix();
 
-    keyLight.position.set(entry.maxDim * 0.8, entry.maxDim * 1.4, entry.maxDim * 0.5);
-    keyLight.shadow.camera.left = -entry.maxDim;
-    keyLight.shadow.camera.right = entry.maxDim;
-    keyLight.shadow.camera.top = entry.maxDim;
-    keyLight.shadow.camera.bottom = -entry.maxDim;
-    keyLight.shadow.camera.updateProjectionMatrix();
+    fitShadow(keyLight, entry.sphere.center, entry.sphere.radius);
 
     renderer.render(scene, camera);
   }
@@ -438,6 +452,7 @@
           child.receiveShadow = true;
           recolorMesh(child);
           child.material.metalness = 0;
+          child.material.vertexColors = false; // COLOR_0 would tint over the site's color
           if (child.material.name === 'Transparent plastic') child.visible = false;
         }
       });

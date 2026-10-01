@@ -603,7 +603,9 @@
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.95;
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  // plain PCF: smoothed but crisp edges — the soft variant blurred every
+  // shadow by a few extra texels on top of the map's own resolution
+  renderer.shadowMap.type = THREE.PCFShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.localClippingEnabled = true;
   container.appendChild(renderer.domElement);
@@ -783,14 +785,32 @@
   const keyLight = new THREE.DirectionalLight(0xfff2e0, 3.4);
   keyLight.position.set(5, 8, 3);
   keyLight.castShadow = true;
-  // the shadow camera's frustum is resized to each project's own
-  // maxDim (see switchProject below), so texel density — and how
-  // crisp the shadow reads — depends on model size vs. this fixed
-  // resolution; 2048 keeps larger buildings (Caserne de Bernex etc.)
-  // from reading as a blurry smear the way 1024 did
-  keyLight.shadow.mapSize.set(2048, 2048);
+  // frustum fitted to each project (fitShadow), so 4096 is spent on the
+  // model itself rather than on empty ground around it
+  keyLight.shadow.mapSize.set(4096, 4096);
   keyLight.shadow.bias = -0.0005;
   scene.add(keyLight);
+  scene.add(keyLight.target);
+
+  // Shadow frustum fitted tight around the model instead of a loose ±2-radius
+  // box around the ground origin: the light's shadow camera is aimed at the
+  // model's bounding-sphere center, so everything that can cast (and every
+  // ground point it shades — same light ray) lies within one radius of the
+  // axis, and the whole shadow map's resolution lands on the model.
+  const SHADOW_DIR = new THREE.Vector3(0.8, 1.4, 0.5).normalize();
+  function fitShadow(light, center, radius){
+    light.target.position.copy(center);
+    light.target.updateMatrixWorld();
+    light.position.copy(center).addScaledVector(SHADOW_DIR, radius * 3);
+    const cam = light.shadow.camera;
+    const r = radius * 1.05;
+    cam.left = -r; cam.right = r; cam.top = r; cam.bottom = -r;
+    cam.near = radius * 0.5;
+    cam.far = radius * 8; // far enough for a long shadow cast by a tall model
+    cam.updateProjectionMatrix();
+    light.shadow.normalBias = radius * 0.0015;
+  }
+
 
   const fillLight = new THREE.HemisphereLight(0x5fc7e3, 0x1b1a18, 0.28);
   scene.add(fillLight);
@@ -1329,6 +1349,9 @@
             child.material.roughness = style.roughness;
             child.material.metalness = 0;
             child.material.envMapIntensity = style.envMapIntensity;
+            // some exports carry per-vertex colors (COLOR_0) that would tint
+            // over the site's own uniform model color
+            child.material.vertexColors = false;
             child.material.clipShadows = true;
             child.material.shadowSide = THREE.DoubleSide;
             // the crease/edge lines below sit exactly on this surface;
@@ -1640,12 +1663,7 @@
     } else {
       flyTo(pos, rig.fitCenter);
     }
-    keyLight.position.set(rig.maxDim * 0.8, rig.maxDim * 1.4, rig.maxDim * 0.5);
-    keyLight.shadow.camera.left = -rig.maxDim;
-    keyLight.shadow.camera.right = rig.maxDim;
-    keyLight.shadow.camera.top = rig.maxDim;
-    keyLight.shadow.camera.bottom = -rig.maxDim;
-    keyLight.shadow.camera.updateProjectionMatrix();
+    fitShadow(keyLight, rig.fitCenter, rig.maxDim / 2);
   }
 
   // ---------- project switching, with the character-select slide ----------
@@ -1739,13 +1757,8 @@
       camera.updateProjectionMatrix();
       controls.minDistance = currentDistance * 0.25;
       controls.maxDistance = currentDistance * 3;
-      const effMaxDim = newRig.maxDim * scaleCorrection;
-      keyLight.position.set(effMaxDim * 0.8, effMaxDim * 1.4, effMaxDim * 0.5);
-      keyLight.shadow.camera.left = -effMaxDim;
-      keyLight.shadow.camera.right = effMaxDim;
-      keyLight.shadow.camera.top = effMaxDim;
-      keyLight.shadow.camera.bottom = -effMaxDim;
-      keyLight.shadow.camera.updateProjectionMatrix();
+      // the group is scaled about the origin, so its world-space center scales too
+      fitShadow(keyLight, newRig.fitCenter.clone().multiplyScalar(scaleCorrection), newRig.maxDim * scaleCorrection / 2);
     } else {
       scene.add(newRig.group);
       newRig.group.visible = true;

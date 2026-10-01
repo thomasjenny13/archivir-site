@@ -384,6 +384,25 @@ const popupLoader = new GLTFLoader();
 const popupCache = new Map();
 let popupRenderer, popupScene, popupCamera, popupKeyLight, popupModel;
 
+// Shadow frustum fitted tight around the model instead of a loose ±2-radius
+// box around the ground origin: the light's shadow camera is aimed at the
+// model's bounding-sphere center, so everything that can cast (and every
+// ground point it shades — same light ray) lies within one radius of the
+// axis, and the whole shadow map's resolution lands on the model.
+const SHADOW_DIR = new THREE.Vector3(0.8, 1.4, 0.5).normalize();
+function fitShadow(light, center, radius){
+  light.target.position.copy(center);
+  light.target.updateMatrixWorld();
+  light.position.copy(center).addScaledVector(SHADOW_DIR, radius * 3);
+  const cam = light.shadow.camera;
+  const r = radius * 1.05;
+  cam.left = -r; cam.right = r; cam.top = r; cam.bottom = -r;
+  cam.near = radius * 0.5;
+  cam.far = radius * 8; // far enough for a long shadow cast by a tall model
+  cam.updateProjectionMatrix();
+  light.shadow.normalBias = radius * 0.0015;
+}
+
 function ensurePopupViewer(container){
   if (!popupRenderer) {
     popupRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -391,7 +410,7 @@ function ensurePopupViewer(container){
     popupRenderer.toneMapping = THREE.ACESFilmicToneMapping;
     popupRenderer.toneMappingExposure = 0.95;
     popupRenderer.shadowMap.enabled = true;
-    popupRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    popupRenderer.shadowMap.type = THREE.PCFShadowMap; // see viewer
     popupRenderer.outputColorSpace = THREE.SRGBColorSpace;
 
     popupScene = new THREE.Scene();
@@ -403,11 +422,11 @@ function ensurePopupViewer(container){
     popupKeyLight = new THREE.DirectionalLight(0xfff2e0, 3.2);
     popupKeyLight.position.set(5, 8, 3);
     popupKeyLight.castShadow = true;
-    // matches the main viewer's 2048 — frustum size scales with each
-    // project's maxDim, so a fixed resolution reads blurrier on larger
-    // buildings unless it's generous enough to begin with
+    // frustum fitted to the model (fitShadow) — plenty for a small bubble
     popupKeyLight.shadow.mapSize.set(2048, 2048);
+    popupKeyLight.shadow.bias = -0.0005;
     popupScene.add(popupKeyLight);
+    popupScene.add(popupKeyLight.target);
     popupScene.add(new THREE.HemisphereLight(0x5fc7e3, 0x1b1a18, 0.28));
 
     const ground = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.ShadowMaterial({ opacity: 0.3 }));
@@ -436,12 +455,7 @@ function applyPopupModel(entry){
   popupCamera.lookAt(entry.sphere.center);
   popupCamera.updateProjectionMatrix();
 
-  popupKeyLight.position.set(entry.maxDim * 0.8, entry.maxDim * 1.4, entry.maxDim * 0.5);
-  popupKeyLight.shadow.camera.left = -entry.maxDim;
-  popupKeyLight.shadow.camera.right = entry.maxDim;
-  popupKeyLight.shadow.camera.top = entry.maxDim;
-  popupKeyLight.shadow.camera.bottom = -entry.maxDim;
-  popupKeyLight.shadow.camera.updateProjectionMatrix();
+  fitShadow(popupKeyLight, entry.sphere.center, entry.sphere.radius);
 
   popupRenderer.render(popupScene, popupCamera);
 }
@@ -478,6 +492,7 @@ function showPopupModel(glbPath, container){
         child.receiveShadow = true;
         recolorMesh(child);
         child.material.metalness = 0;
+        child.material.vertexColors = false; // COLOR_0 would tint over the site's color
         if (child.material.name === 'Transparent plastic') child.visible = false;
       }
     });
