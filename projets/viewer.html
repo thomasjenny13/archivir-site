@@ -516,6 +516,9 @@
       glb: 'concours/oberaletsch/base.glb',
       // the site model's terrain block — outline only, see terrainOutlinePositions
       terrainMeshes: ['Geometry214'],
+      // slab buried flush with the terrain — its outline drew a stray line
+      // across the ground between the hut and the path; surface kept
+      edgelessMeshes: ['Geometry213'],
       title: 'Oberaletschhütte — Archivir',
       creditHtml: '<strong>Oberaletschhütte</strong>Transformation et extension — SAC section Chasseral',
       creditMeta: '2024 · Belalp (VS) · Refuge de montagne · Concours',
@@ -1318,7 +1321,7 @@
   // so it can be positioned/scaled/disposed as a unit ----------
   const loader = new GLTFLoader();
 
-  function loadRig(glbPath, clipNormal = DEFAULT_CLIP_NORMAL, extraGlbPath = null, excludeMeshes = null, terrainMeshes = null) {
+  function loadRig(glbPath, clipNormal = DEFAULT_CLIP_NORMAL, extraGlbPath = null, excludeMeshes = null, terrainMeshes = null, edgelessMeshes = null) {
     return (async () => {
       const gltf = await loader.loadAsync(glbPath);
       const model = gltf.scene;
@@ -1360,7 +1363,10 @@
             // specular lobe reads as glossy/"brillant" next to the other meshes
             // even with identical roughness, so swap it back to Standard
             if (child.material.isMeshPhysicalMaterial) {
-              child.material = new THREE.MeshStandardMaterial({ name: child.material.name });
+              // keep the export's side setting: a fresh material defaults to
+              // FrontSide, which hid every downward-wound face of a
+              // double-sided export (Oberaletsch's roofs read as open boxes)
+              child.material = new THREE.MeshStandardMaterial({ name: child.material.name, side: child.material.side });
             }
             const style = tintStyle();
             child.material.color.setRGB(style.color[0], style.color[1], style.color[2]);
@@ -1458,7 +1464,8 @@
         // triangles flip past any angle threshold), so for terrain only
         // the block's own outline is kept: edges where a vertical cut side
         // meets a non-vertical face (the rims along the ground surface and
-        // the base), the block's vertical corners, and open borders.
+        // the base) and open borders — no vertical folds between the cut
+        // sides, which on a rounded block are just facet seams.
         function terrainOutlinePositions(meshes) {
           if (!meshes.length) return [];
           const geoms = meshes.map((mesh) => positionOnlyGeometry(mesh));
@@ -1486,14 +1493,13 @@
             }
           }
           const VERTICAL = 0.01; // |normal.y| below this = a cut side
-          const cornerCos = Math.cos(22 * Math.PI / 180);
           const out = [];
           edges.forEach(({ a, b, faces }) => {
             let keep = faces.length !== 2; // open border / non-manifold
             if (!keep) {
               const n1 = normals[faces[0]], n2 = normals[faces[1]];
               const v1 = Math.abs(n1.y) < VERTICAL, v2 = Math.abs(n2.y) < VERTICAL;
-              keep = v1 !== v2 || (v1 && v2 && n1.dot(n2) < cornerCos);
+              keep = v1 !== v2;
             }
             if (keep) out.push(pos.getX(a), pos.getY(a), pos.getZ(a), pos.getX(b), pos.getY(b), pos.getZ(b));
           });
@@ -1502,7 +1508,7 @@
         function buildEdges(meshes, widthScale) {
           if (!meshes.length) return null;
           const terrain = meshes.filter((mesh) => terrainMeshes && terrainMeshes.includes(mesh.name));
-          const rest = meshes.filter((mesh) => !terrain.includes(mesh));
+          const rest = meshes.filter((mesh) => !terrain.includes(mesh) && !(edgelessMeshes && edgelessMeshes.includes(mesh.name)));
           const positions = edgePositions(rest, 22).concat(terrainOutlinePositions(terrain));
           const fatEdgesGeom = new LineSegmentsGeometry().setPositions(positions);
           const lines = new LineSegments2(
@@ -1629,7 +1635,7 @@
     // a prize variant's own glb is just the added volumetry, not a full
     // scene — load it merged onto the project's base so the section cut,
     // edges and cap all read the combined base + extension as one piece
-    const rig = await loadRig(cfg.glb, cfg.clipNormal, cfg.variants[variantKey].glb, cfg.excludeMeshes, cfg.terrainMeshes);
+    const rig = await loadRig(cfg.glb, cfg.clipNormal, cfg.variants[variantKey].glb, cfg.excludeMeshes, cfg.terrainMeshes, cfg.edgelessMeshes);
     variantRigCache.set(key, rig);
     return rig;
   }
@@ -1705,7 +1711,7 @@
   async function getRig(slug){
     if (rigCache.has(slug)) return rigCache.get(slug);
     const cfg = PROJECTS[slug];
-    const rig = cfg.glb ? await loadRig(cfg.glb, cfg.clipNormal, null, cfg.excludeMeshes, cfg.terrainMeshes) : buildPlaceholderRig(cfg.clipNormal);
+    const rig = cfg.glb ? await loadRig(cfg.glb, cfg.clipNormal, null, cfg.excludeMeshes, cfg.terrainMeshes, cfg.edgelessMeshes) : buildPlaceholderRig(cfg.clipNormal);
     rigCache.set(slug, rig);
     return rig;
   }
