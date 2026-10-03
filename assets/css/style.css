@@ -1079,3 +1079,6 @@ html[data-theme="dark"] .maplibregl-ctrl-attrib-button{ filter: invert(1); }
 @media (max-width: 640px){
   .maplibregl-ctrl-top-right, .maplibregl-ctrl-top-left{ top: 44px; }
 }
+
+/* texte descriptif optionnel d'un ouvrage (champ "text" de projets/projects.js) */
+.credit-text{ display: block; max-width: 34ch; margin-top: 8px; color: var(--ink-faint); font-size: 0.72rem; line-height: 1.45; }
