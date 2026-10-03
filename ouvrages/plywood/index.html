@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lexend:wght@800&family=Syne:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/style.css?v=37">
+<link rel="stylesheet" href="../assets/css/style.css?v=38">
 <script type="importmap">
 {
   "imports": {
@@ -65,6 +65,9 @@
   <button id="cut-toggle" class="cut-fab" aria-label="Vue en coupe">◐</button>
   <button id="axo-toggle" class="view-fab axo-fab" aria-label="Vue axonométrique" title="Vue axonométrique">
     <svg viewBox="0 0 16 16" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"><path d="M8 1.5 14 5v6l-6 3.5L2 11V5z"/><path d="M2 5l6 3.5L14 5M8 8.5v6"/></svg>
+  </button>
+  <button id="paint-toggle" class="view-fab paint-fab" aria-label="Rendu peinture céramique" title="Rendu peinture céramique">
+    <svg viewBox="0 0 16 16" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.8 1.8 7.2 8.6"/><path d="M7.4 8.2c-1.6-.4-3.1.6-3.3 2.1-.2 1.4-.9 2.3-2.3 2.6 2.3 1.6 5.5 1.1 6.4-1.4.4-1.1.2-2.4-.8-3.3z"/></svg>
   </button>
   <div class="export-menu">
     <button id="export-toggle" class="view-fab export-fab" aria-label="Exporter la vue" title="Exporter la vue" aria-expanded="false">
@@ -649,6 +652,114 @@
     // wheel and a two-finger trackpad swipe forward/backward
   }, { capture: true, passive: false });
 
+  // ---------- "peinture céramique" render mode ----------
+  // A painterly take on a glazed ceramic maquette (after the "painting
+  // shader" look): every surface swaps to a glossy clear-coated glaze
+  // that picks up the environment's reflections, then a Kuwahara filter
+  // flattens the shaded image into soft, brush-like patches of colour.
+  // No hairlines or outline in this mode — the patches carry the form.
+  let paintMode = (() => { try { return localStorage.getItem('archivir-render') === 'peinture'; } catch { return false; } })();
+  const GLAZE = { color: [0.16, 0.32, 0.62], roughness: 0.35, clearcoat: 0.7, clearcoatRoughness: 0.05, envMapIntensity: 0.4 };
+  function glazeFor(mesh){
+    if (!mesh.userData.glazeMaterial) {
+      const std = mesh.material;
+      const m = new THREE.MeshPhysicalMaterial({
+        name: std.name, side: std.side,
+        color: new THREE.Color().setRGB(...GLAZE.color),
+        roughness: GLAZE.roughness, metalness: 0,
+        clearcoat: GLAZE.clearcoat, clearcoatRoughness: GLAZE.clearcoatRoughness,
+        envMapIntensity: GLAZE.envMapIntensity,
+        polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1,
+      });
+      m.clipShadows = true;
+      m.shadowSide = THREE.DoubleSide;
+      // uneven glaze: slow light/dark blotches in world space, which the
+      // Kuwahara pass then turns into visible brush patches — a perfectly
+      // even colour would just stay flat after the filter
+      m.onBeforeCompile = (shader) => {
+        shader.vertexShader = shader.vertexShader
+          .replace('#include <common>', '#include <common>\nvarying vec3 vGlazePos;')
+          .replace('#include <begin_vertex>', '#include <begin_vertex>\nvGlazePos = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+        shader.fragmentShader = shader.fragmentShader
+          .replace('#include <common>', `#include <common>
+            varying vec3 vGlazePos;
+            float gHash(vec3 p){ p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+            float gNoise(vec3 x){ vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);
+              return mix(mix(mix(gHash(i), gHash(i + vec3(1,0,0)), f.x), mix(gHash(i + vec3(0,1,0)), gHash(i + vec3(1,1,0)), f.x), f.y),
+                         mix(mix(gHash(i + vec3(0,0,1)), gHash(i + vec3(1,0,1)), f.x), mix(gHash(i + vec3(0,1,1)), gHash(i + vec3(1,1,1)), f.x), f.y), f.z); }`)
+          .replace('#include <color_fragment>', `#include <color_fragment>
+            float g = 0.6 * gNoise(vGlazePos * 0.35) + 0.4 * gNoise(vGlazePos * 1.1 + 7.3);
+            diffuseColor.rgb *= mix(0.72, 1.28, g);`);
+      };
+      mesh.userData.glazeMaterial = m;
+    }
+    return mesh.userData.glazeMaterial;
+  }
+  function applyRenderMode(rig){
+    if (!rig) return;
+    rig.sectionMeshes.forEach((mesh) => {
+      if (!mesh.userData.stdMaterial) mesh.userData.stdMaterial = mesh.material;
+      const next = paintMode ? glazeFor(mesh) : mesh.userData.stdMaterial;
+      if (mesh.material !== next) {
+        next.clippingPlanes = mesh.material.clippingPlanes; // keep the section cut
+        mesh.material = next;
+      }
+    });
+    if (rig.innerEdges) rig.innerEdges.visible = !paintMode;
+    if (rig.glassEdges) rig.glassEdges.visible = !paintMode;
+    if (rig.cutBoundaryEdges) rig.cutBoundaryEdges.visible = sectionView && !paintMode;
+  }
+  // Kuwahara: for each pixel, the four (R+1)² quadrants around it are
+  // averaged and the one with the least colour variance wins — edges stay
+  // put while gradients collapse into flat, painted patches. Works on the
+  // premultiplied RGBA of the render, so the transparent background
+  // blends cleanly at the silhouette.
+  const KuwaharaShader = {
+    uniforms: { tDiffuse: { value: null }, resolution: { value: new THREE.Vector2(1, 1) }, spacing: { value: 1 } },
+    vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: `
+      uniform sampler2D tDiffuse; uniform vec2 resolution; uniform float spacing; varying vec2 vUv;
+      const int R = 5;
+      void main(){
+        vec2 px = spacing / resolution;
+        vec4 mean[4]; vec3 sq[4];
+        for (int q = 0; q < 4; q++) { mean[q] = vec4(0.0); sq[q] = vec3(0.0); }
+        for (int j = 0; j <= R; j++) for (int i = 0; i <= R; i++) {
+          vec4 a = texture2D(tDiffuse, vUv + vec2(-i, -j) * px);
+          vec4 b = texture2D(tDiffuse, vUv + vec2( i, -j) * px);
+          vec4 c = texture2D(tDiffuse, vUv + vec2(-i,  j) * px);
+          vec4 d = texture2D(tDiffuse, vUv + vec2( i,  j) * px);
+          mean[0] += a; sq[0] += a.rgb * a.rgb;
+          mean[1] += b; sq[1] += b.rgb * b.rgb;
+          mean[2] += c; sq[2] += c.rgb * c.rgb;
+          mean[3] += d; sq[3] += d.rgb * d.rgb;
+        }
+        float n = float((R + 1) * (R + 1));
+        float best = 1e9; vec4 outc = vec4(0.0);
+        for (int q = 0; q < 4; q++) {
+          vec4 m = mean[q] / n;
+          vec3 v = abs(sq[q] / n - m.rgb * m.rgb);
+          float var = v.r + v.g + v.b;
+          if (var < best) { best = var; outc = m; }
+        }
+        gl_FragColor = outc;
+      }`,
+  };
+  let paintPass = null; // created once the composer exists (below)
+  function setPaintMode(on){
+    paintMode = on;
+    try { localStorage.setItem('archivir-render', on ? 'peinture' : 'maquette'); } catch {}
+    if (paintPass) paintPass.enabled = on;
+    outlinePass.enabled = !on;
+    applyRenderMode(currentRig);
+    const btn = document.getElementById('paint-toggle');
+    btn.classList.toggle('active', on);
+    const label = on ? 'Rendu maquette' : 'Rendu peinture céramique';
+    btn.setAttribute('aria-label', label);
+    btn.title = label;
+    requestRender();
+  }
+
   const composerTarget = new THREE.WebGLRenderTarget(container.clientWidth, container.clientHeight, {
     stencilBuffer: true,
     samples: 4,
@@ -656,6 +767,9 @@
   const composer = new EffectComposer(renderer, composerTarget);
   const renderPass = new RenderPass(scene, camera);
   composer.addPass(renderPass);
+  paintPass = new ShaderPass(KuwaharaShader);
+  paintPass.enabled = paintMode;
+  composer.addPass(paintPass);
   const outlinePass = new OutlinePass(
     new THREE.Vector2(container.clientWidth, container.clientHeight),
     scene, camera
@@ -665,6 +779,7 @@
   outlinePass.overlayMaterial.blendSrc = THREE.SrcAlphaFactor;
   outlinePass.overlayMaterial.blendDst = THREE.OneMinusSrcAlphaFactor;
   composer.addPass(outlinePass);
+  outlinePass.enabled = !paintMode;
   const fxaaPass = new ShaderPass(FXAAShader);
   composer.addPass(fxaaPass);
   composer.addPass(new OutputPass());
@@ -680,6 +795,8 @@
     renderer.setSize(w, h);
     composer.setSize(w, h);
     fxaaPass.material.uniforms['resolution'].value.set(1 / (w * dpr), 1 / (h * dpr));
+    paintPass.material.uniforms.resolution.value.set(w * dpr, h * dpr);
+    paintPass.material.uniforms.spacing.value = dpr; // same brush size on any screen
     if (currentRig) {
       currentRig.cutBoundaryEdges.material.resolution.set(w * dpr, h * dpr);
       currentRig.innerEdges.material.resolution.set(w * dpr, h * dpr);
@@ -720,9 +837,10 @@
     const style = tintStyle();
     if (!document.querySelector('.swatch.active')) {
       rig.sectionMeshes.forEach((mesh) => {
-        mesh.material.color.setRGB(style.color[0], style.color[1], style.color[2]);
-        mesh.material.roughness = style.roughness;
-        mesh.material.envMapIntensity = style.envMapIntensity;
+        const mat = mesh.userData.stdMaterial || mesh.material;
+        mat.color.setRGB(style.color[0], style.color[1], style.color[2]);
+        mat.roughness = style.roughness;
+        mat.envMapIntensity = style.envMapIntensity;
       });
     }
     if (rig.cutBoundaryEdges) {
@@ -977,7 +1095,7 @@
     if (rig.innerEdges) rig.innerEdges.material.clippingPlanes = planes;
     if (rig.glassEdges) rig.glassEdges.material.clippingPlanes = planes;
     outlinePass.selectedObjects = on ? [rig.clippedOutlineMesh] : [rig.model];
-    if (rig.cutBoundaryEdges) rig.cutBoundaryEdges.visible = on;
+    if (rig.cutBoundaryEdges) rig.cutBoundaryEdges.visible = on && !paintMode;
     if (rig.sectionCap) rig.sectionCap.visible = on;
   }
   cutToggle.addEventListener('click', () => {
@@ -1038,6 +1156,9 @@
     requestRender();
   }
   axoToggle.addEventListener('click', () => setAxoView(!axoView));
+  const paintToggle = document.getElementById('paint-toggle');
+  paintToggle.classList.toggle('active', paintMode);
+  paintToggle.addEventListener('click', () => setPaintMode(!paintMode));
 
   // ---------- export: PNG screenshot / SVG line drawing ----------
   function exportName(ext){
@@ -1726,6 +1847,7 @@
 
     const newRig = await getVariantRig(slug, variantKey);
     retintRig(newRig);
+    applyRenderMode(newRig);
     const oldRig = currentRig;
 
     scene.add(newRig.group);
@@ -1800,6 +1922,7 @@
     const newRig = await getRig(slug);
     // a cached rig may have loaded under a since-changed tint choice
     retintRig(newRig);
+    applyRenderMode(newRig);
     const oldRig = currentRig;
 
     if (animate && oldRig) {
