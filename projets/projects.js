@@ -18,7 +18,7 @@ export const PROJECTS = {
   tupi: {
     glb: 'tupi/tupi.glb',
     title: 'Tupi — Archivir',
-    creditHtml: '<a class="credit-link" href="https://www.mijong.ch/projects/tupi-sion/" target="_blank" rel="noopener noreferrer"><strong>Tupi</strong></a><a class="credit-author" href="https://www.mijong.ch/" target="_blank" rel="noopener noreferrer">mijong architecture</a>',
+    creditHtml: '<a class="credit-link" href="https://www.mijong.ch/projects/tupi-sion/" target="_blank" rel="noopener noreferrer"><strong>Tupi</strong></a><a class="credit-author" href="https://www.mijong.ch/" target="_blank" rel="noopener noreferrer">mijong architecture design</a>',
     creditMeta: '2019 · Sion (VS) · Santé · <a class="credit-author" href="tupi/Campus PÔLE SANTE - Rapport du jury - Sion (2019).pdf" target="_blank" rel="noopener noreferrer">Concours</a>',
     hasPlans: false,
   },
