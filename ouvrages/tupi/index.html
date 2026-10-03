@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lexend:wght@800&family=Syne:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/style.css?v=38">
+<link rel="stylesheet" href="../assets/css/style.css?v=39">
 <script type="importmap">
 {
   "imports": {
@@ -658,7 +658,9 @@
   // that picks up the environment's reflections, then a Kuwahara filter
   // flattens the shaded image into soft, brush-like patches of colour.
   // No hairlines or outline in this mode — the patches carry the form.
-  let paintMode = (() => { try { return localStorage.getItem('archivir-render') === 'peinture'; } catch { return false; } })();
+  // disabled for now (button hidden in the CSS, stored choice ignored) —
+  // re-enable by restoring: localStorage.getItem('archivir-render') === 'peinture'
+  let paintMode = false;
   const GLAZE = { color: [0.16, 0.32, 0.62], roughness: 0.35, clearcoat: 0.7, clearcoatRoughness: 0.05, envMapIntensity: 0.4 };
   function glazeFor(mesh){
     if (!mesh.userData.glazeMaterial) {

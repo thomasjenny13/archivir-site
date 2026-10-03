@@ -539,7 +539,7 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   background: color-mix(in srgb, var(--rose-gold) 20%, transparent);
 }
 .export-fab{ bottom: 148px; }
-.paint-fab{ bottom: 208px; }
+.paint-fab{ bottom: 208px; display: none; } /* "peinture céramique" mode disabled for now */
 .paint-fab.active{
   color: var(--rose-gold);
   border-color: var(--rose-gold-deep);
