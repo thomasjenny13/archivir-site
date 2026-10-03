@@ -13,5 +13,5 @@ window.PROJECTS = [
   { nom: "Caserne de Bernex", architecte: "bunq", lieu: "Bernex (GE)", lat: 46.1826254, lon: 6.0825067, url: "ouvrages/casernebernex/", glb: "projets/concours/caserne bernex/blend.glb", categorie: "Équipement public", type: "Concours" },
   { nom: "Atelier Hansaallee 94", architecte: "Herzog & de Meuron", lieu: "Düsseldorf (Allemagne)", lat: 51.235433, lon: 6.743714, url: "ouvrages/hansaallee/", glb: "projets/herzog de meuron/atelier hansaallee/atelier.glb", categorie: "Atelier", type: "Nouvelle construction" },
   { nom: "Plywood House", architecte: "Herzog & de Meuron", lieu: "Bottmingen (BL)", lat: 47.528976808370366, lon: 7.585112755354861, url: "ouvrages/plywood/", glb: "projets/herzog de meuron/plywood house/plywood.glb", categorie: "Habitation", type: "Nouvelle construction" },
-  { nom: "Umbrella Pavilion", architecte: "Charly Jolliet architecte", lieu: "Fribourg (FR)", lat: 46.791417, lon: 7.157472, url: "ouvrages/umbrella/", glb: "projets/charly jolliet/umbrella pavilion/umbrella.glb", categorie: "Pavillon", type: "Nouvelle construction" },
+  { nom: "Umbrella Pavilion", architecte: "charly jolliet architectes", lieu: "Fribourg (FR)", lat: 46.791417, lon: 7.157472, url: "ouvrages/umbrella/", glb: "projets/charly jolliet/umbrella pavilion/umbrella.glb", categorie: "Pavillon", type: "Nouvelle construction" },
 ];

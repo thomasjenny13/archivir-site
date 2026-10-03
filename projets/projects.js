@@ -102,7 +102,7 @@ export const PROJECTS = {
   umbrella: {
     glb: 'charly jolliet/umbrella pavilion/umbrella.glb',
     title: 'Umbrella Pavilion — Archivir',
-    creditHtml: '<a class="credit-link" href="https://charlyjolliet.ch/projects/umbrella-pavillon/" target="_blank" rel="noopener noreferrer"><strong>Umbrella Pavilion</strong></a><a class="credit-author" href="https://charlyjolliet.ch/" target="_blank" rel="noopener noreferrer">Charly Jolliet architecte</a>',
+    creditHtml: '<a class="credit-link" href="https://charlyjolliet.ch/projects/umbrella-pavillon/" target="_blank" rel="noopener noreferrer"><strong>Umbrella Pavilion</strong></a><a class="credit-author" href="https://charlyjolliet.ch/" target="_blank" rel="noopener noreferrer">charly jolliet architectes</a>',
     creditMeta: '2020–2022 · Fribourg (FR) · Pavillon · Nouvelle construction',
     hasPlans: false,
     text: 'Pavillon du Jardin botanique de Fribourg, inauguré en avril 2023 : un toit en parapluie posé sur trois mélèzes malades abattus sur place, dont le reste des troncs forme le sol et les bancs. De longues rampes mènent en boucle des futures plantations au pavillon.',
