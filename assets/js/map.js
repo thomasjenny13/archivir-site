@@ -24,9 +24,12 @@ function projectBounds(list = PROJECTS){
 // parentheses at the end of a project's lieu string (e.g. "Bochum
 // (Allemagne)") — same convention reused here so a country picked on
 // the map means the same thing it does in the index
+// Swiss projects carry their canton instead ("Sion (VS)") — a two-letter
+// code there means Switzerland, matching the index's data-country="Suisse"
 function countryOf(project){
   const m = project.lieu.match(/\(([^)]+)\)\s*$/);
-  return m ? m[1] : '';
+  if (!m) return '';
+  return /^[A-Z]{2}$/.test(m[1]) ? 'Suisse' : m[1];
 }
 
 // the index's Lieu column shows a simplified city label (district
