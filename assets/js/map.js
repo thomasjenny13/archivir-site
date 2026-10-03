@@ -558,7 +558,8 @@ function focusMarker(marker, project, popup, tip){
   markers.forEach((m) => { if (m.popup && m.popup !== popup && m.popup.isOpen()) m.popup.remove(); });
   if (map.getZoom() < FOCUS_ZOOM) map.flyTo({ center: [project.lon, project.lat], zoom: FOCUS_ZOOM, duration: 1100 });
   else map.panTo([project.lon, project.lat]);
-  map.once('idle', () => highlightBuildingAt(project.lon, project.lat));
+  // (footprint highlight removed at the user's request — highlightBuildingAt
+  // and its layers are kept, just no longer triggered)
   // deferred: on a real click this handler runs *before* MapLibre's own
   // marker click binding (which toggles the popup too) — opening it here
   // synchronously meant MapLibre's toggle immediately closed it again,
