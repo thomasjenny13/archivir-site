@@ -1,0 +1,2098 @@
+<!doctype html>
+<!-- Page générée par build.mjs depuis projets/viewer.html et projets/projects.js — ne pas éditer à la main -->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>document.documentElement.dataset.theme = localStorage.getItem('archivir-theme') || 'light';</script>
+<script>if (!/\/ouvrages\//.test(location.pathname)) { var p = new URLSearchParams(location.search).get('p'); location.replace('/ouvrages/' + (p ? encodeURIComponent(p) + '/' : '')); }</script>
+<title>Reuse the Convent — Archivir</title>
+<meta name="description" content="Reuse the Convent — Concours ouvert — Reuse Italy. Concours d’idées international pour la reconversion d’un couvent abandonné à Bussi sul Tirino, dans les Abruzzes. Maquette de l’existant fournie aux participants, non réalisé.">
+<base href="/projets/">
+<link rel="canonical" href="https://archivir.ch/ouvrages/convent/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Archivir">
+<meta property="og:locale" content="fr_CH">
+<meta property="og:title" content="Reuse the Convent — Archivir">
+<meta property="og:description" content="Reuse the Convent — Concours ouvert — Reuse Italy. Concours d’idées international pour la reconversion d’un couvent abandonné à Bussi sul Tirino, dans les Abruzzes. Maquette de l’existant fournie aux participants, non réalisé.">
+<meta property="og:url" content="https://archivir.ch/ouvrages/convent/">
+<meta property="og:image" content="https://archivir.ch/assets/img/logo.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"3DModel","name":"Reuse the Convent","description":"Reuse the Convent — Concours ouvert — Reuse Italy. Concours d’idées international pour la reconversion d’un couvent abandonné à Bussi sul Tirino, dans les Abruzzes. Maquette de l’existant fournie aux participants, non réalisé.","url":"https://archivir.ch/ouvrages/convent/","image":"https://archivir.ch/assets/img/logo.jpg","isPartOf":{"@type":"WebSite","name":"Archivir","url":"https://archivir.ch/"},"encoding":{"@type":"MediaObject","contentUrl":"https://archivir.ch/projets/concours/reuse%20the%20convent/convent.glb","encodingFormat":"model/gltf-binary"}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lexend:wght@800&family=Syne:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css?v=39">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.169.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.169.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+
+<header class="site-banner">
+  <a class="site-logo" id="site-logo" href="#">
+    <span class="logo-prefix">archi</span><span class="logo-mid"><span class="logo-mid-text">tecture&nbsp;</span></span><span class="logo-vir">vir</span><span class="logo-tail"><span class="logo-tail-text">tuelle</span></span>
+  </a>
+  <nav class="site-nav">
+    <a class="site-nav-link" href="../index.html">Index</a>
+    <a class="site-nav-3d is-active" href="../ouvrages/" aria-label="Viewer 3D" aria-current="page" title="Viewer 3D">3D</a>
+    <a class="site-nav-link" href="../carte.html">Carte</a>
+  </nav>
+  <div class="site-banner-right">
+    <button id="tint-toggle" class="theme-toggle" aria-label="Couleur du modèle">⌂</button>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Basculer le thème">☾</button>
+  </div>
+</header>
+<a id="nav-prev" class="nav-arrow nav-arrow-left" href="#" aria-label="Projet précédent">←</a>
+<a id="nav-next" class="nav-arrow nav-arrow-right" href="#" aria-label="Projet suivant">→</a>
+
+<main class="viewer-page">
+  <div id="viewer-canvas" class="full-model"></div>
+  <p id="viewer-pending" class="viewer-pending" hidden>Maquette 3D à venir</p>
+
+  <nav class="compass" aria-label="Vues préréglées">
+    <button class="compass-pt compass-n" data-view="north" aria-label="Vue de face">F</button>
+    <button class="compass-pt compass-e" data-view="east" aria-label="Vue de droite">R</button>
+    <button class="compass-pt compass-s" data-view="south" aria-label="Vue arrière">B</button>
+    <button class="compass-pt compass-o" data-view="west" aria-label="Vue de gauche">L</button>
+  </nav>
+
+  <button id="cut-toggle" class="cut-fab" aria-label="Vue en coupe">◐</button>
+  <button id="axo-toggle" class="view-fab axo-fab" aria-label="Vue axonométrique" title="Vue axonométrique">
+    <svg viewBox="0 0 16 16" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"><path d="M8 1.5 14 5v6l-6 3.5L2 11V5z"/><path d="M2 5l6 3.5L14 5M8 8.5v6"/></svg>
+  </button>
+  <button id="paint-toggle" class="view-fab paint-fab" aria-label="Rendu peinture céramique" title="Rendu peinture céramique">
+    <svg viewBox="0 0 16 16" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.8 1.8 7.2 8.6"/><path d="M7.4 8.2c-1.6-.4-3.1.6-3.3 2.1-.2 1.4-.9 2.3-2.3 2.6 2.3 1.6 5.5 1.1 6.4-1.4.4-1.1.2-2.4-.8-3.3z"/></svg>
+  </button>
+  <div class="export-menu">
+    <button id="export-toggle" class="view-fab export-fab" aria-label="Exporter la vue" title="Exporter la vue" aria-expanded="false">
+      <svg viewBox="0 0 16 16" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 11v2.5h11V11"/></svg>
+    </button>
+    <div id="export-dropdown" class="export-dropdown" hidden>
+      <button class="export-item" data-export="png">Image PNG</button>
+      <button class="export-item" data-export="svg">Dessin SVG</button>
+    </div>
+  </div>
+
+  <div class="material-picker" aria-label="Matériaux">
+    <button class="swatch" data-preset="platre" style="background:#9E9689" aria-label="Plâtre"></button>
+    <button class="swatch" data-preset="beton" style="background:#6B6B68" aria-label="Béton"></button>
+    <button class="swatch" data-preset="blanc" style="background:#D9D7CE" aria-label="Blanc architecture"></button>
+    <button class="swatch" data-preset="terre" style="background:#8C6152" aria-label="Terre cuite"></button>
+    <button class="swatch" data-preset="bronze" style="background:#59492E" aria-label="Bronze"></button>
+  </div>
+
+  <p id="viewer-credit" class="viewer-credit"><strong>Reuse the Convent</strong>Concours ouvert — Reuse Italy<br><span class="credit-meta">2026 · Bussi sul Tirino (Italie) · Couvent · Concours ouvert</span><span class="credit-text">Concours d’idées international pour la reconversion d’un couvent abandonné à Bussi sul Tirino, dans les Abruzzes. Maquette de l’existant fournie aux participants, non réalisé.</span></p>
+
+  <div id="prize-picker" class="prize-picker" hidden></div>
+
+</main>
+  <div id="plans-menu" class="plans-menu">
+    <div id="plans-dropdown" class="plans-dropdown">
+      <div class="plans-dropdown-group" data-project="pavillon">
+        <p class="plans-dropdown-heading">Façades</p>
+        <button class="plans-dropdown-item" data-plan="nord"><span class="plans-dropdown-thumb"></span><span class="plans-dropdown-label">Façade nord</span></button>
+        <button class="plans-dropdown-item" data-plan="sud"><span class="plans-dropdown-thumb"></span><span class="plans-dropdown-label">Façade sud</span></button>
+        <p class="plans-dropdown-heading">Coupe</p>
+        <button class="plans-dropdown-item" data-plan="coupe" data-kind="coupe"><span class="plans-dropdown-thumb"></span><span class="plans-dropdown-label">Coupe</span></button>
+        <p class="plans-dropdown-heading">Plans</p>
+        <button class="plans-dropdown-item" data-plan="etage" data-kind="main"><span class="plans-dropdown-thumb"></span><span class="plans-dropdown-label">1er étage</span></button>
+        <button class="plans-dropdown-item" data-plan="toiture"><span class="plans-dropdown-thumb"></span><span class="plans-dropdown-label">Toiture</span></button>
+      </div>
+      <div class="plans-dropdown-group" data-project="haus">
+        <p class="plans-dropdown-heading">Coupe</p>
+        <button class="plans-dropdown-item" data-plan="haus-coupe" data-kind="coupe"><span class="plans-dropdown-thumb"></span><span class="plans-dropdown-label">Coupe</span></button>
+      </div>
+    </div>
+    <button id="plans-menu-toggle" class="plans-menu-toggle" aria-label="Plans" aria-expanded="false">☰</button>
+  </div>
+  <div id="plans-overlay" class="plans-overlay" hidden>
+    <button id="plans-close" class="plans-close" aria-label="Fermer">✕</button>
+    <div class="plans-sheet">
+      <div class="plan-page active" data-plan="etage" data-kind="main"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 8192 8192">
+  <defs>
+    <style>
+      .st0 {
+        fill: none;
+      }
+
+      .st0, .st1 {
+        stroke: #2A2620;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 0.6; vector-effect: non-scaling-stroke;
+      }
+
+      .st1 {
+        fill: #000;
+        opacity: 1;
+      }
+    </style>
+  </defs>
+  <g>
+    <path class="st0" d="M178.18,178.18v7835.65"/>
+    <path class="st0" d="M356.35,356.35v7479.3"/>
+    <path class="st0" d="M0,0v8192"/>
+    <path class="st0" d="M534.53,534.53v7122.94"/>
+    <path class="st0" d="M712.7,712.7v6766.59"/>
+    <path class="st0" d="M890.88,890.88v6410.24"/>
+    <path class="st0" d="M1069.06,1069.06v6053.89"/>
+    <path class="st0" d="M1247.23,1247.23v5697.54"/>
+    <path class="st0" d="M1425.41,1425.41v5341.18"/>
+    <path class="st0" d="M1603.58,1603.58v4984.83"/>
+    <path class="st0" d="M1781.76,1781.76v4628.48"/>
+    <path class="st0" d="M1959.94,1959.94v4272.13"/>
+    <path class="st0" d="M2138.11,2138.11v3915.78"/>
+    <path class="st0" d="M2316.29,2316.29v3559.42"/>
+    <path class="st0" d="M2494.46,2494.46v3203.07"/>
+    <path class="st0" d="M2672.64,2672.64v2846.72"/>
+    <path class="st0" d="M2850.82,2850.82v2490.37"/>
+    <path class="st0" d="M3028.99,3028.99v2134.02"/>
+    <path class="st0" d="M3207.17,3207.17v1777.66"/>
+    <path class="st0" d="M3385.34,3385.34v1421.31"/>
+    <path class="st0" d="M3563.52,3563.52v1064.96"/>
+    <path class="st0" d="M7536.64,655.36L8192,0v8192l-655.36-655.36V655.36"/>
+  </g>
+  <g>
+    <path class="st1" d="M0,0h8192l-655.36,655.36h-3973.12v2908.16L0,0"/>
+    <path class="st1" d="M7536.64,7536.64l655.36,655.36H0l3563.52-3563.52v2908.16h3973.12"/>
+  </g>
+</svg></div>
+      <div class="plan-page" data-plan="toiture"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 8192 8192">
+  <defs>
+    <style>
+      .st0 {
+        fill: none;
+        stroke: #2A2620;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 0.6; vector-effect: non-scaling-stroke;
+      }
+    </style>
+  </defs>
+  <path class="st0" d="M3028.99,3028.99v2134.02"/>
+  <path class="st0" d="M3207.17,3207.17v1777.66"/>
+  <path class="st0" d="M3385.34,3385.34v1421.31"/>
+  <path class="st0" d="M3563.52,3563.52v1064.96"/>
+  <path class="st0" d="M655.36,7536.64h2908.16v-2908.69l-635.39,635.92v-2335.73l635.39,635.39V655.37H655.36v6881.28"/>
+  <path class="st0" d="M8192,0v8192H0V0h8192"/>
+  <path class="st0" d="M8192,0v8192H0V0h8192"/>
+  <path class="st0" d="M7536.64,7536.64V655.36H655.36v6881.28h6881.28"/>
+</svg></div>
+      <div class="plan-page" data-plan="coupe" data-kind="coupe"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 8192 8192">
+  <defs>
+    <style>
+      .st0 {
+        fill: none;
+      }
+
+      .st0, .st1 {
+        stroke: #2A2620;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 0.6; vector-effect: non-scaling-stroke;
+      }
+
+      .st1 {
+        fill: #000;
+        opacity: 1;
+      }
+    </style>
+  </defs>
+  <g>
+    <path class="st0" d="M3563.52,4423.68l-635.39-966.5"/>
+    <path class="st0" d="M0,8012.55v-1638.4"/>
+    <path class="st0" d="M655.36,0h6881.28"/>
+    <path class="st0" d="M8192,3112.96v327.68"/>
+    <path class="st0" d="M7536.64,3440.64v-327.68"/>
+  </g>
+  <g>
+    <path class="st1" d="M0,0v6374.15h169.69l2758.44-2916.97L655.36,0H0"/>
+    <path class="st1" d="M8192,0h-655.36v3112.96h655.36V0"/>
+    <polygon class="st1" points="7536.64 3440.64 7536.64 4423.68 3563.52 4423.68 3563.52 4603.13 3385.34 4603.13 3385.34 4782.57 3207.17 4782.57 3207.17 4962.02 3028.99 4962.02 3028.99 5141.46 2850.82 5141.46 2850.82 5320.91 2672.64 5320.91 2672.64 5500.35 2494.46 5500.35 2494.46 5679.8 2316.29 5679.8 2316.29 5859.25 2138.11 5859.25 2138.11 6038.69 1959.94 6038.69 1959.94 6218.14 1781.76 6218.14 1781.76 6397.58 1603.58 6397.58 1603.58 6577.03 1425.41 6577.03 1425.41 6756.47 1247.23 6756.47 1247.23 6935.92 1069.06 6935.92 1069.06 7115.37 890.88 7115.37 890.88 7294.81 712.7 7294.81 712.7 7474.26 534.53 7474.26 534.53 7653.7 356.35 7653.7 356.35 7833.15 178.18 7833.15 178.18 8012.6 0 8012.6 0 8192 3563.52 8192 8192 8192 8192 4423.68 8192 3440.64 7536.64 3440.64"/>
+  </g>
+</svg></div>
+      <div class="plan-page" data-plan="nord"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 8192 8192">
+  <defs>
+    <style>
+      .st0 {
+        fill: none;
+        stroke: #2A2620;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 0.6; vector-effect: non-scaling-stroke;
+      }
+    </style>
+  </defs>
+  <path class="st0" d="M8192,8192H0V3440.75h8192v4751.25Z"/>
+  <path class="st0" d="M0,3112.99h8192V0H0v3112.99Z"/>
+  <path class="st0" d="M655.51,3440.57H.17v-327.76h655.34v327.76Z"/>
+  <path class="st0" d="M8192,3440.57h-655.34v-327.76h655.34v327.76Z"/>
+</svg></div>
+      <div class="plan-page" data-plan="sud"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 8192 8192">
+  <defs>
+    <style>
+      .st0 {
+        fill: none;
+        stroke: #2A2620;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 0.6; vector-effect: non-scaling-stroke;
+      }
+
+      .st1 {
+        fill: #2a2620;
+        fill-rule: evenodd;
+        opacity: .25;
+      }
+    </style>
+  </defs>
+  <path class="st1" d="M6410.24,6374.16H0l754.13,920.63h6683.74l754.13-920.63h-1781.76ZM1603.58,6397.55h178.18-178.18ZM1425.41,6577h178.18-178.18ZM1247.23,6756.44h178.18-178.18Z"/>
+  <path class="st0" d="M8192,8012.55v-1638.4"/>
+  <path class="st0" d="M0,8012.55v-1638.4"/>
+  <path class="st0" d="M0,0h8192"/>
+  <path class="st0" d="M0,4423.68V0"/>
+  <path class="st0" d="M0,4423.68v1950.47"/>
+  <path class="st0" d="M0,6374.15h8192"/>
+  <path class="st0" d="M8192,6374.15v-1950.47"/>
+  <path class="st0" d="M8192,4423.68V0"/>
+  <path class="st0" d="M178.18,7833.11v179.45"/>
+  <path class="st0" d="M356.35,7653.67v179.45"/>
+  <path class="st0" d="M534.53,7474.23v179.45"/>
+  <path class="st0" d="M712.7,7294.78v179.45"/>
+  <path class="st0" d="M890.88,7115.33v179.45"/>
+  <path class="st0" d="M1069.06,6935.9v179.45"/>
+  <path class="st0" d="M1247.23,6756.45v179.45"/>
+  <path class="st0" d="M1425.41,6577v179.45"/>
+  <path class="st0" d="M1603.58,6397.56v179.45"/>
+  <path class="st0" d="M1781.76,6374.15v23.4"/>
+  <path class="st0" d="M0,8192v-179.45"/>
+  <path class="st0" d="M6410.24,6397.56v-23.4"/>
+  <path class="st0" d="M6588.42,6577v-179.45"/>
+  <path class="st0" d="M6766.59,6756.45v-179.45"/>
+  <path class="st0" d="M6944.77,6935.9v-179.45"/>
+  <path class="st0" d="M7122.94,7115.33v-179.45"/>
+  <path class="st0" d="M7301.12,7294.78v-179.45"/>
+  <path class="st0" d="M7479.3,7474.23v-179.45"/>
+  <path class="st0" d="M7657.47,7653.67v-179.45"/>
+  <path class="st0" d="M7835.65,7833.11v-179.45"/>
+  <path class="st0" d="M8013.82,8012.55v-179.45"/>
+  <path class="st0" d="M8192,8192v-179.45"/>
+  <path class="st0" d="M0,8012.55h8192"/>
+  <path class="st0" d="M178.18,7833.11h7835.65"/>
+  <path class="st0" d="M356.35,7653.67h7479.3"/>
+  <path class="st0" d="M534.53,7474.23h7122.94"/>
+  <path class="st0" d="M712.7,7294.78h6766.59"/>
+  <path class="st0" d="M890.88,7115.33h6410.24"/>
+  <path class="st0" d="M1069.06,6935.9h6053.89"/>
+  <path class="st0" d="M1247.23,6756.45h5697.54"/>
+  <path class="st0" d="M1425.41,6577h5341.18"/>
+  <path class="st0" d="M1603.58,6397.56h4984.83"/>
+  <path class="st0" d="M0,8192h8192"/>
+</svg></div>
+      <div class="plan-page" data-plan="haus-coupe" data-kind="coupe"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 8192 5465.86"><defs><style>.st0{fill:none;}.st0,.st1{stroke:#2A2620;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.6;vector-effect:non-scaling-stroke;}.st1{fill:#000;opacity:1;}</style></defs><g><rect class="st1" x="120.22" y="939.39" width="5653.73" height="173.96"/><rect class="st1" x="120.22" y="2010.99" width="5653.73" height="173.97"/><path class="st1" d="M4817.17,4154.19v-897.64h956.78v-173.96H120.22v173.96h52.18v2209.3h8019.61v-1311.66h-3374.84ZM259.38,3256.55h4470.79v897.64H259.38v-897.64h0ZM8105.02,5291.89H259.38v-963.75h7845.63v963.75h.01Z"/></g><g><path class="st0" d="M2051.18,2184.95h-80.98l80.98,428.44v-261.44h417.51v730.64h50.49l169.66-897.64h-637.66Z"/><path class="st0" d="M1929.41,1969.09l7.92,41.89h113.85v-730.64h417.51v730.64h253.03l7.92-41.89v-855.74h-800.22v855.74h-.01Z"/><path class="st0" d="M1929.41,417.51h800.22V0h-800.22v417.51h0Z"/><path class="st0" d="M2172.74,3256.55l31.56,167h250.44l31.56-167h-313.57.01Z"/><path class="st0" d="M2329.96,4328.15l-75.52,233.11h151.04l-75.52-233.11Z"/><path class="st0" d="M2729.63,4328.15h-308.23l308.23,951.45v-951.45Z"/><path class="st0" d="M2468.68,4154.19h260.94v-897.64h-154.81l-106.14,561.55v336.09h.01Z"/><path class="st0" d="M2642.18,5291.89l-173.49-535.54v535.54h173.49Z"/><path class="st0" d="M2729.63,2437.46l-121.93,645.13h121.93v-645.13Z"/><path class="st0" d="M2729.63,5279.6v-951.45"/><path class="st0" d="M2729.63,4154.19v-897.64"/><path class="st0" d="M2729.63,3082.59v-645.13"/><path class="st0" d="M2729.63,1969.09v-855.74"/><path class="st0" d="M2729.63,417.51V0"/><path class="st0" d="M2729.63,0h-678.45"/><path class="st0" d="M1929.41,5282.34l121.77-375.88v-345.2h111.83l75.52-233.11h-309.12v954.19h0Z"/><path class="st0" d="M1929.41,2437.46v645.13h121.77v-.84l-121.77-644.3h0Z"/><path class="st0" d="M2051.18,3256.55h-121.77v897.64h121.77v-730.64h64.6l-31.56-167h-33.04Z"/><path class="st0" d="M2051.18,5188.68l-33.44,103.21h33.44v-103.21Z"/><path class="st0" d="M5773.94,939.39H120.21v173.96h5653.73v-173.96h0Z"/><path class="st0" d="M120.22,3082.59v173.96h52.19v2209.3h8019.6v-1311.66h-3374.84v-897.64h956.78v-173.96H120.22"/><path class="st0" d="M4730.18,4154.19H259.39v-897.64h4470.79v897.64"/><path class="st0" d="M259.38,5291.89v-963.74h7845.63v963.74H259.38"/><path class="st0" d="M120.22,2010.99v173.96h5653.73v-173.96H120.22Z"/><path class="st0" d="M2051.18,3082.59h.16l-.16-.84v.84Z"/><path class="st0" d="M2051.18,2010.99h417.51v-730.64h-417.51v730.64Z"/><path class="st0" d="M2051.18,2613.4l88.68,469.2h328.83v-730.64h-417.51v261.44Z"/><path class="st0" d="M2051.18,4154.19h202.69l-138.09-730.64h-64.6v730.64h0Z"/><path class="st0" d="M2051.18,4906.46l111.83-345.2h-111.83v345.2Z"/><path class="st0" d="M2051.18,5291.89h417.51v-535.54l-63.21-195.1h-151.04l-203.26,627.43v103.21Z"/><path class="st0" d="M2204.3,3423.55l125.21,662.53,125.21-662.53h-250.44.02Z"/><path class="st0" d="M2405.16,4154.19h63.52v-336.09l-63.52,336.09Z"/><path class="st0" d="M8.88,939.39h5194.47V417.51H8.88v521.88h0Z"/><path class="st0" d="M2238.53,4328.15l-312.22,963.74h91.43l312.22-963.74h-91.43Z"/><path class="st0" d="M2329.96,4328.15l312.22,963.74h91.43l-312.22-963.74h-91.43Z"/><path class="st0" d="M1767.67,1113.35h-88.52l169.66,897.64h88.52l-169.66-897.64Z"/><path class="st0" d="M1881.69,2184.95l169.66,897.64h88.52l-169.66-897.64h-88.52,0Z"/><path class="st0" d="M2329.53,4086.08l-156.78-829.53h-88.53s169.66,897.64,169.66,897.64h62.78"/><path class="st0" d="M2688.84,2184.95l-169.66,897.64h88.52l169.66-897.64h-88.52Z"/><path class="st0" d="M2891.37,1113.35l-169.66,897.64h88.52l169.66-897.64h-88.52Z"/><path class="st0" d="M5138.11,2010.99h1.06v-897.64h-1.06"/><path class="st0" d="M5138.11,1113.35h-3.01"/><path class="st0" d="M5135.1,2010.99h3.01"/><path class="st0" d="M5135.09,1113.35h-4.51"/><path class="st0" d="M5130.58,2010.99h4.51"/><path class="st0" d="M5130.57,1113.35h-5.32"/><path class="st0" d="M5125.25,2010.99h5.32"/><path class="st0" d="M5125.25,1113.35h-5.32"/><path class="st0" d="M5119.93,2010.99h5.32"/><path class="st0" d="M5119.92,1113.35h-4.51"/><path class="st0" d="M5115.41,2010.99h4.51"/><path class="st0" d="M5115.41,1113.35h-3.01"/><path class="st0" d="M5112.4,2010.99h3.01"/><path class="st0" d="M5112.39,1113.35h-1.06v897.64h1.06"/><path class="st0" d="M0,5465.85h172.4v-1311.66H0v1311.66h0Z"/><path class="st0" d="M172.4,3256.55v2035.34"/><path class="st0" d="M259.38,4328.15v963.74"/><path class="st0" d="M259.38,3256.55v897.64"/><path class="st0" d="M1929.41,5282.34v-954.19"/><path class="st0" d="M1929.41,4154.19v-897.64"/><path class="st0" d="M1929.41,3082.59v-645.13"/><path class="st0" d="M1929.41,1969.09v-855.74"/><path class="st0" d="M1929.41,417.51V0"/><path class="st0" d="M1929.41,0h121.77"/><path class="st0" d="M2051.18,1280.35v730.64"/><path class="st0" d="M2051.18,2351.96v261.44"/><path class="st0" d="M2051.18,3081.76v.84"/><path class="st0" d="M2051.18,3423.55v730.64"/><path class="st0" d="M2051.18,4561.26v345.2"/><path class="st0" d="M2051.18,5188.68v103.21"/><path class="st0" d="M4730.18,4154.19H259.39"/><path class="st0" d="M120.22,939.39v173.96"/><path class="st0" d="M5773.94,939.39H120.21"/><path class="st0" d="M5773.94,1113.35H120.21"/><path class="st0" d="M5773.94,939.39v173.96"/><path class="st0" d="M172.4,5291.89v173.96"/><path class="st0" d="M5772.86,5291.89H259.38"/><path class="st0" d="M5772.86,5465.85H172.4"/><path class="st0" d="M120.22,3082.59v173.96"/><path class="st0" d="M172.4,3256.55h-52.19"/><path class="st0" d="M4730.18,3256.55H259.39"/><path class="st0" d="M5773.94,3082.59H120.21"/><path class="st0" d="M5773.94,3082.59v173.96"/><path class="st0" d="M120.22,2010.99v173.96"/><path class="st0" d="M5773.94,2010.99H120.21"/><path class="st0" d="M5773.94,2184.95H120.21"/><path class="st0" d="M5773.94,2010.99v173.96"/><path class="st0" d="M2051.18,4561.26h111.83"/><path class="st0" d="M2254.45,4561.26h151.04"/><path class="st0" d="M2468.68,4756.36v535.54"/><path class="st0" d="M2051.18,3423.55h64.6"/><path class="st0" d="M2204.3,3423.55h250.44"/><path class="st0" d="M2468.68,3818.09v336.09"/><path class="st0" d="M2051.18,2351.96h417.51"/><path class="st0" d="M2468.68,2351.96v730.64"/><path class="st0" d="M2051.18,1280.35h417.51"/><path class="st0" d="M2468.68,1280.35v730.64"/><path class="st0" d="M8.88,939.39h111.34"/><path class="st0" d="M8.88,417.51v521.88"/><path class="st0" d="M5203.35,417.51v521.88"/><path class="st0" d="M8.88,417.51h5194.47"/><path class="st0" d="M2017.75,5291.89l312.22-963.74"/><path class="st0" d="M1926.32,5291.89l312.22-963.74"/><path class="st0" d="M2733.61,5291.89l-312.22-963.74"/><path class="st0" d="M2642.18,5291.89l-312.22-963.74"/><path class="st0" d="M2329.52,4086.08l-156.78-829.53"/><path class="st0" d="M2139.86,3082.59l-169.66-897.64"/><path class="st0" d="M1937.33,2010.99l-169.66-897.64"/><path class="st0" d="M2253.87,4154.19l-169.66-897.64"/><path class="st0" d="M2051.34,3082.59l-169.66-897.64"/><path class="st0" d="M1848.8,2010.99l-169.66-897.64"/><path class="st0" d="M2405.16,4154.19l169.66-897.64"/><path class="st0" d="M2607.7,3082.59l169.66-897.64"/><path class="st0" d="M2810.23,2010.99l169.66-897.64"/><path class="st0" d="M2329.52,4086.08l156.78-829.53"/><path class="st0" d="M2519.18,3082.59l169.66-897.64"/><path class="st0" d="M2721.71,2010.99l169.66-897.64"/><path class="st0" d="M5139.17,2010.99v-897.64"/><path class="st0" d="M5111.33,2010.99v-897.64"/><path class="st0" d="M73.06,4154.19V939.4"/><path class="st0" d="M100.9,4154.19V939.4"/><path class="st0" d="M0,5465.85h172.4"/><path class="st0" d="M0,4154.19h172.4"/><path class="st0" d="M0,5465.85v-1311.66"/></g></svg></div>
+    </div>
+  </div>
+
+<script>
+  const themeToggle = document.getElementById('theme-toggle');
+  function applyThemeIcon(){
+    themeToggle.textContent = document.documentElement.dataset.theme === 'light' ? '☾' : '☀';
+  }
+  applyThemeIcon();
+  themeToggle.addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem('archivir-theme', next);
+    applyThemeIcon();
+  });
+
+  // model tint (satin black vs. warm stone) is a separate, independent
+  // choice from the light/dark site theme — defaults to white/stone so
+  // it never clashes with either background
+  const tintToggle = document.getElementById('tint-toggle');
+  function applyTintIcon(){
+    tintToggle.classList.toggle('active', (localStorage.getItem('archivir-model-tint') || 'white') === 'dark');
+  }
+  applyTintIcon();
+  tintToggle.addEventListener('click', () => {
+    const next = (localStorage.getItem('archivir-model-tint') || 'white') === 'white' ? 'dark' : 'white';
+    localStorage.setItem('archivir-model-tint', next);
+    applyTintIcon();
+  });
+
+  const siteLogo = document.getElementById('site-logo');
+  const logoMid = siteLogo.querySelector('.logo-mid');
+  const logoTail = siteLogo.querySelector('.logo-tail');
+  const logoMidText = siteLogo.querySelector('.logo-mid-text');
+  const logoTailText = siteLogo.querySelector('.logo-tail-text');
+  // every wait and CSS transition in this animation is a multiple of one
+  // base beat, so open -> type -> hold -> decompose -> close -> settle
+  // reads as a single tempo instead of separately-tuned durations.
+  const BEAT = 100; // ms
+  const MS_PER_LETTER = BEAT;
+  function splitLetters(el){
+    const text = el.textContent;
+    el.textContent = '';
+    let maxDelay = 0;
+    text.split('').forEach((ch, i) => {
+      const span = document.createElement('span');
+      span.className = 'logo-letter';
+      span.textContent = ch === ' ' ? ' ' : ch;
+      const delay = i * MS_PER_LETTER;
+      span.style.transitionDelay = delay + 'ms';
+      maxDelay = Math.max(maxDelay, delay);
+      el.appendChild(span);
+    });
+    return maxDelay;
+  }
+  const midRevealMs = splitLetters(logoMidText);
+  const tailRevealMs = splitLetters(logoTailText);
+  const typeDuration = Math.max(midRevealMs, tailRevealMs) + BEAT; // + the last letter's own fade-in beat
+  // dust-disintegration exit: each letter drifts off on its own random
+  // heading rather than the whole word fading uniformly
+  function decomposeText(el){
+    el.querySelectorAll('.logo-letter').forEach((letter) => {
+      const dx = (Math.random() - 0.5) * 50;
+      const dy = -18 - Math.random() * 34;
+      const drot = (Math.random() - 0.5) * 100;
+      letter.style.setProperty('--dx', dx.toFixed(1) + 'px');
+      letter.style.setProperty('--dy', dy.toFixed(1) + 'px');
+      letter.style.setProperty('--drot', drot.toFixed(1) + 'deg');
+      letter.style.transitionDelay = (Math.random() * 2 * BEAT).toFixed(0) + 'ms';
+      letter.classList.add('is-decomposing');
+    });
+  }
+  function resetLetters(el){
+    el.querySelectorAll('.logo-letter').forEach((letter, i) => {
+      letter.classList.remove('is-decomposing');
+      letter.style.transitionDelay = (i * MS_PER_LETTER) + 'ms';
+    });
+  }
+  const OPEN_BEATS = 6;       // matches .logo-mid/.logo-tail.is-open .6s transition
+  const HOLD_BEATS = 5;       // brief beat to register the full word, not a dead pause
+  const DECOMPOSE_BEATS = 9;  // covers the longest decompose transition + its random delay, +1 beat margin
+  const REST_BEATS = 2;       // short rest before the space collapses
+  const CLOSE_BEATS = 3;      // matches .logo-mid/.logo-tail's base .3s transition
+  const SETTLE_BEATS = 4;     // matches .is-settling's .4s bounce
+  let logoAnimating = false;
+  siteLogo.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (logoAnimating) return;
+    logoAnimating = true;
+    // phase 1: open both gaps at once (text still invisible) — this is
+    // what pushes "vir" into its final position via real text reflow
+    logoMid.classList.add('is-open');
+    logoTail.classList.add('is-open');
+    setTimeout(() => {
+      // phase 2: "vir" has settled — type "tecture" and "tuelle" in together,
+      // letter by letter, left to right
+      logoMidText.classList.add('is-visible');
+      logoTailText.classList.add('is-visible');
+      setTimeout(() => {
+        // phase 3: hold, then let each letter disintegrate on its own.
+        // is-visible comes off in the same tick as is-decomposing goes on,
+        // so the higher-specificity ".is-visible .logo-letter{opacity:1}"
+        // rule never gets a chance to fight the decompose opacity/delay
+        decomposeText(logoMidText);
+        decomposeText(logoTailText);
+        logoMidText.classList.remove('is-visible');
+        logoTailText.classList.remove('is-visible');
+        setTimeout(() => {
+          resetLetters(logoMidText);
+          resetLetters(logoTailText);
+          setTimeout(() => {
+            logoMid.classList.remove('is-open');
+            logoTail.classList.remove('is-open');
+            setTimeout(() => {
+              siteLogo.classList.add('is-settling');
+              setTimeout(() => {
+                siteLogo.classList.remove('is-settling');
+                logoAnimating = false;
+              }, SETTLE_BEATS * BEAT);
+            }, CLOSE_BEATS * BEAT);
+          }, REST_BEATS * BEAT);
+        }, DECOMPOSE_BEATS * BEAT);
+      }, typeDuration + HOLD_BEATS * BEAT);
+    }, OPEN_BEATS * BEAT);
+  });
+
+  // plans overlay
+  const plansOverlay = document.getElementById('plans-overlay');
+  const plansClose = document.getElementById('plans-close');
+  function showPlan(plan){
+    document.querySelectorAll('.plan-page').forEach((p) => p.classList.toggle('active', p.dataset.plan === plan));
+    plansOverlay.hidden = false;
+  }
+  // each project has its own set of plans — read the order straight off
+  // the dropdown group that's currently visible, in document order
+  function currentPlanOrder(){
+    const group = document.querySelector('.plans-dropdown-group:not([hidden])');
+    if (!group) return [];
+    return Array.from(group.querySelectorAll('.plans-dropdown-item')).map((b) => b.dataset.plan);
+  }
+  function stepPlan(delta){
+    const order = currentPlanOrder();
+    const current = document.querySelector('.plan-page.active').dataset.plan;
+    const idx = order.indexOf(current);
+    if (idx === -1) return;
+    showPlan(order[(idx + delta + order.length) % order.length]);
+  }
+  const plansMenuToggle = document.getElementById('plans-menu-toggle');
+  const plansDropdown = document.getElementById('plans-dropdown');
+  function isDropdownOpen(){ return plansDropdown.classList.contains('visible'); }
+  function openPlansDropdown(){
+    plansDropdown.classList.add('visible');
+    plansMenuToggle.setAttribute('aria-expanded', 'true');
+  }
+  function closePlansDropdown(){
+    plansDropdown.classList.remove('visible');
+    plansMenuToggle.setAttribute('aria-expanded', 'false');
+  }
+  plansMenuToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (isDropdownOpen()) closePlansDropdown(); else openPlansDropdown();
+  });
+  document.addEventListener('click', (e) => {
+    // a click that lands on the plan overlay (closing the open drawing)
+    // shouldn't also dismiss the dropdown — it should stay open behind it
+    if (isDropdownOpen() && !plansDropdown.contains(e.target) && !plansOverlay.contains(e.target)) {
+      closePlansDropdown();
+    }
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closePlansDropdown();
+    if (!plansOverlay.hidden && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+      e.preventDefault();
+      stepPlan(e.key === 'ArrowUp' ? -1 : 1);
+    }
+  });
+
+  document.querySelectorAll('.plans-dropdown-item').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      showPlan(btn.dataset.plan);
+    });
+    const source = document.querySelector('.plan-page[data-plan="' + btn.dataset.plan + '"] svg');
+    if (source) {
+      const thumb = source.cloneNode(true);
+      thumb.removeAttribute('id');
+      thumb.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+      btn.querySelector('.plans-dropdown-thumb').appendChild(thumb);
+    }
+  });
+  plansClose.addEventListener('click', () => { plansOverlay.hidden = true; });
+  plansOverlay.addEventListener('click', (e) => { if (e.target === plansOverlay) plansOverlay.hidden = true; });
+</script>
+
+<script type="module">
+  import * as THREE from 'three';
+  import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+  import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+  import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+  import { mergeGeometries, mergeVertices, toCreasedNormals } from 'three/addons/utils/BufferGeometryUtils.js';
+  import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+  import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+  import { OutlinePass } from 'three/addons/postprocessing/OutlinePass.js';
+  import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+  import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+  import { FXAAShader } from 'three/addons/shaders/FXAAShader.js';
+  import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
+  import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+  import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
+
+  // ---------- per-project config ----------
+  import { PROJECTS } from './projects.js';
+
+  // l'ouvrage courant vient de l'URL /ouvrages/<slug>/ (ancien ?p=<slug> accepté)
+  function slugFromUrl(){
+    const m = location.pathname.match(/\/ouvrages\/([^/]+)/);
+    return m ? decodeURIComponent(m[1]) : new URLSearchParams(location.search).get('p');
+  }
+  // only projects with an actual glb are browsable via the prev/next
+  // arrows — a glb-less project (still reachable directly by URL) has
+  // nothing to show there beyond the "à venir" placeholder, so cycling
+  // through it would just be a dead end
+  const ORDER = Object.keys(PROJECTS).filter((slug) => PROJECTS[slug].glb);
+
+  // model tint is a user choice, independent of the light/dark site
+  // theme: warm stone + dark hairlines, or matte black + white hairlines
+  // — each pairing keeps the edge lines readable against its own surface
+  // regardless of what the page background is doing
+  const TINT_STYLE = {
+    white: { color: [0.735, 0.72, 0.675], roughness: 0.725, envMapIntensity: 0.4,
+             edgeColor: 0x1a1712, outlineThickness: 0.4, outlineStrength: 1.6, lineWidth: 0.9 },
+    // near-black surface mirrors the RoomEnvironment's light panels as
+    // ugly streaks at any gloss — force it fully matte and drop the env
+    // contribution entirely so it reads as a solid massing model, lit
+    // only by the key light + sky fill
+    dark:  { color: [0.02, 0.02, 0.02],   roughness: 1.0, envMapIntensity: 0,
+             edgeColor: 0xffffff,         outlineThickness: 0.18, outlineStrength: 0.8, lineWidth: 0.22 },
+  };
+  // on a small screen the model renders much smaller on-screen, so the
+  // same CSS-pixel line width reads disproportionately thick — thin it
+  // down further below the phone breakpoint used elsewhere in the CSS
+  function isMobileViewport(){ return window.innerWidth <= 640; }
+  const MOBILE_EDGE_SCALE = 0.5;
+  function tintStyle(){
+    const base = TINT_STYLE[(localStorage.getItem('archivir-model-tint') || 'white') === 'dark' ? 'dark' : 'white'];
+    if (!isMobileViewport()) return base;
+    return Object.assign({}, base, {
+      outlineThickness: base.outlineThickness * MOBILE_EDGE_SCALE,
+      outlineStrength: base.outlineStrength * MOBILE_EDGE_SCALE,
+      lineWidth: base.lineWidth * MOBILE_EDGE_SCALE,
+    });
+  }
+  const GLASS_EDGE_SCALE = 0.4;
+
+  // ---------- shared renderer/scene, set up once ----------
+  const container = document.getElementById('viewer-canvas');
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, stencil: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 0.95;
+  renderer.shadowMap.enabled = true;
+  // plain PCF: smoothed but crisp edges — the soft variant blurred every
+  // shadow by a few extra texels on top of the map's own resolution
+  renderer.shadowMap.type = THREE.PCFShadowMap;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.localClippingEnabled = true;
+  container.appendChild(renderer.domElement);
+
+  const scene = new THREE.Scene();
+
+  const pmremGenerator = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
+
+  const camera = new THREE.PerspectiveCamera(52, container.clientWidth / container.clientHeight, 0.1, 2000);
+  camera.position.set(4.5, 3, 6);
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.enablePan = false;
+  controls.minDistance = 2;
+  controls.maxDistance = 20;
+  controls.target.set(0, 0.6, 0);
+  controls.mouseButtons.MIDDLE = THREE.MOUSE.ROTATE;
+  // orbit stops at the horizon: the target sits at the model's mid-height,
+  // so the camera always stays above ground — seen from below, a site
+  // plot showed the building's footprint lines through it, and the
+  // ground shadow made no sense from underneath anyway
+  controls.maxPolarAngle = Math.PI / 2;
+  controls.update();
+
+  // on-demand rendering: this is a mostly-static scene, so redrawing
+  // every frame at 60fps+ regardless of whether anything moved burns
+  // GPU for no reason. Render only when something actually changed —
+  // an orbit/zoom, a fly-to, a project switch, a toggle — and let the
+  // loop go idle the rest of the time.
+  let needsRender = true;
+  function requestRender(){ needsRender = true; }
+
+  // damping never mathematically reaches exactly zero (it's a x *= 0.95
+  // decay every frame), so OrbitControls keeps firing 'change' — forever,
+  // in practice — after every drag/zoom. Rendering for as long as
+  // 'change' keeps firing would mean never actually going idle, so we
+  // don't gate on it at all: render continuously while actively
+  // interacting (between OrbitControls' own 'start'/'end' events), then
+  // for one bounded settle window after release to let the last bit of
+  // visible deceleration play out, then stop for good.
+  let dampingSettleUntil = 0;
+  const DAMPING_SETTLE_MS = 1200;
+  controls.addEventListener('start', () => { dampingSettleUntil = Infinity; requestRender(); });
+  controls.addEventListener('end', () => { dampingSettleUntil = performance.now() + DAMPING_SETTLE_MS; });
+
+  // Archicad-style trackpad orbit: a two-finger trackpad swipe reaches
+  // the browser as a wheel event, so holding Shift during one rotates
+  // the camera around the target instead of zooming. Registered with
+  // capture:true so it runs before OrbitControls' own wheel listener,
+  // which we suppress for that event via stopPropagation.
+  const ORBIT_WHEEL_SPEED = 0.0025;
+  // a plain (no-Shift) two-finger left/right swipe switches projects,
+  // same as the ←/→ keys; guarded by a cooldown so one continuous
+  // swipe (many wheel events) only fires a single switch
+  let projectSwipeCooldown = false;
+  renderer.domElement.addEventListener('wheel', (e) => {
+    if (e.shiftKey) {
+      e.preventDefault();
+      e.stopPropagation();
+      const offset = camera.position.clone().sub(controls.target);
+      const spherical = new THREE.Spherical().setFromVector3(offset);
+      spherical.theta += e.deltaX * ORBIT_WHEEL_SPEED;
+      spherical.phi += e.deltaY * ORBIT_WHEEL_SPEED;
+      spherical.phi = Math.max(0.05, Math.min(controls.maxPolarAngle, spherical.phi));
+      offset.setFromSpherical(spherical);
+      camera.position.copy(controls.target).add(offset);
+      camera.lookAt(controls.target);
+      requestRender();
+      return;
+    }
+    if (Math.abs(e.deltaX) > 8 && Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (projectSwipeCooldown) return;
+      projectSwipeCooldown = true;
+      setTimeout(() => { projectSwipeCooldown = false; }, 800);
+      // a harder/faster flick reports a larger deltaX on this first
+      // qualifying event than a gentle nudge — use that as a rough
+      // proxy for how many steps to roll through
+      const direction = e.deltaX > 0 ? 1 : -1;
+      const count = Math.min(Math.max(1, Math.round(Math.abs(e.deltaX) / 25)), ORDER.length - 1);
+      requestSteps(direction, count);
+      return;
+    }
+    // otherwise (plain vertical scroll/swipe) fall through to
+    // OrbitControls' own wheel handler — zoom, for both a real mouse
+    // wheel and a two-finger trackpad swipe forward/backward
+  }, { capture: true, passive: false });
+
+  // ---------- "peinture céramique" render mode ----------
+  // A painterly take on a glazed ceramic maquette (after the "painting
+  // shader" look): every surface swaps to a glossy clear-coated glaze
+  // that picks up the environment's reflections, then a Kuwahara filter
+  // flattens the shaded image into soft, brush-like patches of colour.
+  // No hairlines or outline in this mode — the patches carry the form.
+  // disabled for now (button hidden in the CSS, stored choice ignored) —
+  // re-enable by restoring: localStorage.getItem('archivir-render') === 'peinture'
+  let paintMode = false;
+  const GLAZE = { color: [0.16, 0.32, 0.62], roughness: 0.35, clearcoat: 0.7, clearcoatRoughness: 0.05, envMapIntensity: 0.4 };
+  function glazeFor(mesh){
+    if (!mesh.userData.glazeMaterial) {
+      const std = mesh.material;
+      const m = new THREE.MeshPhysicalMaterial({
+        name: std.name, side: std.side,
+        color: new THREE.Color().setRGB(...GLAZE.color),
+        roughness: GLAZE.roughness, metalness: 0,
+        clearcoat: GLAZE.clearcoat, clearcoatRoughness: GLAZE.clearcoatRoughness,
+        envMapIntensity: GLAZE.envMapIntensity,
+        polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1,
+      });
+      m.clipShadows = true;
+      m.shadowSide = THREE.DoubleSide;
+      // uneven glaze: slow light/dark blotches in world space, which the
+      // Kuwahara pass then turns into visible brush patches — a perfectly
+      // even colour would just stay flat after the filter
+      m.onBeforeCompile = (shader) => {
+        shader.vertexShader = shader.vertexShader
+          .replace('#include <common>', '#include <common>\nvarying vec3 vGlazePos;')
+          .replace('#include <begin_vertex>', '#include <begin_vertex>\nvGlazePos = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+        shader.fragmentShader = shader.fragmentShader
+          .replace('#include <common>', `#include <common>
+            varying vec3 vGlazePos;
+            float gHash(vec3 p){ p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+            float gNoise(vec3 x){ vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);
+              return mix(mix(mix(gHash(i), gHash(i + vec3(1,0,0)), f.x), mix(gHash(i + vec3(0,1,0)), gHash(i + vec3(1,1,0)), f.x), f.y),
+                         mix(mix(gHash(i + vec3(0,0,1)), gHash(i + vec3(1,0,1)), f.x), mix(gHash(i + vec3(0,1,1)), gHash(i + vec3(1,1,1)), f.x), f.y), f.z); }`)
+          .replace('#include <color_fragment>', `#include <color_fragment>
+            float g = 0.6 * gNoise(vGlazePos * 0.35) + 0.4 * gNoise(vGlazePos * 1.1 + 7.3);
+            diffuseColor.rgb *= mix(0.72, 1.28, g);`);
+      };
+      mesh.userData.glazeMaterial = m;
+    }
+    return mesh.userData.glazeMaterial;
+  }
+  function applyRenderMode(rig){
+    if (!rig) return;
+    rig.sectionMeshes.forEach((mesh) => {
+      if (!mesh.userData.stdMaterial) mesh.userData.stdMaterial = mesh.material;
+      const next = paintMode ? glazeFor(mesh) : mesh.userData.stdMaterial;
+      if (mesh.material !== next) {
+        next.clippingPlanes = mesh.material.clippingPlanes; // keep the section cut
+        mesh.material = next;
+      }
+    });
+    if (rig.innerEdges) rig.innerEdges.visible = !paintMode;
+    if (rig.glassEdges) rig.glassEdges.visible = !paintMode;
+    if (rig.cutBoundaryEdges) rig.cutBoundaryEdges.visible = sectionView && !paintMode;
+  }
+  // Kuwahara: for each pixel, the four (R+1)² quadrants around it are
+  // averaged and the one with the least colour variance wins — edges stay
+  // put while gradients collapse into flat, painted patches. Works on the
+  // premultiplied RGBA of the render, so the transparent background
+  // blends cleanly at the silhouette.
+  const KuwaharaShader = {
+    uniforms: { tDiffuse: { value: null }, resolution: { value: new THREE.Vector2(1, 1) }, spacing: { value: 1 } },
+    vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: `
+      uniform sampler2D tDiffuse; uniform vec2 resolution; uniform float spacing; varying vec2 vUv;
+      const int R = 5;
+      void main(){
+        vec2 px = spacing / resolution;
+        vec4 mean[4]; vec3 sq[4];
+        for (int q = 0; q < 4; q++) { mean[q] = vec4(0.0); sq[q] = vec3(0.0); }
+        for (int j = 0; j <= R; j++) for (int i = 0; i <= R; i++) {
+          vec4 a = texture2D(tDiffuse, vUv + vec2(-i, -j) * px);
+          vec4 b = texture2D(tDiffuse, vUv + vec2( i, -j) * px);
+          vec4 c = texture2D(tDiffuse, vUv + vec2(-i,  j) * px);
+          vec4 d = texture2D(tDiffuse, vUv + vec2( i,  j) * px);
+          mean[0] += a; sq[0] += a.rgb * a.rgb;
+          mean[1] += b; sq[1] += b.rgb * b.rgb;
+          mean[2] += c; sq[2] += c.rgb * c.rgb;
+          mean[3] += d; sq[3] += d.rgb * d.rgb;
+        }
+        float n = float((R + 1) * (R + 1));
+        float best = 1e9; vec4 outc = vec4(0.0);
+        for (int q = 0; q < 4; q++) {
+          vec4 m = mean[q] / n;
+          vec3 v = abs(sq[q] / n - m.rgb * m.rgb);
+          float var = v.r + v.g + v.b;
+          if (var < best) { best = var; outc = m; }
+        }
+        gl_FragColor = outc;
+      }`,
+  };
+  let paintPass = null; // created once the composer exists (below)
+  function setPaintMode(on){
+    paintMode = on;
+    try { localStorage.setItem('archivir-render', on ? 'peinture' : 'maquette'); } catch {}
+    if (paintPass) paintPass.enabled = on;
+    outlinePass.enabled = !on;
+    applyRenderMode(currentRig);
+    const btn = document.getElementById('paint-toggle');
+    btn.classList.toggle('active', on);
+    const label = on ? 'Rendu maquette' : 'Rendu peinture céramique';
+    btn.setAttribute('aria-label', label);
+    btn.title = label;
+    requestRender();
+  }
+
+  const composerTarget = new THREE.WebGLRenderTarget(container.clientWidth, container.clientHeight, {
+    stencilBuffer: true,
+    samples: 4,
+  });
+  const composer = new EffectComposer(renderer, composerTarget);
+  const renderPass = new RenderPass(scene, camera);
+  composer.addPass(renderPass);
+  paintPass = new ShaderPass(KuwaharaShader);
+  paintPass.enabled = paintMode;
+  composer.addPass(paintPass);
+  const outlinePass = new OutlinePass(
+    new THREE.Vector2(container.clientWidth, container.clientHeight),
+    scene, camera
+  );
+  outlinePass.edgeGlow = 0;
+  outlinePass.overlayMaterial.blending = THREE.CustomBlending;
+  outlinePass.overlayMaterial.blendSrc = THREE.SrcAlphaFactor;
+  outlinePass.overlayMaterial.blendDst = THREE.OneMinusSrcAlphaFactor;
+  composer.addPass(outlinePass);
+  outlinePass.enabled = !paintMode;
+  const fxaaPass = new ShaderPass(FXAAShader);
+  composer.addPass(fxaaPass);
+  composer.addPass(new OutputPass());
+
+  // the composer/outline render targets above are created at CSS-pixel
+  // size; without this they stay under-resolved relative to the
+  // renderer's actual (pixel-ratio-scaled) drawing buffer until the
+  // first window resize fires, which never happens on a normal load —
+  // syncRendererSize corrects that once up front and again on resize
+  function syncRendererSize(){
+    const w = container.clientWidth, h = container.clientHeight;
+    const dpr = renderer.getPixelRatio();
+    renderer.setSize(w, h);
+    composer.setSize(w, h);
+    fxaaPass.material.uniforms['resolution'].value.set(1 / (w * dpr), 1 / (h * dpr));
+    paintPass.material.uniforms.resolution.value.set(w * dpr, h * dpr);
+    paintPass.material.uniforms.spacing.value = dpr; // same brush size on any screen
+    if (currentRig) {
+      currentRig.cutBoundaryEdges.material.resolution.set(w * dpr, h * dpr);
+      currentRig.innerEdges.material.resolution.set(w * dpr, h * dpr);
+      if (currentRig.glassEdges) currentRig.glassEdges.material.resolution.set(w * dpr, h * dpr);
+    }
+    // the mobile breakpoint in tintStyle() depends on window width, so
+    // a resize can cross it (rotation, resizing the browser) — refresh
+    // the actual thicknesses here too, not just the line resolutions
+    applyEdgeStyle();
+  }
+
+  // re-tint the outline pass and every edge-line material from the
+  // current tint style — shared by the tint toggle, the initial setup,
+  // and any resize that might cross the mobile line-thickness breakpoint
+  function applyEdgeStyle(){
+    const style = tintStyle();
+    outlinePass.edgeStrength = style.outlineStrength;
+    outlinePass.edgeThickness = style.outlineThickness;
+    outlinePass.visibleEdgeColor.set(style.edgeColor);
+    outlinePass.hiddenEdgeColor.set(style.edgeColor);
+    if (!currentRig) return;
+    currentRig.cutBoundaryEdges.material.color.set(style.edgeColor);
+    currentRig.cutBoundaryEdges.material.linewidth = style.lineWidth;
+    currentRig.innerEdges.material.color.set(style.edgeColor);
+    currentRig.innerEdges.material.linewidth = style.lineWidth;
+    if (currentRig.glassEdges) {
+      currentRig.glassEdges.material.color.set(style.edgeColor);
+      currentRig.glassEdges.material.linewidth = style.lineWidth * GLASS_EDGE_SCALE;
+    }
+  }
+
+  // re-apply the current tint (surfaces + edge lines) to one rig. Rigs
+  // are cached and keep whatever tint was active when they loaded, so
+  // both the tint toggle and a project switch have to refresh them —
+  // otherwise the dark/stone choice only sticks on the visible model.
+  function retintRig(rig){
+    if (!rig) return;
+    const style = tintStyle();
+    if (!document.querySelector('.swatch.active')) {
+      rig.sectionMeshes.forEach((mesh) => {
+        const mat = mesh.userData.stdMaterial || mesh.material;
+        mat.color.setRGB(style.color[0], style.color[1], style.color[2]);
+        mat.roughness = style.roughness;
+        mat.envMapIntensity = style.envMapIntensity;
+      });
+    }
+    if (rig.cutBoundaryEdges) {
+      rig.cutBoundaryEdges.material.color.set(style.edgeColor);
+      rig.cutBoundaryEdges.material.linewidth = style.lineWidth;
+    }
+    if (rig.innerEdges) {
+      rig.innerEdges.material.color.set(style.edgeColor);
+      rig.innerEdges.material.linewidth = style.lineWidth;
+    }
+    if (rig.glassEdges) {
+      rig.glassEdges.material.color.set(style.edgeColor);
+      rig.glassEdges.material.linewidth = style.lineWidth * GLASS_EDGE_SCALE;
+    }
+  }
+
+  const keyLight = new THREE.DirectionalLight(0xfff2e0, 3.4);
+  keyLight.position.set(5, 8, 3);
+  keyLight.castShadow = true;
+  // frustum fitted to each project (fitShadow), so 4096 is spent on the
+  // model itself rather than on empty ground around it
+  keyLight.shadow.mapSize.set(4096, 4096);
+  keyLight.shadow.bias = -0.0005;
+  scene.add(keyLight);
+  scene.add(keyLight.target);
+
+  // Shadow frustum fitted tight around the model instead of a loose ±2-radius
+  // box around the ground origin: the light's shadow camera is aimed at the
+  // model's bounding-sphere center, so everything that can cast (and every
+  // ground point it shades — same light ray) lies within one radius of the
+  // axis, and the whole shadow map's resolution lands on the model.
+  const SHADOW_DIR = new THREE.Vector3(0.8, 1.4, 0.5).normalize();
+  function fitShadow(light, center, radius){
+    light.target.position.copy(center);
+    light.target.updateMatrixWorld();
+    light.position.copy(center).addScaledVector(SHADOW_DIR, radius * 3);
+    const cam = light.shadow.camera;
+    const r = radius * 1.05;
+    cam.left = -r; cam.right = r; cam.top = r; cam.bottom = -r;
+    cam.near = radius * 0.5;
+    cam.far = radius * 8; // far enough for a long shadow cast by a tall model
+    cam.updateProjectionMatrix();
+    light.shadow.normalBias = radius * 0.0015;
+  }
+
+
+  const fillLight = new THREE.HemisphereLight(0x5fc7e3, 0x1b1a18, 0.28);
+  scene.add(fillLight);
+
+  const ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(4000, 4000),
+    new THREE.ShadowMaterial({ opacity: 0.35 })
+  );
+  ground.rotation.x = -Math.PI / 2;
+  // a hair below 0: a model's own flat ground (a site plot) sits exactly
+  // at 0, and two coplanar surfaces fight over which one shows
+  ground.position.y = -0.01;
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  // section-cut plane normal, per project (default: front/back halves,
+  // normal along Z) — each rig bakes its own Plane instance from this at
+  // load time, so a project can be cut along a different axis
+  const DEFAULT_CLIP_NORMAL = [0, 0, -1];
+  // default initial camera direction — kept on the same side as
+  // -DEFAULT_CLIP_NORMAL so a section cut's cap faces the camera by
+  // default instead of hiding behind the kept half
+  const DEFAULT_VIEW_DIR = [-1.5, 1.3, 0.55];
+
+  // ---------- helpers (unchanged from the per-project pages) ----------
+  function clipGeometryByPlane(geometry, plane) {
+    const pos = geometry.attributes.position;
+    const out = [];
+    const cutEdges = [];
+    const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3();
+    function side(v) { return plane.normal.dot(v) + plane.constant; }
+    function intersect(p, q, dp, dq) {
+      return new THREE.Vector3().lerpVectors(p, q, dp / (dp - dq));
+    }
+    for (let i = 0; i < pos.count; i += 3) {
+      a.fromBufferAttribute(pos, i);
+      b.fromBufferAttribute(pos, i + 1);
+      c.fromBufferAttribute(pos, i + 2);
+      const da = side(a), db = side(b), dc = side(c);
+      const ia = da >= 0, ib = db >= 0, ic = dc >= 0;
+      const n = (ia ? 1 : 0) + (ib ? 1 : 0) + (ic ? 1 : 0);
+      if (n === 3) {
+        out.push(a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z);
+      } else if (n === 1) {
+        let p, q, r, dp, dq, dr;
+        if (ia) { p = a; q = b; r = c; dp = da; dq = db; dr = dc; }
+        else if (ib) { p = b; q = c; r = a; dp = db; dq = dc; dr = da; }
+        else { p = c; q = a; r = b; dp = dc; dq = da; dr = db; }
+        const pq = intersect(p, q, dp, dq);
+        const pr = intersect(p, r, dp, dr);
+        out.push(p.x, p.y, p.z, pq.x, pq.y, pq.z, pr.x, pr.y, pr.z);
+        cutEdges.push(pq.x, pq.y, pq.z, pr.x, pr.y, pr.z);
+      } else if (n === 2) {
+        let p, q, r, dp, dq, dr;
+        if (!ia) { r = a; p = b; q = c; dr = da; dp = db; dq = dc; }
+        else if (!ib) { r = b; p = c; q = a; dr = db; dp = dc; dq = da; }
+        else { r = c; p = a; q = b; dr = dc; dp = da; dq = db; }
+        const pr = intersect(p, r, dp, dr);
+        const qr = intersect(q, r, dq, dr);
+        out.push(p.x, p.y, p.z, q.x, q.y, q.z, qr.x, qr.y, qr.z);
+        out.push(p.x, p.y, p.z, qr.x, qr.y, qr.z, pr.x, pr.y, pr.z);
+        cutEdges.push(qr.x, qr.y, qr.z, pr.x, pr.y, pr.z);
+      }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(out, 3));
+    return { geometry: g, cutEdges };
+  }
+
+  // clip caps and edge extraction only ever read vertex positions, but
+  // meshes can carry mismatched attribute sets (e.g. an extra UV channel
+  // on one mesh only) which makes BufferGeometryUtils.mergeGeometries()
+  // bail out — so strip everything but position before merging
+  function positionOnlyGeometry(mesh) {
+    const g = mesh.geometry.clone();
+    g.applyMatrix4(mesh.matrixWorld);
+    Object.keys(g.attributes).forEach((name) => { if (name !== 'position') g.deleteAttribute(name); });
+    return g;
+  }
+
+  function buildSectionCap(meshes, plane, size, color) {
+    const group = new THREE.Group();
+    const geometries = meshes.map((mesh) => positionOnlyGeometry(mesh));
+    const geometry = mergeGeometries(geometries, false);
+
+    const baseMat = new THREE.MeshBasicMaterial();
+    baseMat.depthWrite = false;
+    baseMat.depthTest = false;
+    baseMat.colorWrite = false;
+    baseMat.stencilWrite = true;
+    baseMat.stencilFunc = THREE.AlwaysStencilFunc;
+
+    const backMat = baseMat.clone();
+    backMat.side = THREE.BackSide;
+    backMat.clippingPlanes = [plane];
+    backMat.stencilFail = THREE.IncrementWrapStencilOp;
+    backMat.stencilZFail = THREE.IncrementWrapStencilOp;
+    backMat.stencilZPass = THREE.IncrementWrapStencilOp;
+    const backMesh = new THREE.Mesh(geometry, backMat);
+    backMesh.renderOrder = 1;
+    group.add(backMesh);
+
+    const frontMat = baseMat.clone();
+    frontMat.side = THREE.FrontSide;
+    frontMat.clippingPlanes = [plane];
+    frontMat.stencilFail = THREE.DecrementWrapStencilOp;
+    frontMat.stencilZFail = THREE.DecrementWrapStencilOp;
+    frontMat.stencilZPass = THREE.DecrementWrapStencilOp;
+    const frontMesh = new THREE.Mesh(geometry, frontMat);
+    frontMesh.renderOrder = 1;
+    group.add(frontMesh);
+
+    const capMat = new THREE.MeshStandardMaterial({
+      color, roughness: 0.85, metalness: 0, side: THREE.DoubleSide,
+      stencilWrite: true, stencilRef: 0, stencilFunc: THREE.NotEqualStencilFunc,
+      stencilFail: THREE.ReplaceStencilOp, stencilZFail: THREE.ReplaceStencilOp, stencilZPass: THREE.ReplaceStencilOp,
+    });
+    const capPlane = new THREE.Mesh(new THREE.PlaneGeometry(size, size), capMat);
+    capPlane.renderOrder = 2;
+    plane.coplanarPoint(capPlane.position);
+    capPlane.lookAt(
+      capPlane.position.x - plane.normal.x,
+      capPlane.position.y - plane.normal.y,
+      capPlane.position.z - plane.normal.z
+    );
+    capPlane.onAfterRender = function (r) { r.clearStencil(); };
+    group.add(capPlane);
+    return group;
+  }
+
+  function easeInOutQuad(t){ return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+
+  // ---------- camera fly (compass presets) ----------
+  let viewDistance = 8;
+  let viewEyeY = 1;
+  let flying = false;
+  let flightStart = 0;
+  const flightDuration = 750;
+  const flightFrom = new THREE.Vector3();
+  const flightFromTarget = new THREE.Vector3();
+  const flightTo = new THREE.Vector3();
+  const flightToTarget = new THREE.Vector3();
+  function flyTo(position, target){
+    flightFrom.copy(camera.position);
+    flightFromTarget.copy(controls.target);
+    flightTo.copy(position);
+    flightToTarget.copy(target);
+    flightStart = performance.now();
+    flying = true;
+  }
+  const VIEW_PRESETS = {
+    north: () => flyTo(new THREE.Vector3(viewDistance, viewEyeY, 0), new THREE.Vector3(0, viewEyeY, 0)),
+    south: () => flyTo(new THREE.Vector3(-viewDistance, viewEyeY, 0), new THREE.Vector3(0, viewEyeY, 0)),
+    east:  () => flyTo(new THREE.Vector3(0, viewEyeY, viewDistance), new THREE.Vector3(0, viewEyeY, 0)),
+    west:  () => flyTo(new THREE.Vector3(0, viewEyeY, -viewDistance), new THREE.Vector3(0, viewEyeY, 0)),
+  };
+  document.querySelectorAll('[data-view]').forEach((btn) => {
+    btn.addEventListener('click', () => VIEW_PRESETS[btn.dataset.view]());
+  });
+
+  // ---------- material presets ----------
+  const MATERIAL_PRESETS = {
+    platre: { color: [0.62, 0.60, 0.55], roughness: 0.85, metalness: 0 },
+    beton:  { color: [0.42, 0.42, 0.40], roughness: 0.75, metalness: 0 },
+    blanc:  { color: [0.85, 0.84, 0.80], roughness: 0.6,  metalness: 0 },
+    terre:  { color: [0.55, 0.38, 0.32], roughness: 0.7,  metalness: 0 },
+    bronze: { color: [0.35, 0.28, 0.18], roughness: 0.35, metalness: 0.5 },
+  };
+  function applyMaterialPreset(name){
+    const p = MATERIAL_PRESETS[name];
+    if (!p || !currentRig || !currentRig.sectionMeshes.length) return;
+    currentRig.sectionMeshes.forEach((mesh) => {
+      mesh.material.color.setRGB(p.color[0], p.color[1], p.color[2]);
+      mesh.material.roughness = p.roughness;
+      mesh.material.metalness = p.metalness;
+    });
+    requestRender();
+  }
+  document.querySelectorAll('.swatch').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      applyMaterialPreset(btn.dataset.preset);
+      document.querySelectorAll('.swatch').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  // re-tint the model and its edge lines when the tint choice changes,
+  // unless a material swatch was explicitly chosen — that choice should stick
+  document.getElementById('tint-toggle').addEventListener('click', () => {
+    requestRender();
+    applyEdgeStyle();
+    // refresh every project already loaded this session, not just the
+    // one on screen, so the tint is already right when you navigate
+    rigCache.forEach(retintRig);
+  });
+
+  // ---------- section cut toggle ----------
+  let sectionView = false;
+  const cutToggle = document.getElementById('cut-toggle');
+  // applies the current on/off section-cut state to a given rig — shared by
+  // the toggle click and by a variant switch that should keep the cut open
+  // (the picker swaps in a whole new rig, which loads with clipping off)
+  function applySectionView(rig, on) {
+    if (!rig) return;
+    const planes = on ? [rig.clipPlane] : [];
+    rig.sectionMeshes.forEach((mesh) => { mesh.material.clippingPlanes = planes; });
+    if (rig.innerEdges) rig.innerEdges.material.clippingPlanes = planes;
+    if (rig.glassEdges) rig.glassEdges.material.clippingPlanes = planes;
+    outlinePass.selectedObjects = on ? [rig.clippedOutlineMesh] : [rig.model];
+    if (rig.cutBoundaryEdges) rig.cutBoundaryEdges.visible = on && !paintMode;
+    if (rig.sectionCap) rig.sectionCap.visible = on;
+  }
+  cutToggle.addEventListener('click', () => {
+    if (!currentRig) return;
+    sectionView = !sectionView;
+    applySectionView(currentRig, sectionView);
+    cutToggle.classList.toggle('active', sectionView);
+    requestRender();
+  });
+
+  // ---------- axonometric view ----------
+  // an orthographic camera that shadows the perspective one: OrbitControls,
+  // the compass presets, project switching and the zoom limits all keep
+  // driving the perspective camera exactly as before, and every frame the
+  // ortho camera just copies its orientation and derives its frustum from
+  // the orbit distance (same apparent size at the target), so toggling
+  // only changes the projection, never the framing
+  let axoView = false;
+  const axoCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.01, 1000);
+  function viewCamera(){ return axoView ? axoCamera : camera; }
+  function syncAxoCamera(){
+    const offset = camera.position.clone().sub(controls.target);
+    const distance = offset.length();
+    const halfH = distance * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    axoCamera.left = -halfH * camera.aspect;
+    axoCamera.right = halfH * camera.aspect;
+    axoCamera.top = halfH;
+    axoCamera.bottom = -halfH;
+    // backed off beyond the model so zooming in close never slices it —
+    // an ortho camera's distance doesn't change the image, only clipping
+    const reach = currentRig ? currentRig.maxDim * currentRig.group.scale.x * 2 : distance;
+    axoCamera.position.copy(controls.target).addScaledVector(offset.normalize(), distance + reach);
+    axoCamera.quaternion.copy(camera.quaternion);
+    axoCamera.near = reach * 0.001;
+    axoCamera.far = distance + reach * 4;
+    axoCamera.updateProjectionMatrix();
+    axoCamera.updateMatrixWorld();
+  }
+  const axoToggle = document.getElementById('axo-toggle');
+  function setAxoView(on){
+    axoView = on;
+    if (on) syncAxoCamera();
+    const cam = viewCamera();
+    renderPass.camera = cam;
+    outlinePass.renderCamera = cam;
+    // OutlinePass bakes its depth → view-Z conversion into the shader for
+    // the camera type it was built with; swap it along with the camera or
+    // its occlusion test reads orthographic depth as perspective
+    const mask = outlinePass.prepareMaskMaterial;
+    mask.fragmentShader = on
+      ? mask.fragmentShader.replace(/perspectiveDepthToViewZ/g, 'orthographicDepthToViewZ')
+      : mask.fragmentShader.replace(/orthographicDepthToViewZ/g, 'perspectiveDepthToViewZ');
+    mask.needsUpdate = true;
+    axoToggle.classList.toggle('active', on);
+    const label = on ? 'Vue en perspective' : 'Vue axonométrique';
+    axoToggle.setAttribute('aria-label', label);
+    axoToggle.title = label;
+    requestRender();
+  }
+  axoToggle.addEventListener('click', () => setAxoView(!axoView));
+  const paintToggle = document.getElementById('paint-toggle');
+  paintToggle.classList.toggle('active', paintMode);
+  paintToggle.addEventListener('click', () => setPaintMode(!paintMode));
+
+  // ---------- export: PNG screenshot / SVG line drawing ----------
+  function exportName(ext){
+    return 'archivir-' + (currentSlug || 'vue') + '-' + (axoView ? 'axonometrie' : 'perspective') + '.' + ext;
+  }
+  function downloadBlob(blob, filename){
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  // the WebGL canvas is transparent (the page background shows through),
+  // so the capture is flattened onto the current theme's background
+  function exportPNG(){
+    if (axoView) syncAxoCamera();
+    composer.render(); // read back in the same task, before the buffer is cleared
+    const src = renderer.domElement;
+    const out = document.createElement('canvas');
+    out.width = src.width;
+    out.height = src.height;
+    const ctx = out.getContext('2d');
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#ffffff';
+    ctx.fillRect(0, 0, out.width, out.height);
+    ctx.drawImage(src, 0, 0);
+    out.toBlob((blob) => downloadBlob(blob, exportName('png')), 'image/png');
+  }
+
+  // Vector export of the model's edge lines as seen right now, hidden
+  // lines removed. The on-screen edges are fat lines (LineSegments2),
+  // which three's SVGRenderer can't draw, and its painter's-sort hiding
+  // mangles lines lying on faces — so instead: render the model's
+  // view-space depth into an offscreen buffer, then walk every edge
+  // segment in small screen-space steps and keep only the stretches
+  // that aren't behind that depth.
+  const SVG_DEPTH_SCALE = 2; // depth buffer resolution vs CSS pixels
+  const depthExportMaterial = new THREE.ShaderMaterial({
+    uniforms: { uNear: { value: 0 }, uFar: { value: 1 } },
+    vertexShader: `
+      #include <common>
+      #include <clipping_planes_pars_vertex>
+      varying float vDepth;
+      void main(){
+        #include <begin_vertex>
+        #include <project_vertex>
+        #include <clipping_planes_vertex>
+        vDepth = -mvPosition.z;
+      }`,
+    fragmentShader: `
+      #include <clipping_planes_pars_fragment>
+      uniform float uNear;
+      uniform float uFar;
+      varying float vDepth;
+      void main(){
+        #include <clipping_planes_fragment>
+        // linear depth packed into 24 bits of an ordinary RGBA8 target
+        float v = floor(clamp((vDepth - uNear) / (uFar - uNear), 0.0, 1.0) * 16777215.0);
+        float r = floor(v / 65536.0);
+        float g = floor((v - r * 65536.0) / 256.0);
+        float b = v - r * 65536.0 - g * 256.0;
+        gl_FragColor = vec4(r, g, b, 255.0) / 255.0;
+      }`,
+    side: THREE.DoubleSide,
+    clipping: true,
+  });
+
+  function exportSVG(){
+    const rig = currentRig;
+    if (!rig || !rig.innerEdges) return;
+    if (axoView) syncAxoCamera();
+    const cam = viewCamera();
+    cam.updateMatrixWorld();
+    const W = container.clientWidth, H = container.clientHeight;
+    const dw = Math.round(W * SVG_DEPTH_SCALE), dh = Math.round(H * SVG_DEPTH_SCALE);
+
+    // depth range tight around the model, for the most precision
+    const sphere = new THREE.Box3().setFromObject(rig.model).getBoundingSphere(new THREE.Sphere());
+    const centerDepth = -sphere.center.clone().applyMatrix4(cam.matrixWorldInverse).z;
+    const near = Math.max(1e-4, centerDepth - sphere.radius * 1.05);
+    const far = centerDepth + sphere.radius * 1.05;
+    const eps = sphere.radius * 0.004;
+    depthExportMaterial.uniforms.uNear.value = near;
+    depthExportMaterial.uniforms.uFar.value = far;
+    depthExportMaterial.clippingPlanes = sectionView ? [rig.clipPlane] : [];
+
+    // depth pass over the model's meshes only — no edges, section cap,
+    // ground/shadow plane or outline helper
+    const target = new THREE.WebGLRenderTarget(dw, dh);
+    const swapped = [];
+    rig.model.traverse((o) => {
+      if (o.isMesh && o.visible) { swapped.push([o, o.material]); o.material = depthExportMaterial; }
+    });
+    const prevTarget = renderer.getRenderTarget();
+    const prevClear = renderer.getClearColor(new THREE.Color());
+    const prevAlpha = renderer.getClearAlpha();
+    renderer.setRenderTarget(target);
+    renderer.setClearColor(0xffffff, 1);
+    renderer.clear();
+    renderer.render(rig.model, cam);
+    const pixels = new Uint8Array(dw * dh * 4);
+    renderer.readRenderTargetPixels(target, 0, 0, dw, dh, pixels);
+    renderer.setRenderTarget(prevTarget);
+    renderer.setClearColor(prevClear, prevAlpha);
+    swapped.forEach(([o, m]) => { o.material = m; });
+    target.dispose();
+
+    const range = far - near;
+    function bufferDepth(px, py){
+      const i = ((dh - 1 - py) * dw + px) * 4; // readPixels rows start at the bottom
+      return near + ((pixels[i] * 65536 + pixels[i + 1] * 256 + pixels[i + 2]) / 16777215) * range;
+    }
+    // lenient 3×3 test: an edge lying exactly on a silhouette or on its
+    // own face must not flicker hidden because of a one-pixel miss
+    function isVisible(sx, sy, depth){
+      const cx = Math.floor(sx * SVG_DEPTH_SCALE), cy = Math.floor(sy * SVG_DEPTH_SCALE);
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          const x = cx + dx, y = cy + dy;
+          if (x < 0 || y < 0 || x >= dw || y >= dh) continue;
+          if (depth <= bufferDepth(x, y) + eps) return true;
+        }
+      }
+      return false;
+    }
+
+    const clipPlane = sectionView ? rig.clipPlane : null;
+    const tmp = new THREE.Vector3();
+    function toScreen(p){
+      tmp.copy(p).project(cam);
+      return [(tmp.x + 1) / 2 * W, (1 - tmp.y) / 2 * H, tmp.z];
+    }
+    function viewDepth(p){ return -tmp.copy(p).applyMatrix4(cam.matrixWorldInverse).z; }
+
+    // visible runs of every segment of one LineSegments2, as SVG path data
+    function traceEdges(lines, respectClip){
+      if (!lines) return '';
+      const data = lines.geometry.attributes.instanceStart.data;
+      const arr = data.array, stride = data.stride;
+      lines.updateMatrixWorld();
+      const m = lines.matrixWorld;
+      const a = new THREE.Vector3(), b = new THREE.Vector3(), p = new THREE.Vector3();
+      let d = '';
+      for (let i = 0; i + 5 < arr.length; i += stride) {
+        a.set(arr[i], arr[i + 1], arr[i + 2]).applyMatrix4(m);
+        b.set(arr[i + 3], arr[i + 4], arr[i + 5]).applyMatrix4(m);
+        if (respectClip && clipPlane) {
+          // same side three's clipping keeps: signed distance >= 0
+          const da = clipPlane.distanceToPoint(a), db = clipPlane.distanceToPoint(b);
+          if (da < 0 && db < 0) continue;
+          if (da < 0) a.lerp(b, da / (da - db));
+          else if (db < 0) b.lerpVectors(a, b, da / (da - db));
+        }
+        const sa = toScreen(a), sb = toScreen(b);
+        const len = Math.hypot(sb[0] - sa[0], sb[1] - sa[1]);
+        const steps = Math.max(2, Math.ceil(len / 1.5));
+        let runStart = null, last = null;
+        for (let k = 0; k <= steps; k++) {
+          p.lerpVectors(a, b, k / steps);
+          const s = toScreen(p);
+          const onScreen = s[0] >= 0 && s[0] < W && s[1] >= 0 && s[1] < H && s[2] >= -1 && s[2] <= 1;
+          const vis = onScreen && isVisible(s[0], s[1], viewDepth(p));
+          if (vis) {
+            if (!runStart) runStart = s;
+            last = s;
+          }
+          if ((!vis || k === steps) && runStart) {
+            if (Math.hypot(last[0] - runStart[0], last[1] - runStart[1]) >= 0.75) {
+              d += 'M' + runStart[0].toFixed(2) + ' ' + runStart[1].toFixed(2) + 'L' + last[0].toFixed(2) + ' ' + last[1].toFixed(2);
+            }
+            runStart = null;
+          }
+        }
+      }
+      return d;
+    }
+
+    const inner = traceEdges(rig.innerEdges, true);
+    const glass = traceEdges(rig.glassEdges, true);
+    const cut = sectionView ? traceEdges(rig.cutBoundaryEdges, false) : '';
+    const title = (PROJECTS[currentSlug] && PROJECTS[currentSlug].title || 'Archivir').replace(/[<&]/g, '');
+    const svg =
+      '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">\n` +
+      `<title>${title} — ${axoView ? 'axonométrie' : 'perspective'}</title>\n` +
+      '<g fill="none" stroke="#1c1a17" stroke-linecap="round" stroke-linejoin="round">\n' +
+      (inner ? `<path id="aretes" stroke-width="1" d="${inner}"/>\n` : '') +
+      (glass ? `<path id="vitrages" stroke-width="0.5" d="${glass}"/>\n` : '') +
+      (cut ? `<path id="coupe" stroke-width="1.8" d="${cut}"/>\n` : '') +
+      '</g>\n</svg>\n';
+    downloadBlob(new Blob([svg], { type: 'image/svg+xml' }), exportName('svg'));
+  }
+
+  const exportToggle = document.getElementById('export-toggle');
+  const exportDropdown = document.getElementById('export-dropdown');
+  function closeExportMenu(){ exportDropdown.hidden = true; exportToggle.setAttribute('aria-expanded', 'false'); }
+  exportToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    exportDropdown.hidden = !exportDropdown.hidden;
+    exportToggle.setAttribute('aria-expanded', String(!exportDropdown.hidden));
+    // no model yet ("à venir") → nothing to draw as vectors
+    exportDropdown.querySelector('[data-export="svg"]').disabled = !(currentRig && currentRig.innerEdges);
+  });
+  exportDropdown.addEventListener('click', (e) => {
+    const item = e.target.closest('[data-export]');
+    if (!item || item.disabled) return;
+    closeExportMenu();
+    if (item.dataset.export === 'png') exportPNG();
+    else exportSVG();
+  });
+  document.addEventListener('click', (e) => {
+    if (!exportDropdown.hidden && !e.target.closest('.export-menu')) closeExportMenu();
+  });
+
+  // ---------- rig: everything belonging to one loaded project, grouped
+  // so it can be positioned/scaled/disposed as a unit ----------
+  const loader = new GLTFLoader();
+
+  const BLOCK_SINK = 3;
+  // A clean prism around a group of pieces: the plan-view convex outline,
+  // simplified (corners closer than 15 cm merged, near-straight turns
+  // dropped) so slightly misaligned wall corners give one crisp vertical
+  // edge instead of sliver faces with doubled lines; each corner keeps the
+  // real top height found there, so a sloped roof stays sloped; the base
+  // sits BLOCK_SINK below the lowest point.
+  function blockPrism(pts) {
+    const xz = pts.map((p) => [p.x, p.z]).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+    const lower = [], upper = [];
+    xz.forEach((p) => { while (lower.length > 1 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) lower.pop(); lower.push(p); });
+    xz.slice().reverse().forEach((p) => { while (upper.length > 1 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) upper.pop(); upper.push(p); });
+    let hull = lower.slice(0, -1).concat(upper.slice(0, -1));
+    let changed = true;
+    while (changed && hull.length > 3) {
+      changed = false;
+      for (let i = 0; i < hull.length && hull.length > 3; i++) {
+        const a = hull[(i - 1 + hull.length) % hull.length], b = hull[i], c = hull[(i + 1) % hull.length];
+        const ab = Math.hypot(b[0] - a[0], b[1] - a[1]), bc = Math.hypot(c[0] - b[0], c[1] - b[1]);
+        const turn = Math.abs(Math.atan2(cross(a, b, c), (b[0] - a[0]) * (c[0] - b[0]) + (b[1] - a[1]) * (c[1] - b[1])));
+        if (bc < 0.15 || turn < 8 * Math.PI / 180) { hull.splice(i, 1); changed = true; i--; }
+        else if (ab < 0.15) { hull.splice(i, 1); changed = true; i--; }
+      }
+    }
+    const minY = Math.min(...pts.map((p) => p.y)) - BLOCK_SINK;
+    const cornerTops = hull.map(([x, z]) => {
+      let best = -Infinity;
+      pts.forEach((p) => { if (Math.hypot(p.x - x, p.z - z) < 0.3 && p.y > best) best = p.y; });
+      return best;
+    });
+    // one flat (possibly sloped) top: least-squares plane y = a·x + b·z + c
+    // through the corner heights, so the top and every side stay planar —
+    // per-corner heights alone twisted small pieces into skewed shapes
+    const fit = (() => {
+      let sxx = 0, sxz = 0, szz = 0, sx = 0, sz = 0, sxy = 0, szy = 0, sy = 0;
+      hull.forEach(([x, z], i) => { const y = cornerTops[i]; sxx += x * x; sxz += x * z; szz += z * z; sx += x; sz += z; sxy += x * y; szy += z * y; sy += y; });
+      const m = [[sxx, sxz, sx], [sxz, szz, sz], [sx, sz, hull.length]], r = [sxy, szy, sy];
+      const det = (a) => a[0][0] * (a[1][1] * a[2][2] - a[1][2] * a[2][1]) - a[0][1] * (a[1][0] * a[2][2] - a[1][2] * a[2][0]) + a[0][2] * (a[1][0] * a[2][1] - a[1][1] * a[2][0]);
+      const D = det(m);
+      if (Math.abs(D) < 1e-9) { const avg = sy / hull.length; return () => avg; }
+      const col = (k) => det(m.map((row, i) => row.map((v, j) => (j === k ? r[i] : v))));
+      const a = col(0) / D, b = col(1) / D, c = col(2) / D;
+      return (x, z) => a * x + b * z + c;
+    })();
+    const tops = hull.map(([x, z]) => fit(x, z));
+    const n = hull.length, v = [];
+    const tri = (a, b, c) => v.push(...a, ...b, ...c);
+    const T = (i) => [hull[i][0], tops[i], hull[i][1]], B = (i) => [hull[i][0], minY, hull[i][1]];
+    for (let i = 1; i < n - 1; i++) { tri(T(0), T(i + 1), T(i)); tri(B(0), B(i), B(i + 1)); }
+    for (let i = 0; i < n; i++) { const j = (i + 1) % n; tri(T(i), T(j), B(j)); tri(T(i), B(j), B(i)); }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(v, 3));
+    g.computeVertexNormals();
+    return g;
+  }
+  function loadRig(glbPath, clipNormal = DEFAULT_CLIP_NORMAL, extraGlbPath = null, excludeMeshes = null, terrainMeshes = null, edgelessMeshes = null, blockGroups = null) {
+    return (async () => {
+      const gltf = await loader.loadAsync(glbPath);
+      const model = gltf.scene;
+      let extraScene = null;
+      const blockMeshes = [];
+      if (extraGlbPath) {
+        // the extension shares the base export's coordinate system —
+        // parent it directly onto the base model so everything below
+        // (centering, welding, section cap, edges) treats base + extension
+        // as one combined volume instead of two separate rigs
+        const extraGltf = await loader.loadAsync(extraGlbPath);
+        extraScene = extraGltf.scene;
+        model.add(extraScene);
+      }
+      if (excludeMeshes && excludeMeshes.length) {
+        // some exports carry a stray object left far from the rest of
+        // the building (a leftover reference mesh, not moved along when
+        // the real geometry was recentered in the source file) — it
+        // never shows on its own, but including it in the model's
+        // bounding box blows up centering, camera framing and the
+        // shadow-map frustum for everything else. Drop it before any
+        // of that gets computed rather than trying to render around it.
+        const toRemove = [];
+        model.traverse((child) => { if (excludeMeshes.includes(child.name)) toRemove.push(child); });
+        toRemove.forEach((child) => child.parent && child.parent.remove(child));
+      }
+      if (blockGroups) {
+        // a small annex modeled as four walls with a roof set between them
+        // reads as a hollow box with visible wall thicknesses — each group
+        // is replaced by one solid: the convex envelope of its pieces,
+        // pushed BLOCK_SINK below their base so it stays anchored in the
+        // terrain where the ground dips between the wall feet
+        model.updateMatrixWorld(true);
+        blockGroups.forEach((names) => {
+          const members = [];
+          model.traverse((child) => { if (child.isMesh && names.includes(child.name)) members.push(child); });
+          if (!members.length) return;
+          const pts = [];
+          const v = new THREE.Vector3();
+          members.forEach((mesh) => {
+            const pos = mesh.geometry.attributes.position;
+            for (let i = 0; i < pos.count; i++) {
+              v.fromBufferAttribute(pos, i).applyMatrix4(mesh.matrixWorld);
+              pts.push(v.clone(), v.clone().setY(v.y - BLOCK_SINK));
+            }
+          });
+          const block = new THREE.Mesh(blockPrism(pts), members[0].material);
+          block.name = names.join('+');
+          blockMeshes.push(block);
+          members.forEach((mesh) => mesh.parent.remove(mesh));
+          model.add(block);
+        });
+      }
+      {
+        const group = new THREE.Group();
+        const clipPlane = new THREE.Plane(new THREE.Vector3(...clipNormal), 0);
+
+        model.traverse((child) => {
+          if (child.isMesh) {
+            // a perfectly flat surface (a site plot at ground level) shadowing
+            // itself only speckles — it still receives the building's shadows
+            child.castShadow = new THREE.Box3().setFromObject(child).getSize(new THREE.Vector3()).y > 0.01;
+            child.receiveShadow = true;
+            // some exports carry a KHR_materials_specular extension, which makes
+            // GLTFLoader build a MeshPhysicalMaterial instead of a plain
+            // MeshStandardMaterial — physical material's extra energy-conserving
+            // specular lobe reads as glossy/"brillant" next to the other meshes
+            // even with identical roughness, so swap it back to Standard
+            if (child.material.isMeshPhysicalMaterial) {
+              // keep the export's side setting: a fresh material defaults to
+              // FrontSide, which hid every downward-wound face of a
+              // double-sided export (Oberaletsch's roofs read as open boxes)
+              child.material = new THREE.MeshStandardMaterial({ name: child.material.name, side: child.material.side });
+            }
+            const style = tintStyle();
+            child.material.color.setRGB(style.color[0], style.color[1], style.color[2]);
+            child.material.roughness = style.roughness;
+            child.material.metalness = 0;
+            child.material.envMapIntensity = style.envMapIntensity;
+            // some exports carry per-vertex colors (COLOR_0) that would tint
+            // over the site's own uniform model color
+            child.material.vertexColors = false;
+            child.material.clipShadows = true;
+            child.material.shadowSide = THREE.DoubleSide;
+            // the crease/edge lines below sit exactly on this surface;
+            // without a polygon offset pushing the surface back a hair,
+            // the depth test flickers pixel-to-pixel between the line
+            // and the surface and the line reads as dashed, not solid
+            child.material.polygonOffset = true;
+            child.material.polygonOffsetFactor = 1;
+            child.material.polygonOffsetUnits = 1;
+            // "Transparent plastic" meshes stay in the model for edge
+            // extraction below but never render their own surface
+            if (child.material.name === 'Transparent plastic') child.visible = false;
+          }
+        });
+
+        // centered on the base model alone, never on base + extension:
+        // a competition entry's added volume would shift the combined box,
+        // and the same building would jump sideways or up/down when
+        // switching between Existant and a prize variant
+        if (extraScene) model.remove(extraScene);
+        const box = new THREE.Box3().setFromObject(model);
+        if (extraScene) model.add(extraScene);
+        const center = new THREE.Vector3();
+        box.getCenter(center);
+        model.position.x -= center.x;
+        model.position.z -= center.z;
+        model.position.y -= box.min.y;
+        group.add(model);
+
+        const fitBox = new THREE.Box3().setFromObject(model);
+        const sphere = new THREE.Sphere();
+        fitBox.getBoundingSphere(sphere);
+        const fov = camera.fov * (Math.PI / 180);
+        const fitDistance = (sphere.radius / Math.sin(fov / 2)) * 1.5;
+        const maxDim = sphere.radius * 2;
+
+        model.traverse((child) => {
+          if (child.isMesh) {
+            child.geometry.deleteAttribute('normal');
+            const welded = mergeVertices(child.geometry, maxDim * 0.001);
+            child.geometry = toCreasedNormals(welded, 22 * Math.PI / 180);
+          }
+        });
+
+        model.updateMatrixWorld(true);
+        const sectionMeshes = [];
+        model.traverse((child) => { if (child.isMesh) sectionMeshes.push(child); });
+
+        const sectionCap = buildSectionCap(sectionMeshes, clipPlane, maxDim * 2.2, 0xb4864f);
+        sectionCap.visible = false;
+        group.add(sectionCap);
+
+        const clipGeoms = sectionMeshes.map((mesh) => positionOnlyGeometry(mesh));
+        const mergedForClip = mergeGeometries(clipGeoms, false).toNonIndexed();
+        const { geometry: clippedGeom, cutEdges } = clipGeometryByPlane(mergedForClip, clipPlane);
+        const clippedOutlineMesh = new THREE.Mesh(
+          clippedGeom,
+          new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false, depthTest: false })
+        );
+        group.add(clippedOutlineMesh);
+
+        const cutEdgeGeom = new LineSegmentsGeometry().setPositions(cutEdges);
+        const cutBoundaryEdges = new LineSegments2(
+          cutEdgeGeom,
+          new LineMaterial({ color: tintStyle().edgeColor, linewidth: tintStyle().lineWidth, worldUnits: false })
+        );
+        cutBoundaryEdges.material.resolution.set(container.clientWidth * renderer.getPixelRatio(), container.clientHeight * renderer.getPixelRatio());
+        cutBoundaryEdges.visible = false;
+        group.add(cutBoundaryEdges);
+
+        // "Transparent plastic" meshes get their own thinner edge lines,
+        // separate from the regular maquette edges
+        const glassMeshes = sectionMeshes.filter((mesh) => mesh.material.name === 'Transparent plastic');
+        const solidMeshes = sectionMeshes.filter((mesh) => mesh.material.name !== 'Transparent plastic');
+
+        // crease lines between faces meeting at more than `angle` degrees
+        function edgePositions(meshes, angle) {
+          if (!meshes.length) return [];
+          const geoms = meshes.map((mesh) => positionOnlyGeometry(mesh));
+          const welded = mergeVertices(mergeGeometries(geoms, false), maxDim * 0.001);
+          return Array.from(new THREE.EdgesGeometry(welded, angle).attributes.position.array);
+        }
+        // A site model's terrain is a triangulated ground surface on top
+        // of a block with vertically cut sides. Crease detection on the
+        // ground surface draws stray strokes all over it (thin sliver
+        // triangles flip past any angle threshold), so for terrain only
+        // the block's own outline is kept: edges where a vertical cut side
+        // meets a non-vertical face (the rims along the ground surface and
+        // the base) and open borders — no vertical folds between the cut
+        // sides, which on a rounded block are just facet seams.
+        function terrainOutlinePositions(meshes) {
+          if (!meshes.length) return [];
+          const geoms = meshes.map((mesh) => positionOnlyGeometry(mesh));
+          const welded = mergeVertices(mergeGeometries(geoms, false), maxDim * 0.001);
+          const pos = welded.attributes.position;
+          const index = welded.index.array;
+          const va = new THREE.Vector3(), vb = new THREE.Vector3(), vc = new THREE.Vector3();
+          const normals = [];
+          for (let i = 0; i < index.length; i += 3) {
+            va.fromBufferAttribute(pos, index[i]);
+            vb.fromBufferAttribute(pos, index[i + 1]);
+            vc.fromBufferAttribute(pos, index[i + 2]);
+            const n = new THREE.Vector3().crossVectors(vb.sub(va), vc.sub(va));
+            normals.push(n.lengthSq() > 0 ? n.normalize() : null);
+          }
+          const edges = new Map();
+          for (let f = 0; f < normals.length; f++) {
+            if (!normals[f]) continue;
+            for (let k = 0; k < 3; k++) {
+              const a = index[f * 3 + k], b = index[f * 3 + (k + 1) % 3];
+              if (a === b) continue;
+              const key = a < b ? a + '_' + b : b + '_' + a;
+              if (!edges.has(key)) edges.set(key, { a, b, faces: [] });
+              edges.get(key).faces.push(f);
+            }
+          }
+          const VERTICAL = 0.01; // |normal.y| below this = a cut side
+          const out = [];
+          edges.forEach(({ a, b, faces }) => {
+            let keep = faces.length !== 2; // open border / non-manifold
+            if (!keep) {
+              const n1 = normals[faces[0]], n2 = normals[faces[1]];
+              const v1 = Math.abs(n1.y) < VERTICAL, v2 = Math.abs(n2.y) < VERTICAL;
+              // a rim separates a cut side from the ground or the base —
+              // not from a slightly tilted sliver on the same flank (that
+              // drew a doubled seam line down the side of the block)
+              keep = (v1 && Math.abs(n2.y) > 0.3) || (v2 && Math.abs(n1.y) > 0.3);
+            }
+            if (keep) out.push(pos.getX(a), pos.getY(a), pos.getZ(a), pos.getX(b), pos.getY(b), pos.getZ(b));
+          });
+          return out;
+        }
+        // where a solid block (blockGroups) passes through the terrain there
+        // is no shared edge to draw — the contact line is computed as the
+        // triangle–triangle intersection of the block with the terrain
+        function contactPositions(blocks, grounds) {
+          if (!blocks.length || !grounds.length) return [];
+          const tris = (meshes) => {
+            const out = [];
+            meshes.forEach((mesh) => {
+              const g0 = positionOnlyGeometry(mesh);
+              const g = g0.index ? g0.toNonIndexed() : g0;
+              const p = g.attributes.position;
+              for (let i = 0; i < p.count; i += 3) {
+                const t = [0, 1, 2].map((k) => new THREE.Vector3().fromBufferAttribute(p, i + k));
+                const n = new THREE.Vector3().crossVectors(t[1].clone().sub(t[0]), t[2].clone().sub(t[0]));
+                if (n.lengthSq() < 1e-12) continue;
+                n.normalize();
+                out.push({ t, n, d: -n.dot(t[0]), box: new THREE.Box3().setFromPoints(t) });
+              }
+            });
+            return out;
+          };
+          // the stretch of triangle t lying in plane (n, d), as 0 or 2 points
+          const planeCut = (t, n, d) => {
+            const dist = t.map((v) => n.dot(v) + d);
+            const pts = [];
+            for (let k = 0; k < 3; k++) {
+              const a = dist[k], b = dist[(k + 1) % 3];
+              if (Math.abs(a) < 1e-9) pts.push(t[k].clone());
+              else if (a * b < 0) pts.push(t[k].clone().lerp(t[(k + 1) % 3], a / (a - b)));
+            }
+            return pts.length >= 2 ? [pts[0], pts[1]] : null;
+          };
+          const out = [];
+          const A = tris(blocks), B = tris(grounds);
+          A.forEach((a) => B.forEach((b) => {
+            if (!a.box.intersectsBox(b.box)) return;
+            const s1 = planeCut(a.t, b.n, b.d), s2 = planeCut(b.t, a.n, a.d);
+            if (!s1 || !s2) return;
+            const dir = new THREE.Vector3().crossVectors(a.n, b.n);
+            if (dir.lengthSq() < 1e-12) return; // coplanar
+            const u = [s1[0].dot(dir), s1[1].dot(dir)], w = [s2[0].dot(dir), s2[1].dot(dir)];
+            const lo = Math.max(Math.min(...u), Math.min(...w)), hi = Math.min(Math.max(...u), Math.max(...w));
+            if (hi - lo < 1e-6) return;
+            const at = (x) => s1[0].clone().lerp(s1[1], (x - u[0]) / (u[1] - u[0]));
+            const p = at(lo), q = at(hi);
+            out.push(p.x, p.y, p.z, q.x, q.y, q.z);
+          }));
+          return out;
+        }
+        function buildEdges(meshes, widthScale) {
+          if (!meshes.length) return null;
+          const terrain = meshes.filter((mesh) => terrainMeshes && terrainMeshes.includes(mesh.name));
+          const rest = meshes.filter((mesh) => !terrain.includes(mesh) && !(edgelessMeshes && edgelessMeshes.includes(mesh.name)));
+          const positions = edgePositions(rest, 22)
+            .concat(terrainOutlinePositions(terrain))
+            .concat(contactPositions(meshes.filter((mesh) => blockMeshes.includes(mesh)), terrain));
+          const fatEdgesGeom = new LineSegmentsGeometry().setPositions(positions);
+          const lines = new LineSegments2(
+            fatEdgesGeom,
+            new LineMaterial({ color: tintStyle().edgeColor, linewidth: tintStyle().lineWidth * widthScale, worldUnits: false })
+          );
+          lines.material.resolution.set(container.clientWidth * renderer.getPixelRatio(), container.clientHeight * renderer.getPixelRatio());
+          group.add(lines);
+          return lines;
+        }
+
+        const innerEdges = buildEdges(solidMeshes, 1);
+        const glassEdges = buildEdges(glassMeshes, GLASS_EDGE_SCALE);
+
+        return {
+          group, model, sectionMeshes, sectionCap, clippedOutlineMesh,
+          cutBoundaryEdges, innerEdges, glassEdges, clipPlane,
+          fitDistance, fitCenter: sphere.center.clone(),
+          maxDim,
+          dispose() {
+            scene.remove(group);
+            group.traverse((obj) => {
+              if (obj.geometry) obj.geometry.dispose();
+              if (obj.material) {
+                (Array.isArray(obj.material) ? obj.material : [obj.material]).forEach((m) => m.dispose());
+              }
+            });
+          },
+        };
+      }
+    })();
+  }
+
+  // a project with no glb yet ("à venir") gets an empty rig shaped just
+  // like loadRig's — camera framing, section-cut toggle, compass and
+  // project-switch animation all keep working unmodified against an
+  // empty scene, no special-casing needed anywhere else
+  function buildPlaceholderRig(clipNormal = DEFAULT_CLIP_NORMAL) {
+    const model = new THREE.Group();
+    const group = new THREE.Group();
+    group.add(model);
+    const sectionCap = new THREE.Group();
+    sectionCap.visible = false;
+    group.add(sectionCap);
+    return {
+      group, model, sectionMeshes: [], sectionCap, clippedOutlineMesh: model,
+      cutBoundaryEdges: null, innerEdges: null, glassEdges: null,
+      clipPlane: new THREE.Plane(new THREE.Vector3(...clipNormal), 0),
+      fitDistance: 8, fitCenter: new THREE.Vector3(0, 0.6, 0), maxDim: 2,
+      dispose() { scene.remove(group); },
+    };
+  }
+
+  // ---------- UI updates per project ----------
+  function applyProjectUI(slug) {
+    const cfg = PROJECTS[slug];
+    document.title = cfg.title;
+    document.getElementById('viewer-credit').innerHTML =
+      cfg.creditHtml + (cfg.creditMeta ? '<br><span class="credit-meta">' + cfg.creditMeta + '</span>' : '')
+      + (cfg.text ? '<span class="credit-text">' + cfg.text + '</span>' : '');
+    document.getElementById('plans-menu').style.display = cfg.hasPlans ? '' : 'none';
+    document.getElementById('viewer-pending').hidden = !!cfg.glb;
+    // each project only shows its own plans in the dropdown — the group
+    // key matches the project slug directly
+    document.querySelectorAll('.plans-dropdown-group').forEach((g) => {
+      g.hidden = g.dataset.project !== slug;
+    });
+    // if a section (coupe) was open, follow it straight to the new
+    // project's own coupe, or its main/ground-floor plan if it has no
+    // coupe — any other open plan type (façade, toiture…) doesn't carry
+    // over, since it's specific to the project being left
+    if (!plansOverlay.hidden) {
+      const wasCoupe = document.querySelector('.plan-page.active')?.dataset.kind === 'coupe';
+      const group = document.querySelector('.plans-dropdown-group[data-project="' + slug + '"]');
+      const coupeBtn = wasCoupe && group?.querySelector('.plans-dropdown-item[data-kind="coupe"]');
+      const mainBtn = wasCoupe && group?.querySelector('.plans-dropdown-item[data-kind="main"]');
+      if (coupeBtn) showPlan(coupeBtn.dataset.plan);
+      else if (mainBtn) showPlan(mainBtn.dataset.plan);
+      else plansOverlay.hidden = true;
+    }
+    // reset section-cut + material picker UI state for the new project
+    sectionView = false;
+    cutToggle.classList.remove('active');
+    document.querySelectorAll('.swatch').forEach((b) => b.classList.remove('active'));
+
+    buildPrizePicker(slug);
+  }
+
+  // ---------- prize picker: one project (a single competition), several
+  // submitted volumetries switched in place over the same base model ----------
+  const prizePicker = document.getElementById('prize-picker');
+  let currentVariant = null;
+
+  function buildPrizePicker(slug){
+    const cfg = PROJECTS[slug];
+    prizePicker.innerHTML = '';
+    if (!cfg.variants) { prizePicker.hidden = true; return; }
+    cfg.variantOrder.forEach((key) => {
+      const v = cfg.variants[key];
+      const btn = document.createElement('button');
+      btn.className = 'prize-btn';
+      btn.dataset.variant = key;
+      btn.textContent = v.label;
+      if (!v.glb && key !== 'base') {
+        btn.disabled = true;
+        btn.title = 'Maquette à venir';
+      } else {
+        btn.addEventListener('click', () => switchVariant(slug, key));
+      }
+      prizePicker.appendChild(btn);
+    });
+    prizePicker.hidden = false;
+    currentVariant = 'base';
+    prizePicker.querySelector('.prize-btn[data-variant="base"]')?.classList.add('active');
+  }
+
+  // rigs for non-base variants are cached the same way as project rigs,
+  // just keyed by "slug::variant" so they don't collide
+  const variantRigCache = new Map();
+  async function getVariantRig(slug, variantKey){
+    if (variantKey === 'base') return getRig(slug);
+    const key = slug + '::' + variantKey;
+    if (variantRigCache.has(key)) return variantRigCache.get(key);
+    const cfg = PROJECTS[slug];
+    // a prize variant's own glb is just the added volumetry, not a full
+    // scene — load it merged onto the project's base so the section cut,
+    // edges and cap all read the combined base + extension as one piece
+    const rig = await loadRig(cfg.glb, cfg.clipNormal, cfg.variants[variantKey].glb, cfg.excludeMeshes, cfg.terrainMeshes, cfg.edgelessMeshes, cfg.blockGroups);
+    variantRigCache.set(key, rig);
+    return rig;
+  }
+
+  async function switchVariant(slug, variantKey){
+    if (slug !== currentSlug || variantKey === currentVariant || switching) return;
+    const cfg = PROJECTS[slug];
+    const v = cfg.variants[variantKey];
+    if (!v.glb && variantKey !== 'base') return;
+    switching = true;
+
+    const newRig = await getVariantRig(slug, variantKey);
+    retintRig(newRig);
+    applyRenderMode(newRig);
+    const oldRig = currentRig;
+
+    scene.add(newRig.group);
+    newRig.group.visible = true;
+    // same placement as the version it replaces — the outgoing rig may
+    // still carry the scale correction from a project-switch slide
+    // (arriving here via the arrows), and resetting to 1 made the model
+    // visibly grow or shrink on some switches but not others
+    newRig.group.position.copy(oldRig ? oldRig.group.position : new THREE.Vector3());
+    newRig.group.scale.copy(oldRig ? oldRig.group.scale : new THREE.Vector3(1, 1, 1));
+    if (oldRig && oldRig !== newRig) oldRig.group.visible = false;
+
+    currentRig = newRig;
+    currentVariant = variantKey;
+    // a fresh rig always loads with clipping off — re-apply whatever
+    // section-cut state was already showing, so it stays cut across
+    // Existant/1er/2e/3e prix instead of resetting on every switch
+    applySectionView(currentRig, sectionView);
+    // deliberately no frameCamera() here: switching between a competition's
+    // submitted volumetries should read as the same building under the
+    // viewer's current angle/zoom, not a fresh reframe each time
+
+    const creditHtml = v.creditHtml || cfg.creditHtml;
+    const creditMeta = v.creditMeta || cfg.creditMeta;
+    document.getElementById('viewer-credit').innerHTML =
+      creditHtml + (creditMeta ? '<br><span class="credit-meta">' + creditMeta + '</span>' : '');
+    prizePicker.querySelectorAll('.prize-btn').forEach((b) => b.classList.toggle('active', b.dataset.variant === variantKey));
+    switching = false;
+    requestRender();
+  }
+
+  function frameCamera(rig, instant, viewDir = DEFAULT_VIEW_DIR) {
+    viewDistance = rig.fitDistance;
+    viewEyeY = rig.fitCenter.y;
+    const dir = new THREE.Vector3(...viewDir).normalize();
+    const pos = dir.clone().multiplyScalar(rig.fitDistance).add(rig.fitCenter);
+    camera.near = rig.fitDistance / 100;
+    camera.far = rig.fitDistance * 100;
+    camera.updateProjectionMatrix();
+    controls.minDistance = rig.fitDistance * 0.25;
+    controls.maxDistance = rig.fitDistance * 3;
+    if (instant) {
+      camera.position.copy(pos);
+      controls.target.copy(rig.fitCenter);
+      controls.update();
+    } else {
+      flyTo(pos, rig.fitCenter);
+    }
+    fitShadow(keyLight, rig.fitCenter, rig.maxDim / 2);
+  }
+
+  // ---------- project switching, with the character-select slide ----------
+  let currentRig = null;
+  let currentSlug = null;
+  let switching = false;
+  // rigs are kept resident once loaded (never disposed) so revisiting a
+  // project — inevitable once a roll cycles past it — is instant instead
+  // of re-parsing and re-processing the GLTF from scratch every time
+  const rigCache = new Map();
+  async function getRig(slug){
+    if (rigCache.has(slug)) return rigCache.get(slug);
+    const cfg = PROJECTS[slug];
+    const rig = cfg.glb ? await loadRig(cfg.glb, cfg.clipNormal, null, cfg.excludeMeshes, cfg.terrainMeshes, cfg.edgelessMeshes, cfg.blockGroups) : buildPlaceholderRig(cfg.clipNormal);
+    rigCache.set(slug, rig);
+    return rig;
+  }
+
+  async function switchProject(slug, { direction = 1, animate = true, duration = 750 } = {}) {
+    if (switching || slug === currentSlug && currentRig) return;
+    switching = true;
+
+    const newRig = await getRig(slug);
+    // a cached rig may have loaded under a since-changed tint choice
+    retintRig(newRig);
+    applyRenderMode(newRig);
+    const oldRig = currentRig;
+
+    if (animate && oldRig) {
+      // Keep the camera exactly where it currently is — including any
+      // manual orbit/zoom the visitor has done — for the whole slide AND
+      // after the incoming model has arrived: it stays at that same
+      // viewpoint permanently (no auto-reframe), matching the outgoing
+      // model's behavior. The incoming rig is scale-corrected so it
+      // reads at a consistent size under that untouched view.
+      const currentDistance = camera.position.distanceTo(controls.target);
+      const rightAxis = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
+      const offsetVec = rightAxis.multiplyScalar(currentDistance * 2.2 * direction);
+      const scaleCorrection = currentDistance / newRig.fitDistance;
+
+      // oldRig may already be resting at a non-1 scale left over from
+      // when it was itself an incoming rig in a previous switch (its
+      // scale is never reset to 1 since the camera never auto-reframes
+      // any more) — animate its exit from that actual current scale,
+      // not an assumed 1, or it pops the instant the slide starts.
+      const oldStartScale = oldRig.group.scale.x;
+
+      // each project has its own height, so its vertical center sits at a
+      // different world-space Y once scale-corrected — the camera and
+      // target are re-aimed by that difference (same distance, same
+      // angle) *during* the slide, so the incoming model arrives already
+      // centered instead of jumping up or down once it has landed
+      const endEyeY = newRig.fitCenter.y * scaleCorrection;
+      const startCamY = camera.position.y;
+      const startTargetY = controls.target.y;
+      const targetDeltaY = endEyeY - startTargetY;
+
+      scene.add(newRig.group);
+      newRig.group.visible = true;
+      newRig.group.position.copy(offsetVec);
+      newRig.group.scale.setScalar(scaleCorrection * 0.25);
+
+      await new Promise((resolve) => {
+        const start = performance.now();
+        function step(now) {
+          const t = Math.min((now - start) / duration, 1);
+          const e = easeInOutQuad(t);
+          oldRig.group.position.copy(offsetVec).multiplyScalar(-e);
+          oldRig.group.scale.setScalar(oldStartScale * (1 - 0.75 * e));
+          newRig.group.position.copy(offsetVec).multiplyScalar(1 - e);
+          newRig.group.scale.setScalar(scaleCorrection * (0.25 + 0.75 * e));
+          camera.position.y = startCamY + targetDeltaY * e;
+          controls.target.y = startTargetY + targetDeltaY * e;
+          requestRender();
+          if (t < 1) requestAnimationFrame(step);
+          else resolve();
+        }
+        requestAnimationFrame(step);
+      });
+
+      oldRig.group.visible = false;
+      newRig.group.position.set(0, 0, 0);
+
+      // camera stays put — just keep the compass presets, zoom limits
+      // and shadow framing consistent with the model's current
+      // apparent size (currentDistance === newRig.fitDistance *
+      // scaleCorrection, i.e. exactly where the camera already is)
+      viewDistance = currentDistance;
+      viewEyeY = endEyeY;
+      camera.near = currentDistance / 100;
+      camera.far = currentDistance * 100;
+      camera.updateProjectionMatrix();
+      controls.minDistance = currentDistance * 0.25;
+      controls.maxDistance = currentDistance * 3;
+      // the group is scaled about the origin, so its world-space center scales too
+      fitShadow(keyLight, newRig.fitCenter.clone().multiplyScalar(scaleCorrection), newRig.maxDim * scaleCorrection / 2);
+    } else {
+      scene.add(newRig.group);
+      newRig.group.visible = true;
+      newRig.group.position.set(0, 0, 0);
+      newRig.group.scale.setScalar(1);
+      if (oldRig) oldRig.group.visible = false;
+      frameCamera(newRig, true, PROJECTS[slug].viewDir);
+    }
+
+    currentRig = newRig;
+    currentSlug = slug;
+    outlinePass.selectedObjects = [currentRig.model];
+    applyProjectUI(slug);
+    switching = false;
+    requestRender();
+  }
+
+  // ---------- nav arrows: cycle through ORDER, no page reload ----------
+  function stepSlug(direction){
+    const idx = ORDER.indexOf(currentSlug);
+    return ORDER[(idx + direction + ORDER.length) % ORDER.length];
+  }
+  // Casino-roll navigation: each request just queues one step in a
+  // direction. If nothing else is pending, that step plays out at full
+  // (settle) duration exactly like before. But if more requests land
+  // while a step is still animating — someone mashing the arrow key, a
+  // hard swipe worth several steps — they queue up and get consumed as
+  // fast, short steps, with only the very last one settling normally.
+  // A single, unhurried request is therefore unchanged; only rapid or
+  // multi-step input turns into the fast reel.
+  let pendingSteps = 0;
+  let rollDirection = 1;
+  let rolling = false;
+  const ROLL_STEP_MS = 130;
+  const SETTLE_MS = 750;
+  function requestSteps(direction, count){
+    pendingSteps = Math.min(pendingSteps + count, ORDER.length - 1);
+    rollDirection = direction;
+    if (rolling) return;
+    rolling = true;
+    (async () => {
+      while (pendingSteps > 0) {
+        pendingSteps--;
+        const isLast = pendingSteps === 0;
+        const slug = stepSlug(rollDirection);
+        if (isLast) history.pushState({}, '', '/ouvrages/' + slug + '/');
+        await switchProject(slug, { direction: rollDirection, duration: isLast ? SETTLE_MS : ROLL_STEP_MS });
+      }
+      rolling = false;
+    })();
+  }
+  document.querySelectorAll('.nav-arrow').forEach((link, i) => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      requestSteps(link.id === 'nav-next' ? 1 : -1, 1);
+    });
+  });
+  window.addEventListener('popstate', () => {
+    const slug = slugFromUrl() || ORDER[0];
+    if (PROJECTS[slug]) switchProject(slug, { direction: 1 });
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    requestSteps(e.key === 'ArrowRight' ? 1 : -1, 1);
+  });
+
+  // ---------- initial load ----------
+  const initialSlug = slugFromUrl();
+  switchProject(PROJECTS[initialSlug] ? initialSlug : ORDER[0], { animate: false });
+  syncRendererSize();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.updateProjectionMatrix();
+    syncRendererSize();
+    requestRender();
+  });
+
+  (function animate() {
+    requestAnimationFrame(animate);
+    if (flying) {
+      const t = Math.min((performance.now() - flightStart) / flightDuration, 1);
+      const e = easeInOutQuad(t);
+      camera.position.lerpVectors(flightFrom, flightTo, e);
+      controls.target.lerpVectors(flightFromTarget, flightToTarget, e);
+      if (t >= 1) flying = false;
+      needsRender = true;
+    }
+    controls.update();
+    if (needsRender || performance.now() < dampingSettleUntil) {
+      if (axoView) syncAxoCamera();
+      composer.render();
+      needsRender = false;
+    }
+  })();
+</script>
+
+
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "cd4dd3adc67b4e449e7528c57a0e43ba"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>

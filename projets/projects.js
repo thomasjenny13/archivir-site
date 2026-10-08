@@ -106,4 +106,14 @@ export const PROJECTS = {
     creditMeta: '2020–2022 · Fribourg (FR) · Pavillon · Nouvelle construction',
     hasPlans: false,
   },
+  convent: {
+    glb: 'concours/reuse the convent/convent.glb',
+    // the site's toposolid — outline only, like Oberaletsch
+    terrainMeshes: ['Toposolid'],
+    title: 'Reuse the Convent — Archivir',
+    creditHtml: '<strong>Reuse the Convent</strong>Concours ouvert — Reuse Italy',
+    creditMeta: '2026 · Bussi sul Tirino (Italie) · Couvent · Concours ouvert',
+    text: 'Concours d’idées international pour la reconversion d’un couvent abandonné à Bussi sul Tirino, dans les Abruzzes. Maquette de l’existant fournie aux participants, non réalisé.',
+    hasPlans: false,
+  },
 };
