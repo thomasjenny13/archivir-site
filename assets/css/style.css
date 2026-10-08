@@ -1098,3 +1098,7 @@ html[data-theme="dark"] .maplibregl-ctrl-attrib-button{ filter: invert(1); }
   border: 1px solid currentColor; border-radius: 999px; opacity: 0.8;
 }
 .credit-more:hover{ color: var(--rose-gold); opacity: 1; }
+
+/* index : cellules Auteur / Type de mandat cliquables pour filtrer */
+.index-table td.cell-filter{ cursor: pointer; }
+.index-table td.cell-filter:hover{ color: var(--rose-gold); }

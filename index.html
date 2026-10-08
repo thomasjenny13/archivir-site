@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lexend:wght@800&family=Syne:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=40">
+<link rel="stylesheet" href="assets/css/style.css?v=41">
 <script type="importmap">
 {
   "imports": {
@@ -302,6 +302,23 @@
     setupFilterHeader('lieu-header', { useAttr: 'country' });
     setupFilterHeader('typologie-header', { useAttr: 'group' });
     setupFilterHeader('type-header');
+
+    // clicking an Auteur or Type de mandat cell filters on that value
+    // (clicking it again while it's the active filter clears it)
+    const CELL_FILTER_COLS = [1, 5];
+    allRows().forEach((row) => CELL_FILTER_COLS.forEach((col) => {
+      const cell = row.children[col];
+      cell.classList.add('cell-filter');
+      cell.title = 'Filtrer sur « ' + cell.textContent.trim() + ' »';
+    }));
+    tbody.addEventListener('click', (e) => {
+      const cell = e.target.closest('td.cell-filter');
+      if (!cell) return;
+      const col = Array.from(cell.parentNode.children).indexOf(cell);
+      const value = cellValue(cell.parentNode, col);
+      activeFilters[col] = activeFilters[col] === value ? '' : value;
+      applyFilters();
+    });
 
     applyFilters();
 
