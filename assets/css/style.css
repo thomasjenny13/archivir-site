@@ -189,12 +189,17 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   padding: 100px 24px 60px;
 }
 .index-header{
+  position: relative;
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 40px;
 }
+/* centred above the table, where the pointer already is, rather than
+   out in the window's corner (left/margin instead of a translate, which
+   the spin's transform would override) */
 .index-reset{
-  position: fixed; top: 72px; right: 24px; z-index: 10;
+  position: absolute; top: 50%; left: 50%; z-index: 10;
   width: 48px; height: 48px;
+  margin: -24px 0 0 -24px;
   display: flex; align-items: center; justify-content: center;
   border-radius: 50%;
   border: 1px solid var(--line);
@@ -840,7 +845,7 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 
   .index-page{ padding: 76px 16px 40px; }
   .index-header{ margin-bottom: 24px; }
-  .index-reset{ top: 58px; right: 16px; width: 38px; height: 38px; font-size: 1rem; }
+  .index-reset{ width: 38px; height: 38px; margin: -19px 0 0 -19px; font-size: 1rem; }
 
   .compass{ top: 58px; right: 16px; width: 54px; height: 54px; }
   .compass-pt{ font-size: 0.5rem; }
