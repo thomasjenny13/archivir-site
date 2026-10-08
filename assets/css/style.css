@@ -1088,4 +1088,13 @@ html[data-theme="dark"] .maplibregl-ctrl-attrib-button{ filter: invert(1); }
 }
 
 /* texte descriptif optionnel d'un ouvrage (champ "text" de projets/projects.js) */
-.credit-text{ display: block; max-width: 34ch; margin-top: 8px; color: var(--ink-faint); font-size: 0.72rem; line-height: 1.45; }
+.credit-text{ display: none; max-width: 34ch; margin-top: 8px; color: var(--ink-faint); font-size: 0.72rem; line-height: 1.45; }
+.credit-more[aria-expanded="true"] + .credit-text{ display: block; }
+.credit-more{
+  display: block; margin-top: 6px; padding: 1px 7px;
+  pointer-events: auto; cursor: pointer;
+  font: inherit; font-size: 0.66rem; letter-spacing: 0.06em;
+  color: var(--ink-faint); background: none;
+  border: 1px solid currentColor; border-radius: 999px; opacity: 0.8;
+}
+.credit-more:hover{ color: var(--rose-gold); opacity: 1; }

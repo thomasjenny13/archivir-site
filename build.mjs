@@ -68,7 +68,7 @@ function page(slug, cfg) {
   ].join('\n');
   const credit = cfg.creditHtml
     + (cfg.creditMeta ? '<br><span class="credit-meta">' + cfg.creditMeta + '</span>' : '')
-    + (cfg.text ? '<span class="credit-text">' + cfg.text + '</span>' : '');
+    + (cfg.text ? '<button type="button" class="credit-more" aria-expanded="false">+ info</button><span class="credit-text">' + cfg.text + '</span>' : '');
 
   let html = template;
   html = replaceOnce(html, '<!doctype html>', '<!doctype html>\n<!-- Page générée par build.mjs depuis projets/viewer.html et projets/projects.js — ne pas éditer à la main -->', 'doctype');

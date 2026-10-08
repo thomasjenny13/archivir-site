@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lexend:wght@800&family=Syne:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/style.css?v=39">
+<link rel="stylesheet" href="../assets/css/style.css?v=40">
 <script type="importmap">
 {
   "imports": {
@@ -1749,13 +1749,23 @@
     };
   }
 
+  // the project's description stays folded behind a small "+ info"
+  // button so it doesn't cover the model on arrival
+  document.getElementById('viewer-credit').addEventListener('click', (e) => {
+    const btn = e.target.closest('.credit-more');
+    if (!btn) return;
+    const open = btn.getAttribute('aria-expanded') !== 'true';
+    btn.setAttribute('aria-expanded', String(open));
+    btn.textContent = open ? '− info' : '+ info';
+  });
+
   // ---------- UI updates per project ----------
   function applyProjectUI(slug) {
     const cfg = PROJECTS[slug];
     document.title = cfg.title;
     document.getElementById('viewer-credit').innerHTML =
       cfg.creditHtml + (cfg.creditMeta ? '<br><span class="credit-meta">' + cfg.creditMeta + '</span>' : '')
-      + (cfg.text ? '<span class="credit-text">' + cfg.text + '</span>' : '');
+      + (cfg.text ? '<button type="button" class="credit-more" aria-expanded="false">+ info</button><span class="credit-text">' + cfg.text + '</span>' : '');
     document.getElementById('plans-menu').style.display = cfg.hasPlans ? '' : 'none';
     document.getElementById('viewer-pending').hidden = !!cfg.glb;
     // each project only shows its own plans in the dropdown — the group
