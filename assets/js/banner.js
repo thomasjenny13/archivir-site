@@ -67,6 +67,8 @@ const SETTLE_BEATS = 4;     // matches .is-settling's .4s bounce
 let logoAnimating = false;
 siteLogo.addEventListener('click', (e) => {
   e.preventDefault();
+  // no animation on phones: the expanded word runs into the nav
+  if (window.matchMedia('(max-width: 640px)').matches) return;
   if (logoAnimating) return;
   logoAnimating = true;
   // phase 1: open both gaps at once (text still invisible) — this is
