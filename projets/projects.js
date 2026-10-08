@@ -111,9 +111,9 @@ export const PROJECTS = {
     // the site's toposolid — outline only, like Oberaletsch
     terrainMeshes: ['Toposolid'],
     title: 'Reuse the Convent — Archivir',
-    creditHtml: '<strong>Reuse the Convent</strong>Concours ouvert — Reuse Italy',
+    creditHtml: '<a class="credit-link" href="https://www.reuseitaly.com/competitions/reuse-the-convent-bussi-sul-tirino/" target="_blank" rel="noopener noreferrer"><strong>Reuse the Convent</strong></a>Concours ouvert — <a class="credit-author" href="https://www.reuseitaly.com/" target="_blank" rel="noopener noreferrer">Reuse Italy</a>',
     creditMeta: '2026 · Bussi sul Tirino (Italie) · Couvent · Concours ouvert',
     text: 'Concours d’idées international pour la reconversion d’un couvent abandonné à Bussi sul Tirino, dans les Abruzzes. Maquette de l’existant fournie aux participants, non réalisé.',
-    hasPlans: false,
+    hasPlans: true,
   },
 };
