@@ -633,7 +633,7 @@ PROJECTS.forEach((project) => {
   // Its image only loads on first hover, not for every marker on page load.
   const tipEl = document.createElement('div');
   tipEl.innerHTML =
-    (project.glb || project.photo ? `<img class="map-tip-thumb" alt="">` : '') +
+    (project.glb || project.photo ? `<img class="map-tip-thumb" alt="">` : `<span class="map-tip-thumb map-tip-thumb-pending">À venir</span>`) +
     `<span class="map-tip-title">${project.nom}</span>` +
     `<span class="map-tip-arch">${project.architecte}</span>` +
     `<span class="map-tip-loc">${project.lieu}</span>`;
