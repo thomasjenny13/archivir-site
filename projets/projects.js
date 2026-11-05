@@ -8,7 +8,8 @@
 //   section: { cap, only, hide }  vue en coupe sur mesure : cap = section plate du .glb
 //                          (hors scène) servant de remplissage, only = maillages hors
 //                          scène affichés en coupe, hide = maillages masqués en coupe
-//   simulation: 'x/y.js'   module d'animation (chemin depuis projets/), ajoute son bouton
+//   simulation: 'x/y.js?v=N'  module d'animation (chemin depuis projets/), ajoute son
+//                          bouton ; augmenter v à chaque modification du module
 //   og: 'tupi/apercu.jpg'  image d'aperçu des partages (chemin depuis projets/),
 //                          idéalement 1200×630 ; à défaut, le logo est utilisé
 export const PROJECTS = {
@@ -138,6 +139,6 @@ export const PROJECTS = {
       only: ['Pont_plein'],
       hide: ['Pont', 'Hiloire', 'Cockpit', 'Mat', 'Bome', 'Barre', 'Grand_voile', 'Foc', 'Greement_courant'],
     },
-    simulation: 'copponex/moucheron/gite.js',
+    simulation: 'copponex/moucheron/gite.js?v=5',
   },
 };

@@ -27,7 +27,7 @@ const CSS = `
 .sim-fab.active{ background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .sim-panel{
   position: fixed; left: 28px; top: 92px; z-index: 5; width: 260px;
-  display: grid; gap: 14px;
+  display: grid; gap: 14px; justify-items: stretch;
   font-family: var(--mono); font-size: 0.75rem; color: var(--ink-soft);
 }
 .sim-panel[hidden]{ display: none; }
@@ -47,14 +47,44 @@ const CSS = `
 }
 .sim-panel input[type=range]::-moz-range-thumb{ width: 3px; height: 15px; background: var(--ink); border: 0; border-radius: 0; }
 .sim-panel input[type=range]:focus-visible{ outline: 1px solid var(--ink); outline-offset: 2px; }
+/* roue de cap : le vent vient du haut, le bateau tourne dedans, tour complet possible */
+.sim-dial{ display: block; width: 132px; height: 132px; margin: 2px auto 0; cursor: grab; touch-action: none; color: var(--ink); }
+.sim-dial:active{ cursor: grabbing; }
+.sim-dial:focus-visible{ outline: 1px solid var(--ink); outline-offset: 2px; }
+.sim-row > .sim-swatches{ justify-content: flex-start; gap: 10px; }
+.sim-swatches button{ width: 22px; height: 22px; padding: 0; border: 1px solid var(--line); cursor: pointer; }
+.sim-swatches button[aria-pressed=true]{ outline: 1px solid var(--ink); outline-offset: 2px; }
 .sim-heel{ display: flex; align-items: baseline; justify-content: space-between; }
 .sim-heel output{ font-family: var(--title); font-size: 1.6rem; color: var(--ink); font-variant-numeric: tabular-nums; }
-.sim-panel a{ color: inherit; }
 @media (max-width: 768px){
   .sim-fab{ bottom: 168px; }
   .sim-panel{ left: 18px; top: 76px; width: min(220px, calc(100vw - 130px)); gap: 8px; }
   .sim-heel output{ font-size: 1.25rem; }
+  .sim-dial{ width: 104px; height: 104px; }
 }`;
+
+// couleurs d'eau au choix, à essayer sur la maquette
+const WATERS = [
+  { key: 'bleu', label: 'Bleu profond', color: 0x1f3d52 },
+  { key: 'noir', label: 'Noir', color: 0x101010 },
+  { key: 'gris', label: 'Gris', color: 0x7d8083 },
+];
+const readWater = () => { try { return localStorage.getItem('archivir-water'); } catch { return null; } };
+const saveWater = (key) => { try { localStorage.setItem('archivir-water', key); } catch { /* préférence non conservée */ } };
+
+const ticks = Array.from({ length: 12 }, (_, i) => {
+  const a = i * Math.PI / 6, r0 = i % 3 ? 54 : 50;
+  return `<line x1="${(66 + r0 * Math.sin(a)).toFixed(1)}" y1="${(66 - r0 * Math.cos(a)).toFixed(1)}" x2="${(66 + 58 * Math.sin(a)).toFixed(1)}" y2="${(66 - 58 * Math.cos(a)).toFixed(1)}"/>`;
+}).join('');
+const DIAL = `<svg class="sim-dial" id="sim-dial" viewBox="0 0 132 132" role="slider" tabindex="0" aria-label="Cap du bateau par rapport au vent" aria-valuemin="-180" aria-valuemax="180">
+  <g fill="none" stroke="currentColor" stroke-width="1">
+    <circle cx="66" cy="66" r="58"/>
+    ${ticks}
+    <path d="M66 1v10M62 7l4 4 4-4"/>
+  </g>
+  <g id="sim-boat" fill="currentColor"><path d="M66 28C74 38 77 52 77 66C77 82 75 94 73 102H59C57 94 55 82 55 66C55 52 58 38 66 28Z"/></g>
+  <rect x="0" y="0" width="132" height="132" fill="transparent"/>
+</svg>`;
 
 const WIND_ICON = '<svg viewBox="0 0 16 16" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M1.5 6h8.2a2 2 0 1 0-1.9-2.6"/><path d="M1.5 9.5h11a1.8 1.8 0 1 1-1.7 2.4"/><path d="M1.5 13H7"/></svg>';
 
@@ -80,10 +110,10 @@ export function mount({ THREE, scene, ground, getRig, requestRender, exitSection
   panel.innerHTML = `
     <div class="sim-row"><div><label for="sim-wind">Vent</label><output id="sim-windv"></output></div>
       <input id="sim-wind" type="range" min="0" max="25" step="0.5" value="12"></div>
-    <div class="sim-row"><div><label for="sim-cap">Cap</label><output id="sim-capv"></output></div>
-      <input id="sim-cap" type="range" min="-180" max="180" step="1" value="40"></div>
+    <div class="sim-row"><div><span>Cap</span><output id="sim-capv"></output></div>${DIAL}</div>
     <div class="sim-heel"><span>Gîte</span><output id="sim-heel">0°</output></div>
-    <a href="/projets/copponex/moucheron/simulation/">Voir les forces et la houle</a>`;
+    <div class="sim-row"><div><span>Eau</span><output id="sim-waterv"></output></div>
+      <div class="sim-swatches">${WATERS.map((w) => `<button type="button" data-water="${w.key}" title="${w.label}" aria-label="Eau : ${w.label}" style="background:#${w.color.toString(16).padStart(6, '0')}"></button>`).join('')}</div></div>`;
   document.body.append(button, panel);
   // les flèches et les gestes sur le panneau règlent les curseurs, sans changer d'ouvrage
   ['keydown', 'touchstart', 'touchmove', 'touchend', 'pointerdown', 'wheel'].forEach((type) =>
@@ -96,8 +126,59 @@ export function mount({ THREE, scene, ground, getRig, requestRender, exitSection
     $('sim-capv').textContent = a === 0 || a === 180 ? `${a}° · ${allure(a)}` : `${a}° ${state.cap < 0 ? 'bâbord' : 'tribord'} · ${allure(a)}`;
   };
   $('sim-wind').addEventListener('input', (e) => { state.wind = +e.target.value; showWind(); });
-  $('sim-cap').addEventListener('input', (e) => { state.cap = +e.target.value; showCap(); });
-  showWind(); showCap();
+  showWind();
+
+  // roue de cap : le bateau y est vu du dessus, vent venant du haut. Cap positif
+  // (vent sur tribord) : l'étrave part vers la gauche, comme le bateau en 3D vu de haut.
+  const dial = $('sim-dial');
+  const wrap = (c) => { const w = ((c + 180) % 360 + 360) % 360 - 180; return w === -180 ? 180 : w; };
+  const setCap = (c) => {
+    state.cap = wrap(c);
+    $('sim-boat').setAttribute('transform', `rotate(${-state.cap} 66 66)`);
+    dial.setAttribute('aria-valuenow', Math.round(state.cap));
+    showCap();
+    dial.setAttribute('aria-valuetext', $('sim-capv').textContent);
+  };
+  const pointerAngle = (e) => {
+    const r = dial.getBoundingClientRect();
+    return Math.atan2(e.clientX - (r.left + r.width / 2), -(e.clientY - (r.top + r.height / 2))) * 180 / Math.PI;
+  };
+  let dragAngle = null;
+  dial.addEventListener('pointerdown', (e) => {
+    dial.setPointerCapture(e.pointerId);
+    dragAngle = pointerAngle(e);
+    e.preventDefault();
+  });
+  dial.addEventListener('pointermove', (e) => {
+    if (dragAngle === null) return;
+    const a = pointerAngle(e);
+    setCap(state.cap - wrap(a - dragAngle));   // en relatif : le bateau ne saute pas à la prise
+    dragAngle = a;
+  });
+  const endDrag = () => { dragAngle = null; };
+  dial.addEventListener('pointerup', endDrag);
+  dial.addEventListener('pointercancel', endDrag);
+  dial.addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    setCap(state.cap + (e.key === 'ArrowLeft' ? 3 : -3));
+    e.preventDefault();
+  });
+  setCap(state.cap);
+
+  // couleur de l'eau
+  let waterKey = WATERS.some((w) => w.key === readWater()) ? readWater() : WATERS[0].key;
+  const applyWater = () => {
+    const w = WATERS.find((x) => x.key === waterKey);
+    $('sim-waterv').textContent = w.label;
+    panel.querySelectorAll('[data-water]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.water === waterKey)));
+    if (built) built.water.material.color.setHex(w.color);
+    requestRender();
+  };
+  panel.querySelectorAll('[data-water]').forEach((b) => b.addEventListener('click', () => {
+    waterKey = b.dataset.water;
+    saveWater(waterKey);
+    applyWater();
+  }));
 
   // ---------- scène : préparée au premier lancement, puis réutilisée ----------
   let built = null;
@@ -157,7 +238,7 @@ export function mount({ THREE, scene, ground, getRig, requestRender, exitSection
     // eau : disque net à la flottaison, comme le socle d'une maquette ; la quille reste lisible par transparence
     const water = new THREE.Mesh(
       new THREE.CircleGeometry(rig.maxDim * 0.75, 96),
-      new THREE.MeshBasicMaterial({ color: 0x9fc2cf, transparent: true, opacity: 0.8, depthWrite: false })
+      new THREE.MeshBasicMaterial({ color: 0x9fc2cf, transparent: true, opacity: 0.9, depthWrite: false })
     );
     water.rotation.x = -Math.PI / 2;
     water.position.y = off.y;
@@ -215,6 +296,7 @@ export function mount({ THREE, scene, ground, getRig, requestRender, exitSection
     if (!rig) return;
     exitSectionView();
     if (!built || built.rig !== rig) build(rig);
+    applyWater();
     show(true);
     ground.position.y = built.off.y * rig.group.scale.y + 0.002;
     ground.renderOrder = 3;
