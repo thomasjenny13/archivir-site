@@ -212,26 +212,27 @@ export function mount({ THREE, scene, ground, getRig, requestRender, exitSection
     water.renderOrder = 2;
     rig.group.add(water);
 
-    // filets de vent : traits blancs à plat sur l'eau, dans l'empreinte du disque
-    const N = 48;
+    // filets de vent : traits fins en volume, au-dessus de l'empreinte du disque.
+    // Gris moyen et opaque, pour se lire autant sur le blanc de la page que sur l'eau noire
+    const N = 60;
     const radius = rig.maxDim * 0.75;
-    const streakPos = new Float32Array(N * 12);
+    const streakPos = new Float32Array(N * 6);
     const streakGeo = new THREE.BufferGeometry();
     streakGeo.setAttribute('position', new THREE.BufferAttribute(streakPos, 3));
-    streakGeo.setIndex(Array.from({ length: N }, (_, i) => {
-      const k = i * 4;
-      return [k, k + 1, k + 2, k, k + 2, k + 3];
-    }).flat());
-    const streaks = new THREE.Mesh(streakGeo, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8, side: THREE.DoubleSide, depthWrite: false }));
+    const streaks = new THREE.LineSegments(streakGeo, new THREE.LineBasicMaterial({ color: 0x777777 }));
     streaks.frustumCulled = false;
-    streaks.renderOrder = 4;
     rig.group.add(streaks);
-    const seeds = Array.from({ length: N }, () => ({ u: Math.random(), x: (Math.random() * 2 - 1) * radius * 0.97 }));
+    const newSeed = (s) => {
+      s.x = (Math.random() * 2 - 1) * radius * 0.97;
+      s.y = 0.6 + Math.random() * 8;
+      return s;
+    };
+    const seeds = Array.from({ length: N }, () => newSeed({ u: Math.random() }));
 
     rig.group.add(boat);
     boat.add(rig.model);
     rig.group.scale.setScalar(scale);
-    built = { rig, off, boat, meshes, parts, allLines, stay, mask, water, streaks, streakGeo, streakPos, seeds, radius, center: V(0, off.y, 0) };
+    built = { rig, off, boat, meshes, parts, allLines, stay, mask, water, streaks, streakGeo, streakPos, seeds, newSeed, radius, center: V(0, off.y, 0) };
     return built;
   }
 
@@ -354,16 +355,15 @@ export function mount({ THREE, scene, ground, getRig, requestRender, exitSection
     b.boat.position.y += heave;
 
     // filets de vent : chaque trait suit une corde du disque, dans le sens du vent (+z)
-    const speed = 1 + v * 0.45, len = 0.7 + v * 0.14, half = 0.022;
-    const y = b.off.y + 0.012;
-    b.streaks.material.opacity = state.wind < 0.5 ? 0 : 0.4 + 0.5 * Math.min(1, state.wind / 15);
+    const speed = 0.6 + v * 0.35, len = 0.4 + v * 0.06;
+    b.streaks.visible = state.wind >= 0.5;
     b.seeds.forEach((s, i) => {
       s.u += speed * dt / (2 * b.radius);
-      if (s.u > 1) { s.u -= 1; s.x = (Math.random() * 2 - 1) * b.radius * 0.97; }
+      if (s.u > 1) { s.u -= 1; b.newSeed(s); }
       const h = Math.sqrt(b.radius * b.radius - s.x * s.x);   // demi-corde à cette position
       const z1 = -h + s.u * (2 * h + len);
-      const a = Math.max(-h, z1 - len), c = Math.min(h, z1);
-      b.streakPos.set([s.x - half, y, a, s.x + half, y, a, s.x + half, y, c, s.x - half, y, c], i * 12);
+      const y = b.off.y + s.y;
+      b.streakPos.set([s.x, y, Math.max(-h, z1 - len), s.x, y, Math.min(h, z1)], i * 6);
     });
     b.streakGeo.attributes.position.needsUpdate = true;
 

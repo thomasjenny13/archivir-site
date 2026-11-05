@@ -139,6 +139,6 @@ export const PROJECTS = {
       only: ['Pont_plein'],
       hide: ['Pont', 'Hiloire', 'Cockpit', 'Mat', 'Bome', 'Barre', 'Grand_voile', 'Foc', 'Greement_courant'],
     },
-    simulation: 'copponex/moucheron/gite.js?v=7',
+    simulation: 'copponex/moucheron/gite.js?v=8',
   },
 };
