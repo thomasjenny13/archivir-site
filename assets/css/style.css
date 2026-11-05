@@ -9,8 +9,8 @@
   --ink: #EDE9E2;
   --ink-soft: #A39C93;
   --ink-faint: #655F58;
-  --rose-gold: #D8A66C;
-  --rose-gold-deep: #A87A4B;
+  --rose-gold: #FFFFFF;
+  --rose-gold-deep: #BBBBBB;
   --blue: #5FC7E3;
   --blue-deep: #2E8FAE;
   --pink: #E8488F;
@@ -29,8 +29,8 @@
   --ink: #201E1B;
   --ink-soft: #5C564B;
   --ink-faint: #8C8474;
-  --rose-gold: #B07A3E;
-  --rose-gold-deep: #8A5D2C;
+  --rose-gold: #111111;
+  --rose-gold-deep: #444444;
   --blue: #1F7C96;
   --blue-deep: #145B70;
   --pink: #C13574;
@@ -354,7 +354,7 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   text-decoration: none;
   white-space: nowrap;
 }
-.site-logo:hover{ color: var(--rose-gold); }
+.site-logo:hover{ color: var(--ink-soft); }
 .logo-prefix, .logo-vir{ display: inline-block; }
 /* "archi" + "vir" is literally "archivir"; revealing "tecture " between
    them (real inline content, not an overlay) pushes "vir" rightward via
@@ -423,7 +423,7 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   border-bottom: 2px solid transparent;
   transition: color .2s ease, border-color .2s ease;
 }
-.site-nav-link:hover{ color: var(--rose-gold); }
+.site-nav-link:hover{ color: var(--ink-soft); }
 .site-nav-link.is-active{ color: var(--ink); border-bottom-color: var(--rose-gold); }
 /* round "3D" tab between index and carte — the logo's own typeface, and
    filled rose-gold when on the 3D viewer, the way the text tabs get their

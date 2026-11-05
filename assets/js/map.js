@@ -652,7 +652,7 @@ PROJECTS.forEach((project) => {
 
   // every project gets the popup — glb-less ones just show the "à
   // venir" bubble from popupHtml() instead of loading a model
-  const popup = new maplibregl.Popup({ closeButton: true, className: 'map-popup-wrap', maxWidth: '240px', offset: POPUP_OFFSET })
+  const popup = new maplibregl.Popup({ closeButton: true, focusAfterOpen: false, className: 'map-popup-wrap', maxWidth: '240px', offset: POPUP_OFFSET })
     .setDOMContent(popupHtml(project));
   marker.setPopup(popup);
   popup.on('open', () => {
