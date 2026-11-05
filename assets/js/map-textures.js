@@ -78,11 +78,11 @@ const TEXTURES = {
     grain(ctx, PAPER, rand, 15);
   }) },
   water: { pixelRatio: 1, make: () => texture(TILE, 23, (ctx, rand) => {
-    ctx.fillStyle = '#c6cede';
+    ctx.fillStyle = '#ccd3e0';
     ctx.fillRect(0, 0, TILE, TILE);
-    strokes(ctx, TILE, rand, { count: 240, angle: -0.1, wobble: 0.05, length: [70, 220], width: [0.5, 1.2], alpha: [0.12, 0.4], color: '#47609b' });
-    strokes(ctx, TILE, rand, { count: 60, angle: -0.1, wobble: 0.05, length: [40, 150], width: [0.6, 1.3], alpha: [0.2, 0.45], color: '#eef0f5' });
-    grain(ctx, TILE, rand, 13);
+    strokes(ctx, TILE, rand, { count: 200, angle: -0.1, wobble: 0.05, length: [40, 130], width: [0.5, 1], alpha: [0.04, 0.13], color: '#5f76a8' });
+    strokes(ctx, TILE, rand, { count: 50, angle: -0.1, wobble: 0.05, length: [30, 100], width: [0.5, 1], alpha: [0.08, 0.2], color: '#eef0f5' });
+    grain(ctx, TILE, rand, 8);
   }) },
   park: { pixelRatio: 1, make: () => texture(TILE, 37, (ctx, rand) => {
     ctx.fillStyle = 'rgba(150, 190, 145, 0.2)';
