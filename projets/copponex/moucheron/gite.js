@@ -22,6 +22,9 @@ const RM = (phi) => P.mass * P.g * P.GM * Math.sin(phi) * (1 + 0.35 * Math.sin(p
 const HM = (v, ch, phi) => 0.5 * P.rho * v * v * P.area * ch * P.lever * Math.cos(phi) ** 2;
 const wave = (x, z, t, amp) => amp * (0.55 * Math.sin(0.55 * x + 0.9 * t) + 0.35 * Math.sin(0.8 * z - 0.7 * t + 1.3) + 0.18 * Math.sin(1.7 * (x + z) + 1.6 * t));
 
+// angle (degrés) dont le vent doit passer l'axe arrière pour faire changer la voile de bord
+const MAIN_GYBE = 15, JIB_GYBE = 3;
+
 const CSS = `
 .sim-fab{ bottom: 208px; }
 .sim-fab.active{ background: var(--ink); color: var(--bg); border-color: var(--ink); }
@@ -262,7 +265,7 @@ export function mount({ THREE, scene, ground, getRig, requestRender, exitSection
   const boatQ = new THREE.Quaternion();
 
   // ---------- état ----------
-  let running = false, t = 0, last = 0, phi = 0, omega = 0, gust = 1, boom = 0, jib = 0, yaw = null, rudder = 0, camber = 1;
+  let running = false, t = 0, last = 0, phi = 0, omega = 0, gust = 1, boom = 0, jib = 0, yaw = null, rudder = 0, camber = 1, sailSide = null, jibSide = null, gybing = false, boomSpeed = 0;
   const groundY = ground.position.y;
 
   function start() {
@@ -273,7 +276,7 @@ export function mount({ THREE, scene, ground, getRig, requestRender, exitSection
     show(true);
     ground.position.y = built.off.y * rig.group.scale.y + 0.002;
     ground.renderOrder = 3;
-    yaw = null; phi = omega = rudder = 0; t = 0; last = performance.now();
+    yaw = null; phi = omega = rudder = boomSpeed = 0; sailSide = null; gybing = false; t = 0; last = performance.now();
     running = true;
     instance.running = true;
     button.classList.add('active');
@@ -327,16 +330,47 @@ export function mount({ THREE, scene, ground, getRig, requestRender, exitSection
     gust += (goal - gust) * Math.min(1, dt * 2);
     const v = state.wind * 0.5144 * gust;   // nœuds -> m/s
 
-    boom += (lee * lerpTab('boom', awaD) - boom) * Math.min(1, dt * 1.5);
-    jib += (lee * lerpTab('jib', awaD) - jib) * Math.min(1, dt * 1.5);
+    // Côté de la voile. Dans la moitié avant du cercle, elle suit le vent : au virement
+    // elle faseye et passe doucement. Vent arrière, elle reste sur son bord même une fois
+    // le vent passé de l'autre côté (« sur la mauvaise panne »), jusqu'à ce qu'il la
+    // prenne par derrière : elle traverse alors d'un coup, c'est l'empannage.
+    if (sailSide === null) sailSide = jibSide = lee;
+    const byLee = 180 - awaD;
+    if (awaD < 90) {
+      sailSide = lee;
+      jibSide = lee;
+    } else {
+      if (lee !== jibSide && byLee > JIB_GYBE) jibSide = lee;   // abrité par la grand-voile, le foc passe d'abord
+      if (lee !== sailSide && byLee > MAIN_GYBE) {
+        sailSide = lee;
+        gybing = true;
+        boomSpeed = 0;
+      }
+    }
+    const boomGoal = sailSide * lerpTab('boom', awaD);
+    if (gybing) {
+      // poussée par le vent, la bôme accélère vers l'autre bord et s'arrête net au bout de l'écoute
+      const w = 1.6 + v * 0.1;   // environ 0,7 s de bord à bord
+      boomSpeed += (w * w * (boomGoal - boom) - 2 * 0.25 * w * boomSpeed) * dt;
+      boom += boomSpeed * dt;
+      if ((boom - boomGoal) * sailSide >= 0) {
+        boom = boomGoal;
+        boomSpeed = 0;
+        gybing = false;
+        omega += sailSide * 0.18 * Math.min(1, v / 6);   // le choc fait gîter le bateau
+      }
+    } else {
+      boom += (boomGoal - boom) * Math.min(1, dt * 1.5);
+    }
+    jib += (jibSide * lerpTab('jib', awaD) - jib) * Math.min(1, dt * (Math.abs(jibSide * lerpTab('jib', awaD) - jib) > 15 && awaD >= 90 ? 4 : 1.5));
 
     for (let i = 0; i < 4; i++) {
       const h = dt / 4;
-      omega += (lee * HM(v, ch, phi) - RM(phi) - P.damping * omega) / P.inertia * h;
+      omega += (sailSide * HM(v, ch, phi) - RM(phi) - P.damping * omega) / P.inertia * h;   // le bateau gîte du côté de la voile
       phi = Math.max(-1.2, Math.min(1.2, phi + omega * h));
     }
 
-    camber += (lee - camber) * Math.min(1, dt * 3);
+    camber += (sailSide - camber) * Math.min(1, dt * (gybing ? 10 : 3));
     const cz = Math.abs(camber) < 0.05 ? 0.05 * Math.sign(camber || 1) : camber;
     const flap = awaD < 32 ? (1 - awaD / 32) * 6 * Math.sin(t * 9) : 0;
     const rad = THREE.MathUtils.degToRad;
