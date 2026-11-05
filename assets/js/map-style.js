@@ -3,20 +3,20 @@
 import { setTextures } from './map-textures.js?v=14';
 
 export const DEFAULT_PALETTE = {
-  paper: '#f6f2ea',
-  water: '#bacfce',
+  paper: '#f4f1e6',
+  water: '#e4ecec',
   waterLine: '#89a8a6',
-  wood: '#c8d695',
-  grass: '#d5e1a7',
-  park: '#e4eabf',
-  zone: '#cd7841',
+  wood: '#d2dab4',
+  grass: '#f6f2df',
+  park: '#f3f5ea',
+  zone: '#af7f60',
   zoneOpacity: 0.14,
   road: '#fffcf4',
   boundary: '#a2876d',
   building: '#34312f',
   buildingLine: '#a39f97',
-  reliefShadow: '#6b5a48',
-  relief: 0.15,
+  reliefShadow: '#a18a72',
+  relief: 0.18,
 };
 
 // strip "bright" down to just city names on a plain white-roads base —
@@ -30,6 +30,9 @@ const HIDE_LAYERS = [
   'highway-shield-non-us', 'highway-shield-us-interstate', 'road_shield_us',
   // street and path name labels
   'highway-name-path', 'highway-name-minor', 'highway-name-major',
+  // protected areas, not parks: OSM draws nature reserves and whole
+  // regional parks here, which covered large parts of the map in one tint
+  'park',
   // ferry routes
   'ferry',
   // dashed footpaths and underground rail
@@ -79,7 +82,7 @@ function setPaint(map, id, props){
 
 // Everything the sliders can change. "bright" tints its zoning categories
 // with candy colors that mean nothing here, so they collapse into one wash.
-// Park, wood and grass stay opaque because OSM stacks these polygons: a
+// Urban parks, wood and grass stay opaque because OSM stacks these polygons: a
 // see-through fill would show every overlap as a darker hard-edged shape.
 export function paintMap(map, palette){
   setTextures(map, palette);
@@ -89,9 +92,8 @@ export function paintMap(map, palette){
   setPaint(map, 'building', { 'fill-pattern': 'pencil-building' });
   setPaint(map, 'road_area_pier', { 'fill-color': palette.paper });
   setPaint(map, 'landcover-sand', { 'fill-color': palette.paper });
-  setPaint(map, 'park', { 'fill-color': palette.park, 'fill-opacity': 1 });
   setPaint(map, 'landcover-grass', { 'fill-color': palette.grass, 'fill-opacity': 1 });
-  setPaint(map, 'landcover-grass-park', { 'fill-color': palette.grass, 'fill-opacity': 1 });
+  setPaint(map, 'landcover-grass-park', { 'fill-color': palette.park, 'fill-opacity': 1 });
   setPaint(map, 'landcover-wood', { 'fill-color': palette.wood, 'fill-opacity': 1, 'fill-outline-color': palette.wood });
   ZONE_LAYERS.forEach((id) => setPaint(map, id, { 'fill-color': rgba(palette.zone, palette.zoneOpacity) }));
   BOUNDARY_LAYERS.forEach((id) => setPaint(map, id, { 'line-color': palette.boundary }));
