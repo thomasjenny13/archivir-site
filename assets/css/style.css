@@ -960,6 +960,13 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 }
 [data-theme="light"] .maplibregl-popup-content{ background: var(--bg); }
 .map-tip-wrap .maplibregl-popup-content{ padding: 8px 10px; font-family: var(--mono); }
+.map-tip-wrap{ pointer-events: none; }
+.map-tip-thumb{
+  display: block;
+  width: 84px; height: 84px; margin: 2px auto 8px;
+  border-radius: 50%; object-fit: cover;
+  background: var(--bg); border: 1px solid var(--line);
+}
 .map-tip-title{ display: block; font-family: var(--title); font-size: 0.82rem; font-weight: 600; color: var(--ink); }
 .map-tip-arch{ display: block; font-size: 0.68rem; color: var(--ink-soft); margin-top: 2px; }
 .map-tip-loc{ display: block; font-size: 0.62rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--rose-gold); margin-top: 4px; }

@@ -360,6 +360,7 @@ function highlightBuildingAt(lon, lat){
 
 document.getElementById('theme-toggle').addEventListener('click', () => {
   popupCache.forEach((entry) => entry.model.traverse(recolorMesh));
+  thumbCache.clear();
   if (popupRenderer) popupRenderer.render(popupScene, popupCamera);
   if (map.getLayer('project-highlight-fill')) {
     const color = themeColor('--rose-gold');
@@ -389,7 +390,7 @@ function recolorMesh(child){
 
 const popupLoader = new GLTFLoader();
 const popupCache = new Map();
-let popupRenderer, popupScene, popupCamera, popupKeyLight, popupModel;
+let popupRenderer, popupScene, popupCamera, popupKeyLight, popupModel, popupEntry;
 
 // Shadow frustum fitted tight around the model instead of a loose ±2-radius
 // box around the ground origin: the light's shadow camera is aimed at the
@@ -410,7 +411,7 @@ function fitShadow(light, center, radius){
   light.shadow.normalBias = radius * 0.0015;
 }
 
-function ensurePopupViewer(container){
+function initPopupViewer(){
   if (!popupRenderer) {
     popupRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     popupRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -442,6 +443,10 @@ function ensurePopupViewer(container){
     ground.receiveShadow = true;
     popupScene.add(ground);
   }
+}
+
+function ensurePopupViewer(container){
+  initPopupViewer();
   container.appendChild(popupRenderer.domElement);
   const w = container.clientWidth, h = container.clientHeight;
   popupRenderer.setSize(w, h);
@@ -450,6 +455,7 @@ function ensurePopupViewer(container){
 }
 
 function applyPopupModel(entry){
+  popupEntry = entry;
   popupModel = entry.model;
   popupScene.add(popupModel);
 
@@ -476,10 +482,35 @@ const EXCLUDE_MESHES = {
 
 function showPopupModel(glbPath, container){
   ensurePopupViewer(container);
-  if (popupModel) { popupScene.remove(popupModel); popupModel = null; }
+  if (popupModel) { popupScene.remove(popupModel); popupModel = null; popupEntry = null; }
+  loadPopupModel(glbPath, applyPopupModel);
+}
 
+// still image of a model for the hover preview, rendered with the one
+// shared renderer: whatever an open popup is showing goes straight back
+// afterwards, within the same tick, so its canvas never visibly changes
+const thumbCache = new Map();
+function modelThumb(glbPath, done){
+  if (thumbCache.has(glbPath)) { done(thumbCache.get(glbPath)); return; }
+  loadPopupModel(glbPath, (entry) => {
+    initPopupViewer();
+    const shown = popupEntry;
+    if (popupModel) popupScene.remove(popupModel);
+    popupRenderer.setSize(108, 108, false); // same size as the popup's bubble
+    applyPopupModel(entry);
+    const url = popupRenderer.domElement.toDataURL();
+    thumbCache.set(glbPath, url);
+    popupScene.remove(entry.model);
+    popupModel = null;
+    popupEntry = null;
+    if (shown) applyPopupModel(shown);
+    done(url);
+  });
+}
+
+function loadPopupModel(glbPath, done){
   if (popupCache.has(glbPath)) {
-    applyPopupModel(popupCache.get(glbPath));
+    done(popupCache.get(glbPath));
     return;
   }
 
@@ -518,7 +549,7 @@ function showPopupModel(glbPath, container){
 
     const entry = { model, sphere, maxDim };
     popupCache.set(glbPath, entry);
-    applyPopupModel(entry);
+    done(entry);
   });
 }
 
@@ -554,21 +585,17 @@ function popupHtml(project){
   return wrap;
 }
 
-// how close "agrandir l'environnement" zooms in on click
+// how close a single-match ?lieu= deep link zooms in
 const FOCUS_ZOOM = 16;
 
 function anyPopupOpen(){
   return markers.some((m) => m.popup && m.popup.isOpen());
 }
 
-// shared by the marker click handler and a single-match ?lieu= deep
-// link from the index: zoom onto the project, highlight its footprint
-// once the view settles, and open its popup if it isn't already
-function focusMarker(marker, project, popup, tip){
+// a marker click just opens its card, the view stays where it is
+function openCard(popup, tip){
   tip.remove();
   markers.forEach((m) => { if (m.popup && m.popup !== popup && m.popup.isOpen()) m.popup.remove(); });
-  if (map.getZoom() < FOCUS_ZOOM) map.flyTo({ center: [project.lon, project.lat], zoom: FOCUS_ZOOM, duration: 1100 });
-  else map.panTo([project.lon, project.lat]);
   // (footprint highlight removed at the user's request — highlightBuildingAt
   // and its layers are kept, just no longer triggered)
   // deferred: on a real click this handler runs *before* MapLibre's own
@@ -577,6 +604,14 @@ function focusMarker(marker, project, popup, tip){
   // so no card ever appeared. One tick later, MapLibre has already
   // opened it (no-op here); for the ?lieu= deep link, this opens it.
   setTimeout(() => { if (!popup.isOpen()) popup.addTo(map); }, 0);
+}
+
+// single-match ?lieu= deep link from the index: zoom onto the project
+// and open its card
+function focusMarker(project, popup, tip){
+  if (map.getZoom() < FOCUS_ZOOM) map.flyTo({ center: [project.lon, project.lat], zoom: FOCUS_ZOOM, duration: 1100 });
+  else map.panTo([project.lon, project.lat]);
+  openCard(popup, tip);
 }
 
 // offset the card away from the marker regardless of which side MapLibre
@@ -598,14 +633,25 @@ PROJECTS.forEach((project) => {
     .setLngLat([project.lon, project.lat])
     .addTo(map);
 
-  const tip = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 14, className: 'map-tip-wrap', anchor: 'bottom' })
+  // hover preview: the model or photo in a small bubble above the text.
+  // Its image only loads on first hover, not for every marker on page load.
+  const tipEl = document.createElement('div');
+  tipEl.innerHTML =
+    (project.glb || project.photo ? `<img class="map-tip-thumb" alt="">` : '') +
+    `<span class="map-tip-title">${project.nom}</span>` +
+    `<span class="map-tip-arch">${project.architecte}</span>` +
+    `<span class="map-tip-loc">${project.lieu}</span>`;
+  const thumb = tipEl.querySelector('.map-tip-thumb');
+  const tip = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 14, className: 'map-tip-wrap' })
     .setLngLat([project.lon, project.lat])
-    .setHTML(
-      `<span class="map-tip-title">${project.nom}</span>` +
-      `<span class="map-tip-arch">${project.architecte}</span>` +
-      `<span class="map-tip-loc">${project.lieu}</span>`
-    );
-  el.addEventListener('mouseenter', () => { el.classList.add('is-active'); tip.addTo(map); });
+    .setDOMContent(tipEl);
+  el.addEventListener('mouseenter', () => {
+    el.classList.add('is-active');
+    if (popup.isOpen()) return;
+    if (project.glb) modelThumb(project.glb, (url) => { thumb.src = url; });
+    else if (project.photo) thumb.src = project.photo;
+    tip.addTo(map);
+  });
   el.addEventListener('mouseleave', () => { el.classList.remove('is-active'); tip.remove(); });
 
   // every project gets the popup — glb-less ones just show the "à
@@ -627,7 +673,7 @@ PROJECTS.forEach((project) => {
     setTimeout(() => { if (!anyPopupOpen()) clearHighlight(); }, 0);
   });
 
-  el.addEventListener('click', () => focusMarker(marker, project, popup, tip));
+  el.addEventListener('click', () => openCard(popup, tip));
 
   markers.push({ marker, project, popup, tip });
 });
@@ -648,7 +694,7 @@ if (cityParam) {
     filterControl.refresh();
     applyFilters(0);
     if (matches.length === 1) {
-      focusMarker(matches[0].marker, matches[0].project, matches[0].popup, matches[0].tip);
+      focusMarker(matches[0].project, matches[0].popup, matches[0].tip);
     } else {
       map.fitBounds(projectBounds(matches.map((m) => m.project)), { padding: 60, maxZoom: 15, duration: 1100 });
     }
