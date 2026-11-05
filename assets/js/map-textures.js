@@ -1,4 +1,4 @@
-// Pencil-on-paper textures for the map, drawn once on a canvas at load.
+// Paper and building textures for the map, drawn once on a canvas at load.
 // Seeded, so the map looks the same on every visit, and seamless, so
 // MapLibre can repeat them as fill patterns: every stroke that crosses
 // an edge is drawn again on the opposite side.
@@ -73,29 +73,8 @@ const TEXTURES = {
   paper: { pixelRatio: 2, make: () => texture(PAPER, 11, (ctx, rand) => {
     ctx.fillStyle = '#f4f0e6';
     ctx.fillRect(0, 0, PAPER, PAPER);
-    // fibres, then the tooth; no large stains, they repeat visibly
-    strokes(ctx, PAPER, rand, { count: 380, angle: 0, wobble: 6.3, length: [6, 30], width: [0.5, 1], alpha: [0.03, 0.09], color: '#8a7a5f' });
+    // only the tooth: strokes or stains would repeat visibly
     grain(ctx, PAPER, rand, 15);
-  }) },
-  water: { pixelRatio: 1, make: () => texture(TILE, 23, (ctx, rand) => {
-    ctx.fillStyle = '#b4d6dc';
-    ctx.fillRect(0, 0, TILE, TILE);
-    strokes(ctx, TILE, rand, { count: 200, angle: -0.1, wobble: 0.05, length: [40, 130], width: [0.5, 1], alpha: [0.05, 0.15], color: '#2f8496' });
-    strokes(ctx, TILE, rand, { count: 50, angle: -0.1, wobble: 0.05, length: [30, 100], width: [0.5, 1], alpha: [0.08, 0.2], color: '#f2fbf8' });
-    grain(ctx, TILE, rand, 8);
-  }) },
-  park: { pixelRatio: 1, make: () => texture(TILE, 37, (ctx, rand) => {
-    ctx.fillStyle = 'rgba(178, 202, 102, 0.3)';
-    ctx.fillRect(0, 0, TILE, TILE);
-    strokes(ctx, TILE, rand, { count: 420, angle: -1.05, wobble: 0.35, length: [8, 26], width: [0.5, 1], alpha: [0.08, 0.26], color: '#6f9a2c' });
-  }) },
-  // opaque, because OSM stacks forest polygons on top of each other: a
-  // see-through fill would show every overlap as a darker hard-edged shape
-  wood: { pixelRatio: 1, make: () => texture(TILE, 41, (ctx, rand) => {
-    ctx.fillStyle = '#d6e0a8';
-    ctx.fillRect(0, 0, TILE, TILE);
-    strokes(ctx, TILE, rand, { count: 620, angle: -1.05, wobble: 0.45, length: [6, 22], width: [0.5, 1.1], alpha: [0.08, 0.26], color: '#5f8a26' });
-    grain(ctx, TILE, rand, 10);
   }) },
   // photocopied poché: near-black, grainy, faint vertical formwork
   building: { pixelRatio: 1, make: () => texture(TILE, 53, (ctx, rand) => {

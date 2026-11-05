@@ -4,7 +4,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 // v6's ESM build has no default export (only named exports) — a
 // namespace import keeps every maplibregl.X reference below unchanged
 import * as maplibregl from 'maplibre-gl';
-import { addPencilTextures } from './map-textures.js?v=9';
+import { addPencilTextures } from './map-textures.js?v=10';
 
 const PROJECTS = window.PROJECTS || [];
 
@@ -261,10 +261,15 @@ const WHITE_ROAD_LAYERS = [
 ];
 // "bright" tints its zoning categories with OSM-default candy colors,
 // which mean nothing on an architecture portfolio map: they collapse
-// into one quiet wash. Everything else reads as a pencil drawing on
-// paper, with the textures from map-textures.js — graphite buildings,
-// blue-hatched water, green-hatched parks.
+// into one quiet wash. Water and greenery are flat colors on a grainy
+// paper, with dark photocopy-like buildings (map-textures.js).
 const PAPER_COLOR = '#f4f0e6';
+const WATER_COLOR = '#b4d6dc';
+// opaque, because OSM stacks these polygons on top of each other: a
+// see-through fill would show every overlap as a darker hard-edged shape
+const PARK_COLOR = '#e9ecca';
+const WOOD_COLOR = '#d6e0a8';
+const GRASS_COLOR = '#dfe7b6';
 const ROAD_COLOR = 'rgba(255, 252, 244, 0.85)';
 const WATER_LINE_COLOR = '#5fa3b3';
 const ZONE_TINT = 'rgba(205, 125, 70, 0.1)';
@@ -278,12 +283,12 @@ const RECOLOR = {
   'background': { 'background-pattern': 'pencil-paper' },
   'road_area_pier': { 'fill-color': PAPER_COLOR },
   'landcover-sand': { 'fill-color': PAPER_COLOR },
-  'water': { 'fill-pattern': 'pencil-water' },
-  'water-intermittent': { 'fill-pattern': 'pencil-water' },
-  'park': { 'fill-pattern': 'pencil-park', 'fill-opacity': 0.9 },
-  'landcover-grass': { 'fill-pattern': 'pencil-park', 'fill-opacity': 0.9 },
-  'landcover-grass-park': { 'fill-pattern': 'pencil-park', 'fill-opacity': 0.9 },
-  'landcover-wood': { 'fill-pattern': 'pencil-wood', 'fill-opacity': 1 },
+  'water': { 'fill-color': WATER_COLOR },
+  'water-intermittent': { 'fill-color': WATER_COLOR, 'fill-opacity': 1 },
+  'park': { 'fill-color': PARK_COLOR, 'fill-opacity': 1 },
+  'landcover-grass': { 'fill-color': GRASS_COLOR, 'fill-opacity': 1 },
+  'landcover-grass-park': { 'fill-color': GRASS_COLOR, 'fill-opacity': 1 },
+  'landcover-wood': { 'fill-color': WOOD_COLOR, 'fill-opacity': 1, 'fill-outline-color': WOOD_COLOR },
   'building': { 'fill-pattern': 'pencil-building' },
   'landuse-residential': { 'fill-color': ZONE_TINT },
   'landuse-suburb': { 'fill-color': ZONE_TINT },
