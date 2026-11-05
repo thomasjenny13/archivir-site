@@ -51,26 +51,11 @@ const CSS = `
 .sim-dial{ display: block; width: 132px; height: 132px; margin: 2px auto 0; cursor: grab; touch-action: none; color: var(--ink); }
 .sim-dial:active{ cursor: grabbing; }
 .sim-dial:focus-visible{ outline: 1px solid var(--ink); outline-offset: 2px; }
-.sim-row > .sim-swatches{ justify-content: flex-start; gap: 10px; }
-.sim-swatches button{ width: 22px; height: 22px; padding: 0; border: 1px solid var(--line); cursor: pointer; }
-.sim-swatches button[aria-pressed=true]{ outline: 1px solid var(--ink); outline-offset: 2px; }
-.sim-heel{ display: flex; align-items: baseline; justify-content: space-between; }
-.sim-heel output{ font-family: var(--title); font-size: 1.6rem; color: var(--ink); font-variant-numeric: tabular-nums; }
 @media (max-width: 768px){
   .sim-fab{ bottom: 168px; }
   .sim-panel{ left: 18px; top: 76px; width: min(220px, calc(100vw - 130px)); gap: 8px; }
-  .sim-heel output{ font-size: 1.25rem; }
   .sim-dial{ width: 104px; height: 104px; }
 }`;
-
-// couleurs d'eau au choix, à essayer sur la maquette
-const WATERS = [
-  { key: 'bleu', label: 'Bleu profond', color: 0x1f3d52 },
-  { key: 'noir', label: 'Noir', color: 0x101010 },
-  { key: 'gris', label: 'Gris', color: 0x7d8083 },
-];
-const readWater = () => { try { return localStorage.getItem('archivir-water'); } catch { return null; } };
-const saveWater = (key) => { try { localStorage.setItem('archivir-water', key); } catch { /* préférence non conservée */ } };
 
 const ticks = Array.from({ length: 12 }, (_, i) => {
   const a = i * Math.PI / 6, r0 = i % 3 ? 54 : 50;
@@ -110,10 +95,7 @@ export function mount({ THREE, scene, ground, getRig, requestRender, exitSection
   panel.innerHTML = `
     <div class="sim-row"><div><label for="sim-wind">Vent</label><output id="sim-windv"></output></div>
       <input id="sim-wind" type="range" min="0" max="25" step="0.5" value="12"></div>
-    <div class="sim-row"><div><span>Cap</span><output id="sim-capv"></output></div>${DIAL}</div>
-    <div class="sim-heel"><span>Gîte</span><output id="sim-heel">0°</output></div>
-    <div class="sim-row"><div><span>Eau</span><output id="sim-waterv"></output></div>
-      <div class="sim-swatches">${WATERS.map((w) => `<button type="button" data-water="${w.key}" title="${w.label}" aria-label="Eau : ${w.label}" style="background:#${w.color.toString(16).padStart(6, '0')}"></button>`).join('')}</div></div>`;
+    <div class="sim-row"><span>Cap</span>${DIAL}</div>`;
   document.body.append(button, panel);
   // les flèches et les gestes sur le panneau règlent les curseurs, sans changer d'ouvrage
   ['keydown', 'touchstart', 'touchmove', 'touchend', 'pointerdown', 'wheel'].forEach((type) =>
@@ -121,9 +103,10 @@ export function mount({ THREE, scene, ground, getRig, requestRender, exitSection
   const $ = (id) => panel.querySelector('#' + id);
   const state = { wind: 12, cap: 40 };
   const showWind = () => { $('sim-windv').textContent = `${state.wind.toLocaleString('fr-CH')} nœuds`; };
-  const showCap = () => {
-    const a = Math.abs(state.cap);
-    $('sim-capv').textContent = a === 0 || a === 180 ? `${a}° · ${allure(a)}` : `${a}° ${state.cap < 0 ? 'bâbord' : 'tribord'} · ${allure(a)}`;
+  // le cap n'est pas affiché, seulement annoncé aux lecteurs d'écran
+  const capText = () => {
+    const a = Math.round(Math.abs(state.cap));
+    return a === 0 || a === 180 ? `${a}° · ${allure(a)}` : `${a}° ${state.cap < 0 ? 'bâbord' : 'tribord'} · ${allure(a)}`;
   };
   $('sim-wind').addEventListener('input', (e) => { state.wind = +e.target.value; showWind(); });
   showWind();
@@ -136,8 +119,7 @@ export function mount({ THREE, scene, ground, getRig, requestRender, exitSection
     state.cap = wrap(c);
     $('sim-boat').setAttribute('transform', `rotate(${-state.cap} 66 66)`);
     dial.setAttribute('aria-valuenow', Math.round(state.cap));
-    showCap();
-    dial.setAttribute('aria-valuetext', $('sim-capv').textContent);
+    dial.setAttribute('aria-valuetext', capText());
   };
   const pointerAngle = (e) => {
     const r = dial.getBoundingClientRect();
@@ -164,21 +146,6 @@ export function mount({ THREE, scene, ground, getRig, requestRender, exitSection
     e.preventDefault();
   });
   setCap(state.cap);
-
-  // couleur de l'eau
-  let waterKey = WATERS.some((w) => w.key === readWater()) ? readWater() : WATERS[0].key;
-  const applyWater = () => {
-    const w = WATERS.find((x) => x.key === waterKey);
-    $('sim-waterv').textContent = w.label;
-    panel.querySelectorAll('[data-water]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.water === waterKey)));
-    if (built) built.water.material.color.setHex(w.color);
-    requestRender();
-  };
-  panel.querySelectorAll('[data-water]').forEach((b) => b.addEventListener('click', () => {
-    waterKey = b.dataset.water;
-    saveWater(waterKey);
-    applyWater();
-  }));
 
   // ---------- scène : préparée au premier lancement, puis réutilisée ----------
   let built = null;
@@ -238,27 +205,33 @@ export function mount({ THREE, scene, ground, getRig, requestRender, exitSection
     // eau : disque net à la flottaison, comme le socle d'une maquette ; la quille reste lisible par transparence
     const water = new THREE.Mesh(
       new THREE.CircleGeometry(rig.maxDim * 0.75, 96),
-      new THREE.MeshBasicMaterial({ color: 0x9fc2cf, transparent: true, opacity: 0.9, depthWrite: false })
+      new THREE.MeshBasicMaterial({ color: 0x101010, transparent: true, opacity: 0.9, depthWrite: false })
     );
     water.rotation.x = -Math.PI / 2;
     water.position.y = off.y;
     water.renderOrder = 2;
     rig.group.add(water);
 
-    // filets de vent
-    const N = 60;
-    const streakPos = new Float32Array(N * 6);
+    // filets de vent : traits blancs à plat sur l'eau, dans l'empreinte du disque
+    const N = 48;
+    const radius = rig.maxDim * 0.75;
+    const streakPos = new Float32Array(N * 12);
     const streakGeo = new THREE.BufferGeometry();
     streakGeo.setAttribute('position', new THREE.BufferAttribute(streakPos, 3));
-    const streaks = new THREE.LineSegments(streakGeo, new THREE.LineBasicMaterial({ color: 0x7f8a90, transparent: true, opacity: 0.4 }));
+    streakGeo.setIndex(Array.from({ length: N }, (_, i) => {
+      const k = i * 4;
+      return [k, k + 1, k + 2, k, k + 2, k + 3];
+    }).flat());
+    const streaks = new THREE.Mesh(streakGeo, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8, side: THREE.DoubleSide, depthWrite: false }));
     streaks.frustumCulled = false;
+    streaks.renderOrder = 4;
     rig.group.add(streaks);
-    const seeds = Array.from({ length: N }, () => ({ u: Math.random(), y: 0.6 + Math.random() * 8, s: (Math.random() - 0.5) * 18 }));
+    const seeds = Array.from({ length: N }, () => ({ u: Math.random(), x: (Math.random() * 2 - 1) * radius * 0.97 }));
 
     rig.group.add(boat);
     boat.add(rig.model);
     rig.group.scale.setScalar(scale);
-    built = { rig, off, boat, meshes, parts, allLines, stay, mask, water, streaks, streakGeo, streakPos, seeds, center: V(0, off.y, 0) };
+    built = { rig, off, boat, meshes, parts, allLines, stay, mask, water, streaks, streakGeo, streakPos, seeds, radius, center: V(0, off.y, 0) };
     return built;
   }
 
@@ -296,7 +269,6 @@ export function mount({ THREE, scene, ground, getRig, requestRender, exitSection
     if (!rig) return;
     exitSectionView();
     if (!built || built.rig !== rig) build(rig);
-    applyWater();
     show(true);
     ground.position.y = built.off.y * rig.group.scale.y + 0.002;
     ground.renderOrder = 3;
@@ -381,14 +353,17 @@ export function mount({ THREE, scene, ground, getRig, requestRender, exitSection
     pose(b.boat, b.center, boatQ);
     b.boat.position.y += heave;
 
-    // filets de vent
-    const speed = 0.6 + v * 0.35, len = 0.4 + v * 0.06;
-    b.streaks.material.opacity = state.wind < 0.5 ? 0 : 0.15 + 0.3 * Math.min(1, state.wind / 15);
+    // filets de vent : chaque trait suit une corde du disque, dans le sens du vent (+z)
+    const speed = 1 + v * 0.45, len = 0.7 + v * 0.14, half = 0.022;
+    const y = b.off.y + 0.012;
+    b.streaks.material.opacity = state.wind < 0.5 ? 0 : 0.4 + 0.5 * Math.min(1, state.wind / 15);
     b.seeds.forEach((s, i) => {
-      s.u += speed * dt / 24;
-      if (s.u > 1) { s.u -= 1; s.y = 0.6 + Math.random() * 8; s.s = (Math.random() - 0.5) * 18; }
-      const z = (s.u - 0.5) * 24, y = b.off.y + s.y;
-      b.streakPos.set([s.s, y, z, s.s, y, z + len], i * 6);
+      s.u += speed * dt / (2 * b.radius);
+      if (s.u > 1) { s.u -= 1; s.x = (Math.random() * 2 - 1) * b.radius * 0.97; }
+      const h = Math.sqrt(b.radius * b.radius - s.x * s.x);   // demi-corde à cette position
+      const z1 = -h + s.u * (2 * h + len);
+      const a = Math.max(-h, z1 - len), c = Math.min(h, z1);
+      b.streakPos.set([s.x - half, y, a, s.x + half, y, a, s.x + half, y, c, s.x - half, y, c], i * 12);
     });
     b.streakGeo.attributes.position.needsUpdate = true;
 
@@ -400,7 +375,6 @@ export function mount({ THREE, scene, ground, getRig, requestRender, exitSection
       l.material.resolution.copy(ref.resolution);
     });
 
-    $('sim-heel').textContent = `${Math.round(Math.abs(THREE.MathUtils.radToDeg(phi)))}°`;
   }
 
   button.addEventListener('click', () => (running ? stop() : start()));
