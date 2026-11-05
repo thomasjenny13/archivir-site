@@ -260,13 +260,17 @@ const WHITE_ROAD_LAYERS = [
 // and it visibly clashes with the site's own warm/neutral palette, so
 // every one of those zone categories collapses into a single quiet
 // wash instead of keeping a rainbow of database categories. Buildings
-// go solid near-black, boundaries a plain warm gray — nothing left
+// go solid near-black, land and boundaries a neutral gray — nothing left
 // that isn't either the site's own ink/line tones or a legible
 // natural feature (water, greenery).
 const BUILDING_COLOR = '#1c1a17';
-const ZONE_TINT = 'rgba(92, 86, 75, 0.07)';
-const BOUNDARY_COLOR = '#c9c4ba';
+const LAND_COLOR = '#e9e9e9';
+const ZONE_TINT = 'rgba(0, 0, 0, 0.05)';
+const BOUNDARY_COLOR = '#c4c4c4';
 const RECOLOR = {
+  'background': { 'background-color': LAND_COLOR },
+  'road_area_pier': { 'fill-color': LAND_COLOR },
+  'landcover-sand': { 'fill-color': LAND_COLOR },
   'building': { 'fill-color': BUILDING_COLOR },
   'landuse-residential': { 'fill-color': ZONE_TINT },
   'landuse-suburb': { 'fill-color': ZONE_TINT },
