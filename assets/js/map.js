@@ -236,6 +236,8 @@ const HIDE_LAYERS = [
   'highway-name-path', 'highway-name-minor', 'highway-name-major',
   // ferry routes
   'ferry',
+  // dashed footpaths and underground rail
+  'tunnel-path', 'highway-path', 'bridge-path-casing', 'bridge-path', 'tunnel-railway',
   // one-way arrows
   'road_oneway', 'road_oneway_opposite',
   // river/lake names
