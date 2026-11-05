@@ -1,23 +1,24 @@
 // The look of the map: which "bright" layers show, and in which colors.
 // Shared by carte.html and carte-reglages.html, the page with the sliders.
+import * as maplibregl from 'maplibre-gl';
 import { setTextures } from './map-textures.js?v=14';
 
 export const DEFAULT_PALETTE = {
-  paper: '#f4f1e6',
-  water: '#bdd0d0',
+  paper: '#f2f0e9',
+  water: '#b6d1d8',
   wood: '#cfd6b8',
-  farmland: '#f2f5d1',
-  grass: '#f4eecd',
-  park: '#f3f5ea',
+  farmland: '#efead7',
+  grass: '#ebe8d6',
+  park: '#f4f6ea',
   zone: '#8e5e3e',
   zoneOpacity: 0.13,
   road: '#fffcf4',
   boundary: '#d7ccc1',
   building: '#34312f',
   buildingLine: '#a39f97',
-  reliefShadow: '#9f886f',
-  relief: 0.24,
-  vegetation: 0,
+  reliefShadow: '#6b5a47',
+  relief: 0.11,
+  vegetation: 0.15,
 };
 
 // strip "bright" down to just city names on a plain white-roads base —
@@ -72,6 +73,43 @@ const BOUNDARY_LAYERS = ['boundary_2', 'boundary_3', 'boundary_disputed'];
 const RELIEF_LAYER = 'relief';
 const FARMLAND_LAYER = 'farmland';
 const VEGETATION_LAYER = 'vegetation-low-zoom';
+
+// Natural Earth bakes its hill shading into the image. Shading is a change
+// of brightness, so giving every pixel the same brightness leaves only the
+// color of the vegetation; the smaller canvas smooths what remains.
+const VEGETATION_PROTOCOL = 'flat-vegetation';
+const NATURAL_EARTH = 'https://tiles.openfreemap.org/natural_earth/ne2sr/';
+const FLAT_SIZE = 64;
+const FLAT_BRIGHTNESS = 200;
+
+async function flatVegetationTile(params, abort){
+  const response = await fetch(params.url.replace(`${VEGETATION_PROTOCOL}://`, NATURAL_EARTH), { signal: abort.signal });
+  if (!response.ok) throw new Error(`Natural Earth : ${response.status}`);
+  const bitmap = await createImageBitmap(await response.blob());
+  const small = document.createElement('canvas');
+  small.width = small.height = FLAT_SIZE;
+  const ctx = small.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(bitmap, 0, 0, FLAT_SIZE, FLAT_SIZE);
+  const image = ctx.getImageData(0, 0, FLAT_SIZE, FLAT_SIZE);
+  const d = image.data;
+  for (let i = 0; i < d.length; i += 4){
+    const scale = FLAT_BRIGHTNESS / Math.max(1, 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]);
+    d[i] = Math.min(255, d[i] * scale);
+    d[i + 1] = Math.min(255, d[i + 1] * scale);
+    d[i + 2] = Math.min(255, d[i + 2] * scale);
+  }
+  ctx.putImageData(image, 0, 0);
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = bitmap.width;
+  const output = canvas.getContext('2d');
+  output.imageSmoothingQuality = 'high';
+  output.drawImage(small, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+  return { data: await blob.arrayBuffer() };
+}
+
+let protocolAdded = false;
 
 function rgba(hex, alpha){
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
@@ -133,8 +171,18 @@ export function applyMapStyle(map, palette){
 
   // the tiles carry no forests below zoom 7, so a Natural Earth image
   // brings the green at small scales and fades out as the real data arrives
+  if (!protocolAdded){
+    maplibregl.addProtocol(VEGETATION_PROTOCOL, flatVegetationTile);
+    protocolAdded = true;
+  }
+  map.addSource(VEGETATION_LAYER, {
+    type: 'raster',
+    tiles: [`${VEGETATION_PROTOCOL}://{z}/{x}/{y}.png`],
+    tileSize: 256,
+    maxzoom: 6,
+  });
   map.addLayer({
-    id: VEGETATION_LAYER, type: 'raster', source: 'ne2_shaded', maxzoom: 9,
+    id: VEGETATION_LAYER, type: 'raster', source: VEGETATION_LAYER, maxzoom: 9,
   }, 'landcover-glacier');
   // the tiles carry farmland but "bright" has no layer to draw it
   map.addLayer({

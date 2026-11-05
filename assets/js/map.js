@@ -4,7 +4,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 // v6's ESM build has no default export (only named exports) — a
 // namespace import keeps every maplibregl.X reference below unchanged
 import * as maplibregl from 'maplibre-gl';
-import { applyMapStyle, DEFAULT_PALETTE } from './map-style.js?v=6';
+import { applyMapStyle, DEFAULT_PALETTE } from './map-style.js?v=7';
 
 const PROJECTS = window.PROJECTS || [];
 

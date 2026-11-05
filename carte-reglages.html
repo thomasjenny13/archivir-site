@@ -67,7 +67,7 @@
 </div>
 <script type="module">
 import * as maplibregl from 'maplibre-gl';
-import { applyMapStyle, paintMap, DEFAULT_PALETTE } from './assets/js/map-style.js?v=6';
+import { applyMapStyle, paintMap, DEFAULT_PALETTE } from './assets/js/map-style.js?v=7';
 
 const STORE = 'archivir-map-palette';
 const COLORS = [
@@ -101,8 +101,13 @@ function hslToHex([h, s, l]){
 }
 
 function load(){
-  try { return { ...DEFAULT_PALETTE, ...JSON.parse(localStorage.getItem(STORE) || '{}') }; }
-  catch { return { ...DEFAULT_PALETTE }; }
+  const palette = { ...DEFAULT_PALETTE };
+  try {
+    const stored = JSON.parse(localStorage.getItem(STORE) || '{}');
+    // settings that no longer exist are dropped
+    Object.keys(palette).forEach((key) => { if (key in stored) palette[key] = stored[key]; });
+  } catch { /* the defaults are enough */ }
+  return palette;
 }
 let palette = load();
 
