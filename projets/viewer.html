@@ -617,6 +617,7 @@
   // an orbit/zoom, a fly-to, a project switch, a toggle — and let the
   // loop go idle the rest of the time.
   let needsRender = true;
+  let simulation = null; // animation of the current project (cfg.simulation in projects.js)
   function requestRender(){ needsRender = true; }
 
   // damping never mathematically reaches exactly zero (it's a x *= 0.95
@@ -1146,6 +1147,7 @@
   }
   cutToggle.addEventListener('click', () => {
     if (!currentRig) return;
+    if (simulation && simulation.running) simulation.stop(); // the cut plane is fixed, the animated boat isn't
     sectionView = !sectionView;
     applySectionView(currentRig, sectionView);
     cutToggle.classList.toggle('active', sectionView);
@@ -1782,6 +1784,7 @@
           cutBoundaryEdges, innerEdges, glassEdges, clipPlane,
           fitDistance, fitCenter: sphere.center.clone(),
           maxDim,
+          edgesFor: (list) => buildEdges(list, 1),
           dispose() {
             scene.remove(group);
             group.traverse((obj) => {
@@ -1829,6 +1832,7 @@
   // ---------- UI updates per project ----------
   function applyProjectUI(slug) {
     const cfg = PROJECTS[slug];
+    updateSimulation(slug);
     document.title = cfg.title;
     document.getElementById('viewer-credit').innerHTML =
       cfg.creditHtml + (cfg.creditMeta ? '<br><span class="credit-meta">' + cfg.creditMeta + '</span>' : '')
@@ -2078,6 +2082,22 @@
     requestRender();
   }
 
+  // ---------- per-project animation ----------
+  // cfg.simulation is a module path from projets/; its mount() adds its own
+  // button and panel, and tick() runs from the render loop while it plays
+  async function updateSimulation(slug){
+    if (simulation) { simulation.unmount(); simulation = null; }
+    const path = PROJECTS[slug].simulation;
+    if (!path) return;
+    const { mount } = await import(new URL(path, document.baseURI).href);
+    if (currentSlug !== slug || simulation) return;
+    simulation = mount({
+      THREE, scene, ground, requestRender,
+      getRig: () => currentRig,
+      exitSectionView: () => { if (sectionView) cutToggle.click(); },
+    });
+  }
+
   // ---------- nav arrows: cycle through ORDER, no page reload ----------
   function stepSlug(direction){
     const idx = ORDER.indexOf(currentSlug);
@@ -2147,6 +2167,10 @@
       camera.position.lerpVectors(flightFrom, flightTo, e);
       controls.target.lerpVectors(flightFromTarget, flightToTarget, e);
       if (t >= 1) flying = false;
+      needsRender = true;
+    }
+    if (simulation && simulation.running) {
+      simulation.tick();
       needsRender = true;
     }
     controls.update();
