@@ -54,16 +54,6 @@ function grain(ctx, size, rand, amount){
   ctx.putImageData(image, 0, 0);
 }
 
-// isolated pale dots, like toner that didn't take on a photocopy
-function speckle(ctx, size, rand, density, color){
-  ctx.fillStyle = color;
-  for (let i = 0; i < size * size * density; i++){
-    ctx.globalAlpha = 0.25 + rand() * 0.55;
-    ctx.fillRect(Math.floor(rand() * size), Math.floor(rand() * size), 1, 1);
-  }
-  ctx.globalAlpha = 1;
-}
-
 function texture(size, seed, draw){
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = size;
@@ -107,14 +97,12 @@ const TEXTURES = {
     strokes(ctx, TILE, rand, { count: 620, angle: -1.05, wobble: 0.45, length: [6, 22], width: [0.5, 1.1], alpha: [0.08, 0.26], color: '#5f8a26' });
     grain(ctx, TILE, rand, 10);
   }) },
-  // photocopied poché: near-black, faint vertical formwork, pale specks
+  // photocopied poché: near-black, grainy, faint vertical formwork
   building: { pixelRatio: 1, make: () => texture(TILE, 53, (ctx, rand) => {
     ctx.fillStyle = '#34312f';
     ctx.fillRect(0, 0, TILE, TILE);
     strokes(ctx, TILE, rand, { count: 150, angle: 1.57, wobble: 0.03, length: [20, 90], width: [0.5, 1.2], alpha: [0.2, 0.5], color: '#141211' });
-    strokes(ctx, TILE, rand, { count: 70, angle: 1.57, wobble: 0.03, length: [10, 50], width: [0.4, 0.8], alpha: [0.06, 0.16], color: '#d8d4cc' });
     grain(ctx, TILE, rand, 34);
-    speckle(ctx, TILE, rand, 0.012, '#c9c5bd');
   }) },
 };
 
