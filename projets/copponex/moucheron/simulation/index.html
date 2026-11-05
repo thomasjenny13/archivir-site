@@ -34,7 +34,6 @@ body { background: var(--lake); color: var(--ink); font-family: var(--body); ove
   background: var(--panel);
   backdrop-filter: blur(6px);
   border: 1px solid var(--line);
-  border-radius: 6px;
   padding: 16px 18px;
   display: grid; gap: 14px;
 }
@@ -46,7 +45,7 @@ label, .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .08em;
 .lblrow { display: flex; justify-content: space-between; align-items: baseline; }
 .val { font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; color: var(--ink); }
 input[type=range] { width: 100%; accent-color: var(--ink); }
-.seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); overflow: hidden; }
 .seg button { font: 500 13px var(--body); padding: 7px 4px; border: 0; background: transparent; color: var(--ink); cursor: pointer; }
 .seg button + button { border-left: 1px solid var(--line); }
 .seg button[aria-pressed=true] { background: var(--ink); color: #f7f9f9; }
@@ -71,7 +70,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 }
 #err { position: fixed; inset: 0; display: grid; place-items: center; font-size: 14px; color: var(--ink); }
 @media (max-width: 560px) {
-  .panel { left: 0; right: 0; bottom: 0; width: auto; border-radius: 0; border-width: 1px 0 0;
+  .panel { left: 0; right: 0; bottom: 0; width: auto; border-width: 1px 0 0;
     padding: 12px max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); gap: 10px; }
   h1 { font-size: 22px; }
   .legend, .sub { display: none; }

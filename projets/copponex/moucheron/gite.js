@@ -26,24 +26,33 @@ const CSS = `
 .sim-fab{ bottom: 208px; }
 .sim-fab.active{ background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .sim-panel{
-  position: fixed; left: 28px; top: 92px; z-index: 5; width: 280px;
-  display: grid; gap: 12px; padding: 14px 16px;
+  position: fixed; left: 28px; top: 92px; z-index: 5; width: 260px;
+  display: grid; gap: 14px;
   font-family: var(--mono); font-size: 0.75rem; color: var(--ink-soft);
-  background: color-mix(in srgb, var(--bg-2) 80%, transparent);
-  backdrop-filter: blur(6px);
-  border: 1px solid var(--line); border-radius: 8px;
 }
 .sim-panel[hidden]{ display: none; }
-.sim-row{ display: grid; gap: 6px; }
+.sim-row{ display: grid; gap: 4px; }
 .sim-row > div{ display: flex; justify-content: space-between; gap: 8px; }
 .sim-row output{ color: var(--ink); text-align: right; }
-.sim-panel input[type=range]{ width: 100%; margin: 0; accent-color: var(--ink); }
-.sim-heel{ display: flex; align-items: baseline; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 10px; }
+/* curseur réduit à un filet et un trait, sans le rendu natif du navigateur */
+.sim-panel input[type=range]{
+  -webkit-appearance: none; appearance: none; display: block;
+  width: 100%; height: 22px; margin: 0; background: transparent; cursor: pointer;
+}
+.sim-panel input[type=range]::-webkit-slider-runnable-track{ height: 1px; background: var(--ink); }
+.sim-panel input[type=range]::-moz-range-track{ height: 1px; background: var(--ink); }
+.sim-panel input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance: none; width: 3px; height: 15px; margin-top: -7px;
+  background: var(--ink); border: 0; border-radius: 0;
+}
+.sim-panel input[type=range]::-moz-range-thumb{ width: 3px; height: 15px; background: var(--ink); border: 0; border-radius: 0; }
+.sim-panel input[type=range]:focus-visible{ outline: 1px solid var(--ink); outline-offset: 2px; }
+.sim-heel{ display: flex; align-items: baseline; justify-content: space-between; }
 .sim-heel output{ font-family: var(--title); font-size: 1.6rem; color: var(--ink); font-variant-numeric: tabular-nums; }
 .sim-panel a{ color: inherit; }
 @media (max-width: 768px){
   .sim-fab{ bottom: 168px; }
-  .sim-panel{ left: 18px; top: 76px; width: min(240px, calc(100vw - 130px)); padding: 10px 12px; gap: 8px; }
+  .sim-panel{ left: 18px; top: 76px; width: min(220px, calc(100vw - 130px)); gap: 8px; }
   .sim-heel output{ font-size: 1.25rem; }
 }`;
 
