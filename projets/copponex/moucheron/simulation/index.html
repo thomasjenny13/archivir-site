@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Moucheron au vent — Archivir</title>
+<meta name="description" content="Simulation interactive de la gîte du Moucheron 15 m² d'Henri Copponex (1934) selon la force du vent et l'allure.">
+<link rel="canonical" href="https://archivir.ch/projets/copponex/moucheron/simulation/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Plein écran : la scène 3D occupe la page, un panneau d'instruments flotte en bas à gauche (en bas sur téléphone). */
+:root {
+  --lake: #b9ccd6;      /* ciel/lac léman, fond de scène */
+  --ink: #17242c;       /* texte principal */
+  --muted: #55666f;     /* texte secondaire */
+  --panel: rgba(247, 249, 249, 0.9);
+  --line: #c9d5da;
+  --accent: #c0392b;    /* rouge des flèches de force / pennon */
+  --ok: #2f7d5b;
+  --display: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+  --body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+html, body { height: 100%; }
+body { background: var(--lake); color: var(--ink); font-family: var(--body); overflow: hidden; }
+#scene { position: fixed; inset: 0; display: block; width: 100%; height: 100%; touch-action: none; }
+.panel {
+  position: fixed;
+  left: max(16px, env(safe-area-inset-left, 0px));
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  width: min(340px, calc(100% - 32px));
+  background: var(--panel);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 16px 18px;
+  display: grid; gap: 14px;
+}
+.head { display: grid; gap: 2px; }
+h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 28px; letter-spacing: .01em; text-wrap: balance; }
+.sub { font-size: 12px; color: var(--muted); }
+.row { display: grid; gap: 6px; }
+label, .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.lblrow { display: flex; justify-content: space-between; align-items: baseline; }
+.val { font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; color: var(--ink); }
+input[type=range] { width: 100%; accent-color: var(--ink); }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+.seg button { font: 500 13px var(--body); padding: 7px 4px; border: 0; background: transparent; color: var(--ink); cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed=true] { background: var(--ink); color: #f7f9f9; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.gauges { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; border-top: 1px solid var(--line); padding-top: 12px; }
+.g { display: grid; gap: 2px; }
+.g .num { font-family: var(--display); font-size: 30px; font-weight: 500; line-height: 1; font-variant-numeric: tabular-nums; }
+.g .num small { font-size: 15px; color: var(--muted); }
+.toggles { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; }
+.toggles label { text-transform: none; letter-spacing: 0; font-size: 13px; color: var(--ink); display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  .hint { font-size: 11.5px; color: var(--muted); }
+.back { font-size: 12px; color: var(--muted); }
+.legend { font-size: 11.5px; color: var(--muted); line-height: 1.45; }
+.legend b { color: var(--accent); font-weight: 500; }
+.legend .blue { color: #1f5f8b; }
+.legend .green { color: var(--ok); }
+.note {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right, 0px));
+  top: calc(14px + env(safe-area-inset-top, 0px));
+  font-size: 11.5px; color: var(--muted); text-align: right; max-width: 260px;
+}
+#err { position: fixed; inset: 0; display: grid; place-items: center; font-size: 14px; color: var(--ink); }
+@media (max-width: 560px) {
+  .panel { left: 0; right: 0; bottom: 0; width: auto; border-radius: 0; border-width: 1px 0 0;
+    padding: 12px max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); gap: 10px; }
+  h1 { font-size: 22px; }
+  .legend, .sub { display: none; }
+  .g .num { font-size: 24px; }
+  .note { display: none; }
+}
+</style>
+
+</head>
+<body>
+<canvas id="scene" aria-label="Moucheron 15 m² en 3D, gîtant selon la force du vent"></canvas>
+<div id="err" hidden></div>
+
+<section class="panel" aria-label="Commandes">
+  <div class="head">
+    <a class="back" href="/ouvrages/moucheron/">← Maquette 3D</a>
+    <h1>Moucheron 15 m²</h1>
+    <div class="sub">H. Copponex, 1934 · 620 kg · voilure 15 m² · tirant d'eau 0,90 m</div>
+  </div>
+
+  <div class="row">
+    <div class="lblrow"><label for="wind">Vent apparent</label><span class="val" id="windv">12 nœuds</span></div>
+    <input id="wind" type="range" min="0" max="25" step="0.5" value="12">
+  </div>
+
+  <div class="row">
+    <div class="lblrow"><label for="cap">Cap / vent</label><span class="val" id="capv">40° tribord amures · près</span></div>
+    <input id="cap" type="range" min="-180" max="180" step="1" value="40">
+    <div class="seg" role="group" aria-label="Allures rapides">
+      <button type="button" data-cap="-40">Près bâbord</button>
+      <button type="button" data-cap="90">Travers</button>
+      <button type="button" data-cap="140">Largue</button>
+    </div>
+    <div class="hint">Flèches ← → du clavier pour barrer. Positif : vent venant de tribord ; négatif : de bâbord.</div>
+  </div>
+
+  <div class="gauges" aria-live="polite">
+    <div class="g"><span class="lbl">Gîte</span><span class="num" id="heel">0<small>°</small></span></div>
+    <div class="g"><span class="lbl">Moment vélique</span><span class="num" id="hm">0<small> N·m</small></span></div>
+    <div class="g"><span class="lbl">Rafales</span><span class="num" id="gustv">—</span></div>
+  </div>
+
+  <div class="toggles">
+    <label><input id="gusts" type="checkbox" checked> Rafales</label>
+    <label><input id="forces" type="checkbox" checked> Forces</label>
+    <label><input id="water" type="checkbox" checked> Eau</label>
+  </div>
+
+  <div class="legend">
+    <b>Rouge</b> : poussée du vent sur les voiles. <span class="blue">Bleu</span> : poussée d'Archimède, qui se décale sous le vent quand le bateau gîte. <span class="green">Vert</span> : poids, concentré dans le lest. Le couple entre bleu et vert redresse le bateau. Seule la flèche rouge est à l'échelle (400 N = 1 m).
+  </div>
+</section>
+
+<div class="note">Modèle reconstruit d'après les plans S.E.N. · gîte calculée par équilibre des moments, dynamique de roulis simplifiée</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = id => document.getElementById(id);
+
+// ---------- physique (unités SI) ----------
+const P = {
+  mass: 620, g: 9.81, rho: 1.2,
+  area: 15.0,
+  GM: 0.62,          // hauteur métacentrique estimée (quille à lest profonde)
+  lever: 3.4,        // bras entre centre vélique (~3,0 m) et centre de dérive (~-0,4 m)
+  inertia: 450,      // inertie en roulis + masse d'eau entraînée (kg·m²)
+  damping: 1000,     // amortissement (N·m·s/rad)
+};
+// selon l'angle au vent : coefficient de force latérale, ouverture de la bôme et du foc (degrés)
+const TAB = { awa: [0, 28, 40, 55, 90, 120, 150, 180],
+              ch:  [0, 0.15, 1.0, 0.95, 0.70, 0.50, 0.32, 0.20],
+              boom:[0, 0, 7, 16, 38, 55, 70, 80],
+              jib: [0, 0, 5, 11, 22, 32, 38, 40] };
+const lerpTab = (key, a) => { const A = TAB.awa; let i = 0; while (i < A.length - 2 && a > A[i + 1]) i++;
+  const f = Math.min(1, Math.max(0, (a - A[i]) / (A[i + 1] - A[i]))); return TAB[key][i] + (TAB[key][i + 1] - TAB[key][i]) * f; };
+const allureName = a => a < 28 ? 'vent debout' : a < 50 ? 'près' : a < 75 ? 'bon plein' : a < 105 ? 'travers' : a < 135 ? 'largue' : a < 165 ? 'grand largue' : 'vent arrière';
+const RM = phi => P.mass * P.g * P.GM * Math.sin(phi) * (1 + 0.35 * Math.sin(phi) ** 2);
+const HM = (v, ch, phi) => 0.5 * P.rho * v * v * P.area * ch * P.lever * Math.cos(phi) ** 2;
+
+// ---------- scène ----------
+const canvas = $('scene');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+const scene = new THREE.Scene();
+const sky = new THREE.Color('#b9ccd6');
+scene.background = sky;
+scene.fog = new THREE.Fog(sky, 30, 70);
+
+const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 200);
+camera.position.set(-13, 5.5, 19);
+const controls = new OrbitControls(camera, canvas);
+controls.target.set(0, 3.4, 0);
+controls.enableDamping = true;
+controls.maxPolarAngle = Math.PI * 0.62;
+controls.minDistance = 5; controls.maxDistance = 40;
+
+scene.add(new THREE.HemisphereLight(0xf4f7f8, 0x50666f, 1.5));
+const sun = new THREE.DirectionalLight(0xffffff, 2.0);
+sun.position.set(-6, 12, 8); scene.add(sun);
+
+// eau : plan découpé avec houle (sommets déplacés à chaque image)
+const waterGeo = new THREE.PlaneGeometry(80, 80, 120, 120);
+waterGeo.rotateX(-Math.PI / 2);
+const waterBase = waterGeo.attributes.position.array.slice();
+const waterMat = new THREE.MeshStandardMaterial({ color: 0x3f6f86, roughness: 0.35, metalness: 0.0, flatShading: false });
+const water = new THREE.Mesh(waterGeo, waterMat);
+water.renderOrder = 2;
+scene.add(water);
+
+// bateau : roll (gîte) > pitch > modèle
+const boatRoot = new THREE.Group();   // pilonnement
+const yawG = new THREE.Group();       // cap (le vent souffle toujours vers +z du monde)
+const heelG = new THREE.Group();      // roulis autour de l'axe longitudinal (x)
+const pitchG = new THREE.Group();
+boatRoot.add(yawG); yawG.add(heelG); heelG.add(pitchG); scene.add(boatRoot);
+const model = new THREE.Group(); model.position.x = -2.65; pitchG.add(model);  // centre le bateau
+
+// forces
+const forceG = new THREE.Group(); scene.add(forceG);
+const mkArrow = color => { const a = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(), 1, color, 0.28, 0.16); a.line.material.linewidth = 2; forceG.add(a); return a; };
+const arrSail = mkArrow(0xc0392b), arrBuoy = mkArrow(0x1f5f8b), arrWeight = mkArrow(0x2f7d5b);
+const dot = c => { const m = new THREE.Mesh(new THREE.SphereGeometry(0.06, 16, 12), new THREE.MeshBasicMaterial({ color: c, depthTest: false })); m.renderOrder = 5; forceG.add(m); return m; };
+const dotCE = dot(0xc0392b), dotCB = dot(0x1f5f8b), dotCG = dot(0x2f7d5b);
+[arrSail, arrBuoy, arrWeight].forEach(a => [a.line, a.cone].forEach(m => { m.material.depthTest = false; m.material.transparent = true; m.renderOrder = 10; }));
+
+// filets de vent
+const streakN = 70;
+const streakGeo = new THREE.BufferGeometry();
+const streakPos = new Float32Array(streakN * 6);
+streakGeo.setAttribute('position', new THREE.BufferAttribute(streakPos, 3));
+const streaks = new THREE.LineSegments(streakGeo, new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.55 }));
+scene.add(streaks);
+const seeds = Array.from({ length: streakN }, () => ({ u: Math.random(), y: 0.6 + Math.random() * 8, s: (Math.random() - 0.5) * 18 }));
+
+// pivots des voiles
+let rudderPivot, rudderAxis, rudder = 0, boomPivot, mastAxis, jibPivot, jibAxis, burgee, mainSail, jibSail, camber = 1;
+const loader = new GLTFLoader();
+loader.load('moucheron.glb', gltf => {
+  const root = gltf.scene;
+  root.traverse(o => { if (o.isMesh) o.material.side = THREE.DoubleSide; });
+  model.add(root);
+  // masque invisible sur l'ouverture du cockpit : écrit la profondeur après le bateau et avant l'eau,
+  // pour que l'eau ne se dessine pas à l'intérieur de la coque
+  const ckX = [2.01, 2.15, 2.40, 2.80, 3.30, 3.90], ckW = [0.20, 0.29, 0.35, 0.39, 0.40, 0.40];
+  const outline = [];
+  for (let i = 0; i <= 40; i++) {
+    const x = 2.01 + (3.90 - 2.01) * i / 40;
+    let k = 0; while (k < ckX.length - 2 && x > ckX[k + 1]) k++;
+    const w = ckW[k] + (ckW[k + 1] - ckW[k]) * (x - ckX[k]) / (ckX[k + 1] - ckX[k]);
+    outline.push([x, w + 0.01]);
+  }
+  const shape = new THREE.Shape();
+  outline.forEach(([x, w], i) => i ? shape.lineTo(x, w) : shape.moveTo(x, w));
+  [...outline].reverse().forEach(([x, w]) => shape.lineTo(x, -w));
+  const capGeo = new THREE.ShapeGeometry(shape); capGeo.rotateX(Math.PI / 2); capGeo.translate(0, 0.48, 0);
+  const cap = new THREE.Mesh(capGeo, new THREE.MeshBasicMaterial({ colorWrite: false, side: THREE.DoubleSide }));
+  cap.renderOrder = 1; model.add(cap);
+  root.updateMatrixWorld(true);
+  const byName = n => root.getObjectByName(n);
+
+  // bôme + grand-voile pivotent autour de l'axe du mât (incliné de 2,5°) : la têtière reste en haut du mât
+  const m0 = new THREE.Vector3(1.896, 1.06, 0), m1 = new THREE.Vector3(2.212, 8.30, 0);
+  mastAxis = m1.clone().sub(m0).normalize();
+  boomPivot = new THREE.Group(); boomPivot.position.copy(m0); model.add(boomPivot);
+  mainSail = byName('Grand_voile');
+  ['Bome', 'Grand_voile'].forEach(n => { const o = byName(n); if (o) boomPivot.attach(o); });
+  // foc pivote autour de l'étai
+  const a = new THREE.Vector3(0.06, 0.535, 0), b = new THREE.Vector3(2.182, 8.18, 0);
+  jibAxis = b.clone().sub(a).normalize();
+  jibPivot = new THREE.Group(); jibPivot.position.copy(a); model.add(jibPivot);
+  const foc = byName('Foc'); if (foc) jibPivot.attach(foc);
+  jibSail = foc;
+  // safran + barre pivotent ensemble autour de la mèche (axe incliné relevé sur le plan)
+  const r0 = new THREE.Vector3(3.536, -0.874, 0), r1 = new THREE.Vector3(4.394, 0.405, 0);
+  rudderAxis = r1.clone().sub(r0).normalize();
+  const safran = byName('Safran'), barre = byName('Barre');
+  rudderPivot = new THREE.Group(); rudderPivot.position.copy(r0); model.add(rudderPivot);
+  if (safran) rudderPivot.attach(safran);
+  if (barre) rudderPivot.attach(barre);
+  // haubans et bastaques masqués pour l'instant ; on garde seulement l'étai
+  const rig = byName('Greement_courant'); if (rig) rig.visible = false;
+  const stayLen = b.distanceTo(a);
+  const stay = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, stayLen, 6), new THREE.MeshStandardMaterial({ color: 0x464646 }));
+  stay.position.copy(a).add(b).multiplyScalar(0.5);
+  stay.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), jibAxis);
+  model.add(stay);
+  // pennon en tête de mât
+  const pg = new THREE.ConeGeometry(0.07, 0.55, 8); pg.rotateZ(-Math.PI / 2); pg.translate(0.27, 0, 0);
+  burgee = new THREE.Mesh(pg, new THREE.MeshStandardMaterial({ color: 0xc0392b }));
+  burgee.position.set(2.21, 8.36, 0); model.add(burgee);
+  start();
+}, undefined, () => { $('err').hidden = false; $('err').textContent = 'Le modèle 3D n\'a pas pu être chargé.'; });
+
+// ---------- état / UI ----------
+const state = { wind: 12, cap: 40, gusts: true, forces: true, water: true };
+let phi = 0, omega = 0, gustF = 1, sheet = { boom: 0, jib: 0 }, yaw = null;
+const windIn = $('wind');
+const setWindLabel = () => { $('windv').textContent = `${(+windIn.value).toLocaleString('fr-CH')} nœuds`; };
+windIn.addEventListener('input', () => { state.wind = +windIn.value; setWindLabel(); });
+const capIn = $('cap');
+const setCap = c => { state.cap = Math.max(-180, Math.min(180, c)); capIn.value = state.cap;
+  $('capv').textContent = `${Math.round(Math.abs(state.cap))}° ${state.cap < 0 ? 'bâbord' : 'tribord'} amures · ${allureName(Math.abs(state.cap))}`; };
+capIn.addEventListener('input', () => setCap(+capIn.value));
+document.querySelectorAll('[data-cap]').forEach(b => b.addEventListener('click', () => setCap(+b.dataset.cap)));
+addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' && e.target.type === 'range') return;
+  const wrap = c => c > 180 ? c - 360 : c < -180 ? c + 360 : c;   // passer par 180° = empanner
+  if (e.key === 'ArrowLeft') { setCap(wrap(state.cap - 3)); e.preventDefault(); }
+  if (e.key === 'ArrowRight') { setCap(wrap(state.cap + 3)); e.preventDefault(); }
+});
+setCap(state.cap);
+$('gusts').addEventListener('change', e => state.gusts = e.target.checked);
+$('forces').addEventListener('change', e => { state.forces = e.target.checked; forceG.visible = state.forces; });
+$('water').addEventListener('change', e => { state.water = e.target.checked; water.visible = state.water; });
+if (reduceMotion) { $('gusts').checked = false; state.gusts = false; }
+setWindLabel();
+
+function resize() {
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / h;
+  // sur écran étroit, élargit le champ et décale l'image vers le haut (le panneau occupe le bas)
+  const narrow = w < 560;
+  camera.fov = narrow ? 50 : 32;
+  if (narrow) camera.setViewOffset(w, h, 0, h * 0.2, w, h); else camera.clearViewOffset();
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize);
+
+function waveH(x, z, t, amp) {
+  return amp * (0.55 * Math.sin(0.55 * x + 0.9 * t) + 0.35 * Math.sin(0.8 * z - 0.7 * t + 1.3) + 0.18 * Math.sin(1.7 * (x + z) + 1.6 * t));
+}
+
+const clock = new THREE.Clock();
+let t = 0;
+function step() {
+  const dt = Math.min(clock.getDelta(), 0.05);
+  t += reduceMotion ? 0 : dt;
+  // cap : le bateau tourne progressivement vers le cap demandé
+  const awaD = Math.abs(state.cap), side = state.cap < 0 ? -1 : 1;   // side = côté sous le vent (z local)
+  const awa = THREE.MathUtils.degToRad(awaD);
+  const yawTarget = Math.atan2(-Math.cos(awa), side * Math.sin(awa));
+  if (yaw === null) yaw = yawTarget;
+  let dy = yawTarget - yaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy));
+  yaw += dy * Math.min(1, dt * 2.2);
+  // angle de barre proportionnel à l'écart de cap restant (max 30°), revient au centre une fois le cap atteint
+  const rudTarget = Math.max(-0.52, Math.min(0.52, dy * 1.4));
+  rudder += (rudTarget - rudder) * Math.min(1, dt * 6);
+  if (rudderPivot) rudderPivot.quaternion.setFromAxisAngle(rudderAxis, -rudder);
+  // angle au vent effectif (suit la rotation du bateau)
+  const lw = new THREE.Vector3(-Math.sin(yaw), 0, Math.cos(yaw));   // direction du vent dans le repère du bateau
+  const awaNow = Math.acos(Math.max(-1, Math.min(1, lw.x)));
+  const sNow = lw.z >= 0 ? 1 : -1;
+  const awaNowD = THREE.MathUtils.radToDeg(awaNow);
+  const al = { ch: lerpTab('ch', awaNowD), boom: sNow * lerpTab('boom', awaNowD), jib: sNow * lerpTab('jib', awaNowD) };
+
+  // rafales : variation lente + risées courtes
+  const target = state.gusts ? 1 + 0.18 * Math.sin(t * 0.45) + 0.1 * Math.sin(t * 1.3 + 2) + 0.06 * Math.sin(t * 3.1) : 1;
+  gustF += (target - gustF) * Math.min(1, dt * 2);
+  const v = state.wind * 0.5144 * gustF;   // nœuds → m/s
+
+  // réglage progressif des écoutes
+  sheet.boom += (al.boom - sheet.boom) * Math.min(1, dt * 1.5);
+  sheet.jib += (al.jib - sheet.jib) * Math.min(1, dt * 1.5);
+
+  // dynamique de roulis : I·φ'' = HM − RM − c·φ'  (sous-pas pour la stabilité)
+  const sub = 4, h = dt / sub;
+  for (let i = 0; i < sub; i++) {
+    const acc = (sNow * HM(v, al.ch, phi) - RM(phi) - P.damping * omega) / P.inertia;
+    omega += acc * h; phi += omega * h;
+    phi = Math.max(-1.2, Math.min(phi, 1.2));
+  }
+  if (reduceMotion) { // équilibre statique direct
+    let lo = 0, hi = 1.2; for (let i = 0; i < 40; i++) { const m = (lo + hi) / 2; (HM(v, al.ch, m) > RM(m)) ? lo = m : hi = m; } phi = sNow * lo; omega = 0;
+  }
+
+  // houle
+  const amp = state.water ? 0.04 + 0.11 * Math.min(1, state.wind / 22) : 0;
+  if (state.water) {
+    const p = waterGeo.attributes.position.array;
+    for (let i = 0; i < p.length; i += 3) p[i + 1] = waveH(waterBase[i], waterBase[i + 2], t, amp);
+    waterGeo.attributes.position.needsUpdate = true; waterGeo.computeVertexNormals();
+  }
+  const heave = waveH(0, 0, t, amp) * 0.8;
+  const fx = -Math.cos(yaw), fz = Math.sin(yaw);       // étrave dans le repère monde
+  const pitch = (waveH(-1.5 * fx, -1.5 * fz, t, amp) - waveH(1.5 * fx, 1.5 * fz, t, amp)) / 3 * 0.8;
+  const rollWave = (waveH(0.6 * fz, 0.6 * -fx, t, amp) - waveH(-0.6 * fz, 0.6 * fx, t, amp)) / 1.2 * 0.4;
+
+  boatRoot.position.y = heave;
+  yawG.rotation.y = yaw;
+  heelG.rotation.x = phi + rollWave;    // +x : le côté sous le vent (+z) s'enfonce
+  pitchG.rotation.z = -pitch;
+
+  if (boomPivot) {
+    // voiles qui faseyent face au vent
+    const flap = awaNowD < 32 ? (1 - awaNowD / 32) * 6 * Math.sin(t * 9) : 0;
+    boomPivot.quaternion.setFromAxisAngle(mastAxis, -THREE.MathUtils.degToRad(sheet.boom + flap));
+    jibPivot.quaternion.setFromAxisAngle(jibAxis, -THREE.MathUtils.degToRad(sheet.jib + flap * 1.5));
+    // le creux des voiles passe de l'autre côté quand le vent change de bord (virement, empannage)
+    camber += (sNow - camber) * Math.min(1, dt * 3);
+    const cz = Math.abs(camber) < 0.05 ? 0.05 * Math.sign(camber || 1) : camber;
+    if (mainSail) mainSail.scale.z = cz;
+    if (jibSail) jibSail.scale.z = cz;
+    // le pennon flotte dans le sens du vent
+    burgee.rotation.y = -Math.atan2(lw.z, lw.x);
+  }
+
+  // forces (repère monde)
+  if (state.forces) {
+    heelG.updateMatrixWorld(true);
+    const toW = (x, y, z) => new THREE.Vector3(x - 2.65, y, z).applyMatrix4(pitchG.matrixWorld);
+    const CE = toW(2.55, 3.2, 0.05 * sNow), CG = toW(2.8, -0.28, 0);
+    const hm = HM(v, al.ch, Math.abs(phi));
+    const fSail = hm / P.lever;                     // N
+    const W = P.mass * P.g;
+    // centre de carène décalé sous le vent : bras de redressement GZ
+        const lee = new THREE.Vector3(0, 0, sNow).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);   // horizontal, sous le vent
+    const gzS = RM(Math.abs(phi)) / W;
+    const CB = new THREE.Vector3(CG.x, -0.06 + heave, CG.z).addScaledVector(lee, gzS);
+    dotCE.position.copy(CE); dotCG.position.copy(CG); dotCB.position.copy(CB);
+    // poids et poussée d'Archimède sont constants (6 kN) : longueur fixe ; la poussée vélique est à l'échelle 400 N = 1 m
+    const sailLen = Math.max(0.05, fSail / 400);
+    arrSail.position.copy(CE); arrSail.setDirection(lee); arrSail.setLength(sailLen, Math.min(0.28, sailLen * 0.5), 0.16);
+    const wl = 1.4;
+    arrWeight.position.copy(CG); arrWeight.setDirection(new THREE.Vector3(0, -1, 0)); arrWeight.setLength(wl, 0.28, 0.16);
+    arrBuoy.position.copy(CB); arrBuoy.setDirection(new THREE.Vector3(0, 1, 0)); arrBuoy.setLength(wl, 0.28, 0.16);
+  }
+
+  // filets de vent : soufflent de l'avant au vent vers l'arrière sous le vent
+  const dir = new THREE.Vector3(0, 0, 1);       // le vent souffle vers +z du monde
+  const perp = new THREE.Vector3(-dir.z, 0, dir.x);
+  const speed = 0.6 + v * 0.35, len = 0.4 + v * 0.06;
+  streaks.material.opacity = state.wind < 0.5 ? 0 : 0.25 + 0.4 * Math.min(1, state.wind / 15);
+  seeds.forEach((s, i) => {
+    s.u += (speed * dt) / 24; if (s.u > 1) { s.u -= 1; s.y = 0.6 + Math.random() * 8; s.s = (Math.random() - 0.5) * 18; }
+    const c = dir.clone().multiplyScalar((s.u - 0.5) * 24).add(perp.clone().multiplyScalar(s.s));
+    streakPos.set([c.x, s.y, c.z, c.x + dir.x * len, s.y, c.z + dir.z * len], i * 6);
+  });
+  streakGeo.attributes.position.needsUpdate = true;
+
+  // jauges
+  $('heel').innerHTML = `${Math.round(Math.abs(THREE.MathUtils.radToDeg(phi)))}<small>°</small>`;
+  $('hm').innerHTML = `${Math.round(HM(v, al.ch, Math.abs(phi))).toLocaleString('fr-CH')}<small> N·m</small>`;
+  $('gustv').innerHTML = state.gusts ? `${(state.wind * gustF).toFixed(1).replace('.', ',')}<small> nd</small>` : '—';
+
+  controls.update();
+  renderer.render(scene, camera);
+  requestAnimationFrame(step);
+}
+function start() { resize(); clock.getDelta(); requestAnimationFrame(step); }
+</script>
+
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "cd4dd3adc67b4e449e7528c57a0e43ba"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>

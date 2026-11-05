@@ -1054,6 +1054,26 @@
     return group;
   }
 
+  // The stencil cap above only works on closed volumes. A model with open
+  // shells or single-sheet surfaces (the boat's hull, cockpit and sails)
+  // supplies its section as a flat mesh instead. It sits a hair on the removed
+  // side of the plane, in front of the model's own lines lying on that plane.
+  function precomputedSectionCap(mesh, model, plane, gap, color) {
+    const group = new THREE.Group();
+    // unlit: the same tone whichever way the cut faces the key light
+    const cap = new THREE.Mesh(mesh.geometry, new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide }));
+    cap.position.copy(model.position).addScaledVector(plane.normal, -gap);
+    group.add(cap);
+    return group;
+  }
+  function precomputedCutEdges(mesh, model, plane, gap) {
+    const shift = model.position.clone().addScaledVector(plane.normal, -gap);
+    const edges = new THREE.EdgesGeometry(mesh.geometry, 1).attributes.position;
+    const out = [];
+    for (let i = 0; i < edges.count; i++) out.push(edges.getX(i) + shift.x, edges.getY(i) + shift.y, edges.getZ(i) + shift.z);
+    return out;
+  }
+
   function easeInOutQuad(t){ return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
 
   // ---------- camera fly (compass presets) ----------
@@ -1474,7 +1494,7 @@
     g.computeVertexNormals();
     return g;
   }
-  function loadRig(glbPath, clipNormal = DEFAULT_CLIP_NORMAL, extraGlbPath = null, excludeMeshes = null, terrainMeshes = null, edgelessMeshes = null, blockGroups = null) {
+  function loadRig(glbPath, clipNormal = DEFAULT_CLIP_NORMAL, extraGlbPath = null, excludeMeshes = null, terrainMeshes = null, edgelessMeshes = null, blockGroups = null, sectionMeshName = null) {
     return (async () => {
       const gltf = await loader.loadAsync(glbPath);
       const model = gltf.scene;
@@ -1500,6 +1520,13 @@
         const toRemove = [];
         model.traverse((child) => { if (excludeMeshes.includes(child.name)) toRemove.push(child); });
         toRemove.forEach((child) => child.parent && child.parent.remove(child));
+      }
+      // a precomputed flat section (see sectionMesh in projects.js): taken out
+      // of the model so it never counts as a surface, shown only in section view
+      let sectionMesh = null;
+      if (sectionMeshName) {
+        model.traverse((child) => { if (child.isMesh && child.name === sectionMeshName) sectionMesh = child; });
+        if (sectionMesh) sectionMesh.parent.remove(sectionMesh);
       }
       if (blockGroups) {
         // a small annex modeled as four walls with a roof set between them
@@ -1605,7 +1632,9 @@
         const sectionMeshes = [];
         model.traverse((child) => { if (child.isMesh) sectionMeshes.push(child); });
 
-        const sectionCap = buildSectionCap(sectionMeshes, clipPlane, maxDim * 2.2, 0xb4864f);
+        const sectionCap = sectionMesh
+          ? precomputedSectionCap(sectionMesh, model, clipPlane, maxDim * 0.0002, 0xdcbc85)
+          : buildSectionCap(sectionMeshes, clipPlane, maxDim * 2.2, 0xb4864f);
         sectionCap.visible = false;
         group.add(sectionCap);
 
@@ -1618,7 +1647,9 @@
         );
         group.add(clippedOutlineMesh);
 
-        const cutEdgeGeom = new LineSegmentsGeometry().setPositions(cutEdges);
+        const cutEdgeGeom = new LineSegmentsGeometry().setPositions(
+          sectionMesh ? precomputedCutEdges(sectionMesh, model, clipPlane, maxDim * 0.0004) : cutEdges
+        );
         const cutBoundaryEdges = new LineSegments2(
           cutEdgeGeom,
           new LineMaterial({ color: tintStyle().edgeColor, linewidth: tintStyle().lineWidth, worldUnits: false })
@@ -1882,7 +1913,7 @@
     // a prize variant's own glb is just the added volumetry, not a full
     // scene — load it merged onto the project's base so the section cut,
     // edges and cap all read the combined base + extension as one piece
-    const rig = await loadRig(cfg.glb, cfg.clipNormal, cfg.variants[variantKey].glb, cfg.excludeMeshes, cfg.terrainMeshes, cfg.edgelessMeshes, cfg.blockGroups);
+    const rig = await loadRig(cfg.glb, cfg.clipNormal, cfg.variants[variantKey].glb, cfg.excludeMeshes, cfg.terrainMeshes, cfg.edgelessMeshes, cfg.blockGroups, cfg.sectionMesh);
     variantRigCache.set(key, rig);
     return rig;
   }
@@ -1959,7 +1990,7 @@
   async function getRig(slug){
     if (rigCache.has(slug)) return rigCache.get(slug);
     const cfg = PROJECTS[slug];
-    const rig = cfg.glb ? await loadRig(cfg.glb, cfg.clipNormal, null, cfg.excludeMeshes, cfg.terrainMeshes, cfg.edgelessMeshes, cfg.blockGroups) : buildPlaceholderRig(cfg.clipNormal);
+    const rig = cfg.glb ? await loadRig(cfg.glb, cfg.clipNormal, null, cfg.excludeMeshes, cfg.terrainMeshes, cfg.edgelessMeshes, cfg.blockGroups, cfg.sectionMesh) : buildPlaceholderRig(cfg.clipNormal);
     rigCache.set(slug, rig);
     return rig;
   }
