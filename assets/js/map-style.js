@@ -6,7 +6,8 @@ export const DEFAULT_PALETTE = {
   paper: '#f4f1e6',
   water: '#e4ecec',
   waterLine: '#89a8a6',
-  wood: '#d2dab4',
+  wood: '#c3d0a0',
+  farmland: '#eef0d8',
   grass: '#f6f2df',
   park: '#f3f5ea',
   zone: '#af7f60',
@@ -17,6 +18,7 @@ export const DEFAULT_PALETTE = {
   buildingLine: '#a39f97',
   reliefShadow: '#a18a72',
   relief: 0.18,
+  vegetation: 0.25,
 };
 
 // strip "bright" down to just city names on a plain white-roads base —
@@ -69,6 +71,8 @@ const ZONE_LAYERS = [
 ];
 const BOUNDARY_LAYERS = ['boundary_2', 'boundary_3', 'boundary_disputed'];
 const RELIEF_LAYER = 'relief';
+const FARMLAND_LAYER = 'farmland';
+const VEGETATION_LAYER = 'vegetation-low-zoom';
 
 function rgba(hex, alpha){
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
@@ -102,6 +106,10 @@ export function paintMap(map, palette){
   // stroke; slightly see-through so the paper grain carries on under it
   WHITE_ROAD_LAYERS.forEach((id) => setPaint(map, id, { 'line-color': rgba(palette.road, 0.85) }));
   setPaint(map, 'building-pencil-line', { 'line-color': palette.buildingLine });
+  setPaint(map, FARMLAND_LAYER, { 'fill-color': palette.farmland });
+  setPaint(map, VEGETATION_LAYER, {
+    'raster-opacity': ['interpolate', ['linear'], ['zoom'], 6.5, palette.vegetation, 9, 0],
+  });
   setPaint(map, RELIEF_LAYER, {
     'hillshade-exaggeration': palette.relief,
     'hillshade-shadow-color': palette.reliefShadow,
@@ -121,6 +129,17 @@ export function applyMapStyle(map, palette){
     minzoom: 14,
     paint: { 'line-opacity': 0.75, 'line-width': 0.6 },
   }, 'building-top');
+
+  // the tiles carry no forests below zoom 7, so a Natural Earth image
+  // brings the green at small scales and fades out as the real data arrives
+  map.addLayer({
+    id: VEGETATION_LAYER, type: 'raster', source: 'ne2_shaded', maxzoom: 9,
+  }, 'landcover-glacier');
+  // the tiles carry farmland but "bright" has no layer to draw it
+  map.addLayer({
+    id: FARMLAND_LAYER, type: 'fill', source: 'openmaptiles', 'source-layer': 'landcover',
+    filter: ['==', ['get', 'class'], 'farmland'],
+  }, 'landuse-residential');
 
   // hill shading over the land colors, under water, roads and buildings
   map.addSource(RELIEF_LAYER, {

@@ -32,7 +32,7 @@
   .title { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font: 600 0.8rem var(--mono); }
   .swatch { width: 16px; height: 16px; border: 1px solid var(--ink); }
   .hex { margin-left: auto; font-weight: 400; }
-  .row { display: grid; grid-template-columns: 74px minmax(0, 1fr) 40px; align-items: center; gap: 8px; height: 26px; font: 400 0.72rem var(--mono); font-variant-numeric: tabular-nums; }
+  .row { display: grid; grid-template-columns: 96px minmax(0, 1fr) 40px; align-items: center; gap: 8px; height: 26px; font: 400 0.72rem var(--mono); font-variant-numeric: tabular-nums; }
   .row output { text-align: right; }
   input[type=range] { width: 100%; margin: 0; accent-color: var(--ink); }
   .panel-foot { display: grid; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--ink); }
@@ -67,16 +67,16 @@
 </div>
 <script type="module">
 import * as maplibregl from 'maplibre-gl';
-import { applyMapStyle, paintMap, DEFAULT_PALETTE } from './assets/js/map-style.js?v=3';
+import { applyMapStyle, paintMap, DEFAULT_PALETTE } from './assets/js/map-style.js?v=5';
 
 const STORE = 'archivir-map-palette';
 const COLORS = [
-  ['paper', 'Papier'], ['water', 'Eau'], ['waterLine', 'Rivières'], ['wood', 'Forêts'],
+  ['paper', 'Papier'], ['water', 'Eau'], ['waterLine', 'Rivières'], ['wood', 'Forêts'], ['farmland', 'Terres agricoles'],
   ['grass', 'Prairies'], ['park', 'Parcs urbains'], ['zone', 'Zones urbaines'], ['road', 'Routes'],
   ['boundary', 'Frontières'], ['building', 'Bâtiments'], ['buildingLine', 'Contour des bâtiments'],
   ['reliefShadow', 'Ombre du relief'],
 ];
-const AMOUNTS = [['relief', 'Relief'], ['zoneOpacity', 'Zones']];
+const AMOUNTS = [['relief', 'Relief'], ['zoneOpacity', 'Zones'], ['vegetation', 'Vert dézoomé']];
 const PLACES = [
   ['europe', [5.5, 45.2], 5.7], ['alpes', [8, 46.4], 8.2], ['toulouse', [1.444, 43.602], 14.6], ['bochum', [7.22, 51.48], 12],
 ];
