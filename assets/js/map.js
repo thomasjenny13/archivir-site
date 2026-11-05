@@ -4,7 +4,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 // v6's ESM build has no default export (only named exports) — a
 // namespace import keeps every maplibregl.X reference below unchanged
 import * as maplibregl from 'maplibre-gl';
-import { addPencilTextures } from './map-textures.js?v=10';
+import { addPencilTextures } from './map-textures.js?v=12';
 
 const PROJECTS = window.PROJECTS || [];
 
@@ -261,17 +261,16 @@ const WHITE_ROAD_LAYERS = [
 ];
 // "bright" tints its zoning categories with OSM-default candy colors,
 // which mean nothing on an architecture portfolio map: they collapse
-// into one quiet wash. Water and greenery are flat colors on a grainy
-// paper, with dark photocopy-like buildings (map-textures.js).
+// into one quiet wash. Greenery is flat color on a grainy paper, water
+// a pale stone, buildings dark and photocopy-like (map-textures.js).
 const PAPER_COLOR = '#f4f0e6';
-const WATER_COLOR = '#b4d6dc';
 // opaque, because OSM stacks these polygons on top of each other: a
 // see-through fill would show every overlap as a darker hard-edged shape
 const PARK_COLOR = '#e9ecca';
 const WOOD_COLOR = '#d6e0a8';
 const GRASS_COLOR = '#dfe7b6';
 const ROAD_COLOR = 'rgba(255, 252, 244, 0.85)';
-const WATER_LINE_COLOR = '#5fa3b3';
+const WATER_LINE_COLOR = '#a3b9b6';
 const ZONE_TINT = 'rgba(205, 125, 70, 0.1)';
 const BOUNDARY_COLOR = '#b89f86';
 const WATER_LINE_LAYERS = [
@@ -283,8 +282,8 @@ const RECOLOR = {
   'background': { 'background-pattern': 'pencil-paper' },
   'road_area_pier': { 'fill-color': PAPER_COLOR },
   'landcover-sand': { 'fill-color': PAPER_COLOR },
-  'water': { 'fill-color': WATER_COLOR },
-  'water-intermittent': { 'fill-color': WATER_COLOR, 'fill-opacity': 1 },
+  'water': { 'fill-pattern': 'pencil-water' },
+  'water-intermittent': { 'fill-pattern': 'pencil-water', 'fill-opacity': 1 },
   'park': { 'fill-color': PARK_COLOR, 'fill-opacity': 1 },
   'landcover-grass': { 'fill-color': GRASS_COLOR, 'fill-opacity': 1 },
   'landcover-grass-park': { 'fill-color': GRASS_COLOR, 'fill-opacity': 1 },

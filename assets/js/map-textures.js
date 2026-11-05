@@ -54,6 +54,25 @@ function grain(ctx, size, rand, amount){
   ctx.putImageData(image, 0, 0);
 }
 
+// soft clouds, as in polished stone; each is drawn again across the
+// edges so the tile stays seamless
+function mottle(ctx, size, rand, o){
+  for (let i = 0; i < o.count; i++){
+    const x = rand() * size;
+    const y = rand() * size;
+    const radius = o.radius[0] + rand() * (o.radius[1] - o.radius[0]);
+    for (const ox of [-size, 0, size]){
+      for (const oy of [-size, 0, size]){
+        const gradient = ctx.createRadialGradient(x + ox, y + oy, 0, x + ox, y + oy, radius);
+        gradient.addColorStop(0, o.color);
+        gradient.addColorStop(1, o.transparent);
+        ctx.fillStyle = gradient;
+        ctx.fillRect(x + ox - radius, y + oy - radius, radius * 2, radius * 2);
+      }
+    }
+  }
+}
+
 function texture(size, seed, draw){
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = size;
@@ -68,6 +87,8 @@ function texture(size, seed, draw){
 // layer and isn't in any tile atlas, can afford more pixels.
 const TILE = 256;
 const PAPER = 512;
+// water covers the largest areas, so its clouds need a longer repeat
+const WATER = 512;
 
 const TEXTURES = {
   paper: { pixelRatio: 2, make: () => texture(PAPER, 11, (ctx, rand) => {
@@ -75,6 +96,14 @@ const TEXTURES = {
     ctx.fillRect(0, 0, PAPER, PAPER);
     // only the tooth: strokes or stains would repeat visibly
     grain(ctx, PAPER, rand, 15);
+  }) },
+  // pale stone: flat from afar, soft clouds and fine grain up close
+  water: { pixelRatio: 1, make: () => texture(WATER, 23, (ctx, rand) => {
+    ctx.fillStyle = '#cfdddc';
+    ctx.fillRect(0, 0, WATER, WATER);
+    mottle(ctx, WATER, rand, { count: 26, radius: [50, 150], color: 'rgba(150, 172, 168, 0.09)', transparent: 'rgba(150, 172, 168, 0)' });
+    mottle(ctx, WATER, rand, { count: 22, radius: [40, 130], color: 'rgba(240, 245, 243, 0.14)', transparent: 'rgba(240, 245, 243, 0)' });
+    grain(ctx, WATER, rand, 9);
   }) },
   // photocopied poché: near-black, grainy, faint vertical formwork
   building: { pixelRatio: 1, make: () => texture(TILE, 53, (ctx, rand) => {
