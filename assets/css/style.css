@@ -4,18 +4,18 @@
    ======================================================== */
 
 :root{
-  --bg: #1B1A18;
-  --bg-2: #242220;
-  --ink: #EDE9E2;
-  --ink-soft: #A39C93;
-  --ink-faint: #655F58;
+  --bg: #1B1B1B;
+  --bg-2: #242424;
+  --ink: #EDEDED;
+  --ink-soft: #A0A0A0;
+  --ink-faint: #626262;
   --rose-gold: #FFFFFF;
   --rose-gold-deep: #BBBBBB;
   --blue: #5FC7E3;
   --blue-deep: #2E8FAE;
   --pink: #E8488F;
   --pink-deep: #A82F63;
-  --line: #332F2B;
+  --line: #333333;
 
   --display: 'Bebas Neue', 'Oswald', Impact, sans-serif;
   --mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
@@ -25,17 +25,17 @@
 
 :root[data-theme="light"]{
   --bg: #FFFFFF;
-  --bg-2: #F2F1EE;
-  --ink: #201E1B;
-  --ink-soft: #5C564B;
-  --ink-faint: #8C8474;
+  --bg-2: #F2F2F2;
+  --ink: #1F1F1F;
+  --ink-soft: #585858;
+  --ink-faint: #868686;
   --rose-gold: #111111;
   --rose-gold-deep: #444444;
   --blue: #1F7C96;
   --blue-deep: #145B70;
   --pink: #C13574;
   --pink-deep: #8E2456;
-  --line: #E3E1DB;
+  --line: #E2E2E2;
 }
 
 *{ box-sizing: border-box; }
@@ -80,7 +80,7 @@ body::before{
 
 [data-theme="light"] body::before{
   background-image:
-    linear-gradient(160deg, #FFFFFF 0%, #F6F5F2 55%, #ECEAE4 100%),
+    linear-gradient(160deg, #FFFFFF 0%, #F6F6F6 55%, #ECECEC 100%),
     url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='340' height='340'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.010' numOctaves='5' seed='11' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/><feComponentTransfer><feFuncR type='linear' slope='0.10' intercept='0.86'/><feFuncG type='linear' slope='0.10' intercept='0.86'/><feFuncB type='linear' slope='0.10' intercept='0.86'/></feComponentTransfer></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   mix-blend-mode: normal, multiply;
   opacity: 0.9;
