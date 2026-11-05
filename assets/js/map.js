@@ -233,6 +233,8 @@ const HIDE_LAYERS = [
   'highway-shield-non-us', 'highway-shield-us-interstate', 'road_shield_us',
   // street and path name labels
   'highway-name-path', 'highway-name-minor', 'highway-name-major',
+  // ferry routes
+  'ferry',
   // one-way arrows
   'road_oneway', 'road_oneway_opposite',
   // river/lake names
