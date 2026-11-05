@@ -1033,30 +1033,39 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 
 /* restyle MapLibre's own chrome to match the site instead of its
    default white-box look, especially needed in dark theme */
-.maplibregl-ctrl-group{
-  background: color-mix(in srgb, var(--bg-2) 92%, transparent);
-  border: 1px solid var(--line);
-  border-radius: 8px;
+/* flat square buttons side by side: sharp corners, hairline border, no
+   shadow, inverted on hover. Each group sits one pixel over the previous
+   one so neighbouring borders collapse into a single line */
+.maplibregl-ctrl-top-right{ display: flex; padding-right: 10px; }
+.maplibregl-ctrl-top-right .maplibregl-ctrl{ float: none; margin: 10px 0 0 -1px; }
+.maplibregl-ctrl-group:not(:empty){
+  display: flex;
+  background: var(--bg);
+  border: 1px solid var(--ink);
+  border-radius: 0;
   overflow: hidden;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  box-shadow: none;
 }
 .maplibregl-ctrl-group button{
-  width: 38px; height: 38px;
+  width: 44px; height: 44px;
   background: transparent;
+  border-radius: 0 !important;
 }
-.maplibregl-ctrl-group button + button{ border-top: 1px solid var(--line); }
-.maplibregl-ctrl-group button:hover{ background: var(--bg-2); }
+.maplibregl-ctrl-group button + button{ border-top: none; border-left: 1px solid var(--ink); }
+.maplibregl-ctrl-group button:not(:disabled):hover{ background-color: var(--ink); }
+.maplibregl-ctrl-group button:not(:disabled):not(.maplibregl-ctrl-geolocate-active):not(.maplibregl-ctrl-geolocate-background):hover .maplibregl-ctrl-icon{ filter: invert(1); }
 /* the + icon is a baked-in dark SVG (background-image) — fine as-is
    against the light theme's pale control, inverted to read as light
    icons against the dark theme's dark control */
 html[data-theme="dark"] .maplibregl-ctrl-icon{ filter: invert(1); }
+html[data-theme="dark"] .maplibregl-ctrl-group button:not(:disabled):not(.maplibregl-ctrl-geolocate-active):not(.maplibregl-ctrl-geolocate-background):hover .maplibregl-ctrl-icon{ filter: none; }
 /* replaces the default "-" zoom-out button: a currentColor SVG icon
    needs no theme-swapped filter like the baked-in +/- ones do */
 .map-ctrl-fit{
   display: flex; align-items: center; justify-content: center;
-  color: var(--ink-soft);
+  color: var(--ink);
 }
-.map-ctrl-fit:hover{ color: var(--rose-gold); }
+.map-ctrl-fit:hover{ color: var(--bg); }
 /* visitor position (GeolocateControl): site rose-gold instead of
    MapLibre's default blue */
 .maplibregl-user-location-dot,
@@ -1066,32 +1075,29 @@ html[data-theme="dark"] .maplibregl-ctrl-icon{ filter: invert(1); }
 }
 
 /* "Lieu" filter control, top-left — same look as the nav control
-   group but sized to fit a text label instead of a 38px icon square,
+   group but sized to fit a text label instead of a 44px icon square,
    and not clipped (its dropdown needs to overflow below it) */
 .map-filter-ctrl{
   position: relative;
-  background: color-mix(in srgb, var(--bg-2) 92%, transparent);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  background: var(--bg);
+  border: 1px solid var(--ink);
 }
 .map-filter-btn{
-  display: flex; align-items: center; gap: 6px;
-  height: 38px;
-  padding: 0 12px;
+  display: flex; align-items: center; gap: 8px;
+  height: 44px;
+  padding: 0 14px;
   background: transparent;
   border: none;
-  font-family: var(--mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
+  font-family: var(--title);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: lowercase;
+  color: var(--ink);
   cursor: pointer;
 }
 .map-filter-btn::after{ content: '▾'; font-size: 0.55rem; opacity: 0.7; }
-.map-filter-btn:hover{ background: var(--bg-2); }
-.map-filter-btn.is-filtered{ color: var(--rose-gold); }
-.map-filter-ctrl .filter-dropdown{ min-width: 100%; }
+.map-filter-btn:hover, .map-filter-btn.is-filtered{ background: var(--ink); color: var(--bg); }
+.map-filter-ctrl .filter-dropdown{ min-width: 100%; border: 1px solid var(--ink); border-radius: 0; box-shadow: none; background: var(--bg); }
 .maplibregl-ctrl-attrib{
   background: color-mix(in srgb, var(--bg-2) 80%, transparent) !important;
   font-family: var(--mono);
