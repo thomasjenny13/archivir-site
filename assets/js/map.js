@@ -518,6 +518,12 @@ function showPopupModel(glbPath, container){
   });
 }
 
+// author and licence of a third-party photo, required by its CC licence
+function creditHtml({ auteur, licence, source, licenceUrl }){
+  const lic = licenceUrl ? `<a href="${licenceUrl}" target="_blank" rel="noopener">${licence}</a>` : licence;
+  return `<p class="map-popup-credit">Photo : <a href="${source}" target="_blank" rel="noopener">${auteur}</a>, ${lic}</p>`;
+}
+
 function popupHtml(project){
   // the whole card is the link — a round bubble up top, the project
   // text anchored bottom-left underneath it in the same card. No glb
@@ -539,6 +545,7 @@ function popupHtml(project){
     `<p class="map-popup-title">${project.nom}</p>` +
     `<p class="map-popup-arch">${project.architecte}</p>` +
     `<p class="map-popup-loc">${project.lieu}</p>` +
+    (project.credit ? creditHtml(project.credit) : '') +
     `</div>`;
   return wrap;
 }

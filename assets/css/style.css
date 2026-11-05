@@ -1013,6 +1013,9 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 .map-popup-title{ font-family: var(--title); font-size: 0.82rem; font-weight: 600; color: var(--ink); margin: 0; }
 .map-popup-arch{ font-size: 0.68rem; color: var(--ink-soft); margin: 2px 0 0; }
 .map-popup-loc{ font-size: 0.62rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--rose-gold); margin: 4px 0 0; }
+.map-popup-credit{ font-size: 0.56rem; color: var(--ink-faint); margin: 6px 0 0; }
+.map-popup-credit a{ color: inherit; text-decoration: underline; }
+.map-popup-credit a:hover{ color: var(--rose-gold); }
 
 /* restyle MapLibre's own chrome to match the site instead of its
    default white-box look, especially needed in dark theme */
