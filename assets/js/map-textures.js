@@ -92,17 +92,17 @@ const WATER = 512;
 
 const TEXTURES = {
   paper: { pixelRatio: 2, make: () => texture(PAPER, 11, (ctx, rand) => {
-    ctx.fillStyle = '#f4f0e6';
+    ctx.fillStyle = '#f8f5ee';
     ctx.fillRect(0, 0, PAPER, PAPER);
     // only the tooth: strokes or stains would repeat visibly
     grain(ctx, PAPER, rand, 15);
   }) },
   // pale stone: flat from afar, soft clouds and fine grain up close
   water: { pixelRatio: 1, make: () => texture(WATER, 23, (ctx, rand) => {
-    ctx.fillStyle = '#cfdddc';
+    ctx.fillStyle = '#a6c1c0';
     ctx.fillRect(0, 0, WATER, WATER);
-    mottle(ctx, WATER, rand, { count: 26, radius: [50, 150], color: 'rgba(150, 172, 168, 0.09)', transparent: 'rgba(150, 172, 168, 0)' });
-    mottle(ctx, WATER, rand, { count: 22, radius: [40, 130], color: 'rgba(240, 245, 243, 0.14)', transparent: 'rgba(240, 245, 243, 0)' });
+    mottle(ctx, WATER, rand, { count: 26, radius: [50, 150], color: 'rgba(110, 140, 138, 0.1)', transparent: 'rgba(110, 140, 138, 0)' });
+    mottle(ctx, WATER, rand, { count: 22, radius: [40, 130], color: 'rgba(205, 222, 220, 0.14)', transparent: 'rgba(205, 222, 220, 0)' });
     grain(ctx, WATER, rand, 9);
   }) },
   // photocopied poché: near-black, grainy, faint vertical formwork

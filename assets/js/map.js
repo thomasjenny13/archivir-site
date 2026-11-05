@@ -4,7 +4,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 // v6's ESM build has no default export (only named exports) — a
 // namespace import keeps every maplibregl.X reference below unchanged
 import * as maplibregl from 'maplibre-gl';
-import { addPencilTextures } from './map-textures.js?v=12';
+import { addPencilTextures } from './map-textures.js?v=13';
 
 const PROJECTS = window.PROJECTS || [];
 
@@ -263,16 +263,16 @@ const WHITE_ROAD_LAYERS = [
 // which mean nothing on an architecture portfolio map: they collapse
 // into one quiet wash. Greenery is flat color on a grainy paper, water
 // a pale stone, buildings dark and photocopy-like (map-textures.js).
-const PAPER_COLOR = '#f4f0e6';
+const PAPER_COLOR = '#f8f5ee';
 // opaque, because OSM stacks these polygons on top of each other: a
 // see-through fill would show every overlap as a darker hard-edged shape
-const PARK_COLOR = '#e9ecca';
-const WOOD_COLOR = '#d6e0a8';
-const GRASS_COLOR = '#dfe7b6';
+const PARK_COLOR = '#e0e8b4';
+const WOOD_COLOR = '#b9cd82';
+const GRASS_COLOR = '#cbdb98';
 const ROAD_COLOR = 'rgba(255, 252, 244, 0.85)';
-const WATER_LINE_COLOR = '#a3b9b6';
-const ZONE_TINT = 'rgba(205, 125, 70, 0.1)';
-const BOUNDARY_COLOR = '#b89f86';
+const WATER_LINE_COLOR = '#6f9896';
+const ZONE_TINT = 'rgba(205, 115, 60, 0.18)';
+const BOUNDARY_COLOR = '#8c6f55';
 const WATER_LINE_LAYERS = [
   'waterway_tunnel', 'waterway-other', 'waterway-other-intermittent',
   'waterway-stream-canal', 'waterway-stream-canal-intermittent',
