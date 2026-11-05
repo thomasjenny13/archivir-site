@@ -4,7 +4,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 // v6's ESM build has no default export (only named exports) — a
 // namespace import keeps every maplibregl.X reference below unchanged
 import * as maplibregl from 'maplibre-gl';
-import { addPencilTextures } from './map-textures.js?v=6';
+import { addPencilTextures } from './map-textures.js?v=7';
 
 const PROJECTS = window.PROJECTS || [];
 
@@ -262,11 +262,11 @@ const WHITE_ROAD_LAYERS = [
 // into one quiet wash. Everything else reads as a pencil drawing on
 // paper, with the textures from map-textures.js — graphite buildings,
 // blue-hatched water, green-hatched parks.
-const PAPER_COLOR = '#e6e6e3';
-const ROAD_COLOR = 'rgba(240, 240, 236, 0.72)';
-const WATER_LINE_COLOR = '#7f8fb5';
-const ZONE_TINT = 'rgba(40, 40, 38, 0.1)';
-const BOUNDARY_COLOR = '#a9a9a6';
+const PAPER_COLOR = '#f4f0e6';
+const ROAD_COLOR = 'rgba(255, 252, 244, 0.85)';
+const WATER_LINE_COLOR = '#5fa3b3';
+const ZONE_TINT = 'rgba(205, 125, 70, 0.1)';
+const BOUNDARY_COLOR = '#b89f86';
 const WATER_LINE_LAYERS = [
   'waterway_tunnel', 'waterway-other', 'waterway-other-intermittent',
   'waterway-stream-canal', 'waterway-stream-canal-intermittent',
@@ -321,7 +321,7 @@ map.on('style.load', () => {
   map.addLayer({
     id: 'building-pencil-line', type: 'line', source: 'openmaptiles', 'source-layer': 'building',
     minzoom: 14,
-    paint: { 'line-color': '#262624', 'line-opacity': 0.5, 'line-width': 0.5 },
+    paint: { 'line-color': '#4a2a1c', 'line-opacity': 0.5, 'line-width': 0.5 },
   }, 'building-top');
 
   // highlight layer for the cadastral footprint of whichever project's

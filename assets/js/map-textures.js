@@ -71,37 +71,37 @@ const PAPER = 512;
 
 const TEXTURES = {
   paper: { pixelRatio: 2, make: () => texture(PAPER, 11, (ctx, rand) => {
-    ctx.fillStyle = '#e6e6e3';
+    ctx.fillStyle = '#f4f0e6';
     ctx.fillRect(0, 0, PAPER, PAPER);
     // fibres, then the tooth; no large stains, they repeat visibly
-    strokes(ctx, PAPER, rand, { count: 380, angle: 0, wobble: 6.3, length: [6, 30], width: [0.5, 1], alpha: [0.03, 0.09], color: '#55554f' });
+    strokes(ctx, PAPER, rand, { count: 380, angle: 0, wobble: 6.3, length: [6, 30], width: [0.5, 1], alpha: [0.03, 0.09], color: '#8a7a5f' });
     grain(ctx, PAPER, rand, 15);
   }) },
   water: { pixelRatio: 1, make: () => texture(TILE, 23, (ctx, rand) => {
-    ctx.fillStyle = '#ccd3e0';
+    ctx.fillStyle = '#b4d6dc';
     ctx.fillRect(0, 0, TILE, TILE);
-    strokes(ctx, TILE, rand, { count: 200, angle: -0.1, wobble: 0.05, length: [40, 130], width: [0.5, 1], alpha: [0.04, 0.13], color: '#5f76a8' });
-    strokes(ctx, TILE, rand, { count: 50, angle: -0.1, wobble: 0.05, length: [30, 100], width: [0.5, 1], alpha: [0.08, 0.2], color: '#eef0f5' });
+    strokes(ctx, TILE, rand, { count: 200, angle: -0.1, wobble: 0.05, length: [40, 130], width: [0.5, 1], alpha: [0.05, 0.15], color: '#2f8496' });
+    strokes(ctx, TILE, rand, { count: 50, angle: -0.1, wobble: 0.05, length: [30, 100], width: [0.5, 1], alpha: [0.08, 0.2], color: '#f2fbf8' });
     grain(ctx, TILE, rand, 8);
   }) },
   park: { pixelRatio: 1, make: () => texture(TILE, 37, (ctx, rand) => {
-    ctx.fillStyle = 'rgba(150, 190, 145, 0.2)';
+    ctx.fillStyle = 'rgba(178, 202, 102, 0.3)';
     ctx.fillRect(0, 0, TILE, TILE);
-    strokes(ctx, TILE, rand, { count: 420, angle: -1.05, wobble: 0.35, length: [8, 26], width: [0.5, 1], alpha: [0.06, 0.22], color: '#4f8a55' });
+    strokes(ctx, TILE, rand, { count: 420, angle: -1.05, wobble: 0.35, length: [8, 26], width: [0.5, 1], alpha: [0.08, 0.26], color: '#6f9a2c' });
   }) },
   // opaque, because OSM stacks forest polygons on top of each other: a
   // see-through fill would show every overlap as a darker hard-edged shape
   wood: { pixelRatio: 1, make: () => texture(TILE, 41, (ctx, rand) => {
-    ctx.fillStyle = '#d3dad0';
+    ctx.fillStyle = '#d6e0a8';
     ctx.fillRect(0, 0, TILE, TILE);
-    strokes(ctx, TILE, rand, { count: 620, angle: -1.05, wobble: 0.45, length: [6, 22], width: [0.5, 1.1], alpha: [0.06, 0.24], color: '#3f7448' });
+    strokes(ctx, TILE, rand, { count: 620, angle: -1.05, wobble: 0.45, length: [6, 22], width: [0.5, 1.1], alpha: [0.08, 0.26], color: '#5f8a26' });
     grain(ctx, TILE, rand, 10);
   }) },
   building: { pixelRatio: 1, make: () => texture(TILE, 53, (ctx, rand) => {
-    ctx.fillStyle = '#6a6a67';
+    ctx.fillStyle = '#a4644a';
     ctx.fillRect(0, 0, TILE, TILE);
-    strokes(ctx, TILE, rand, { count: 250, angle: 0.8, wobble: 0.2, length: [8, 34], width: [0.5, 1.1], alpha: [0.2, 0.6], color: '#1e1e1d' });
-    strokes(ctx, TILE, rand, { count: 170, angle: 0.8, wobble: 0.3, length: [5, 24], width: [0.4, 1], alpha: [0.15, 0.4], color: '#d6d6d2' });
+    strokes(ctx, TILE, rand, { count: 250, angle: 0.8, wobble: 0.2, length: [8, 34], width: [0.5, 1.1], alpha: [0.15, 0.45], color: '#5a2c1c' });
+    strokes(ctx, TILE, rand, { count: 170, angle: 0.8, wobble: 0.3, length: [5, 24], width: [0.4, 1], alpha: [0.15, 0.35], color: '#f0c9a8' });
     grain(ctx, TILE, rand, 24);
   }) },
 };
