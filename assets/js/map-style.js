@@ -4,21 +4,20 @@ import { setTextures } from './map-textures.js?v=14';
 
 export const DEFAULT_PALETTE = {
   paper: '#f4f1e6',
-  water: '#e4ecec',
-  waterLine: '#89a8a6',
-  wood: '#c3d0a0',
-  farmland: '#eef0d8',
-  grass: '#f6f2df',
+  water: '#bdd0d0',
+  wood: '#cfd6b8',
+  farmland: '#f2f5d1',
+  grass: '#f4eecd',
   park: '#f3f5ea',
-  zone: '#af7f60',
-  zoneOpacity: 0.14,
+  zone: '#8e5e3e',
+  zoneOpacity: 0.13,
   road: '#fffcf4',
-  boundary: '#a2876d',
+  boundary: '#d7ccc1',
   building: '#34312f',
   buildingLine: '#a39f97',
-  reliefShadow: '#a18a72',
-  relief: 0.18,
-  vegetation: 0.25,
+  reliefShadow: '#9f886f',
+  relief: 0.24,
+  vegetation: 0,
 };
 
 // strip "bright" down to just city names on a plain white-roads base —
@@ -101,12 +100,14 @@ export function paintMap(map, palette){
   setPaint(map, 'landcover-wood', { 'fill-color': palette.wood, 'fill-opacity': 1, 'fill-outline-color': palette.wood });
   ZONE_LAYERS.forEach((id) => setPaint(map, id, { 'fill-color': rgba(palette.zone, palette.zoneOpacity) }));
   BOUNDARY_LAYERS.forEach((id) => setPaint(map, id, { 'line-color': palette.boundary }));
-  WATER_LINE_LAYERS.forEach((id) => setPaint(map, id, { 'line-color': palette.waterLine }));
+  WATER_LINE_LAYERS.forEach((id) => setPaint(map, id, { 'line-color': palette.water }));
   // casing + main line share one color so a road reads as a single pale
   // stroke; slightly see-through so the paper grain carries on under it
   WHITE_ROAD_LAYERS.forEach((id) => setPaint(map, id, { 'line-color': rgba(palette.road, 0.85) }));
   setPaint(map, 'building-pencil-line', { 'line-color': palette.buildingLine });
   setPaint(map, FARMLAND_LAYER, { 'fill-color': palette.farmland });
+  // hidden at 0 so its image tiles aren't downloaded for nothing
+  if (map.getLayer(VEGETATION_LAYER)) map.setLayoutProperty(VEGETATION_LAYER, 'visibility', palette.vegetation > 0 ? 'visible' : 'none');
   setPaint(map, VEGETATION_LAYER, {
     'raster-opacity': ['interpolate', ['linear'], ['zoom'], 6.5, palette.vegetation, 9, 0],
   });
