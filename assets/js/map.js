@@ -585,17 +585,21 @@ function popupHtml(project){
   return wrap;
 }
 
-// how close a single-match ?lieu= deep link zooms in
+// how close a marker click or a single-match ?lieu= deep link zooms in
 const FOCUS_ZOOM = 16;
 
 function anyPopupOpen(){
   return markers.some((m) => m.popup && m.popup.isOpen());
 }
 
-// a marker click just opens its card, the view stays where it is
-function openCard(popup, tip){
+// shared by the marker click handler and a single-match ?lieu= deep
+// link from the index: zoom onto the project and open its popup if it
+// isn't already
+function focusMarker(project, popup, tip){
   tip.remove();
   markers.forEach((m) => { if (m.popup && m.popup !== popup && m.popup.isOpen()) m.popup.remove(); });
+  if (map.getZoom() < FOCUS_ZOOM) map.flyTo({ center: [project.lon, project.lat], zoom: FOCUS_ZOOM, duration: 1100 });
+  else map.panTo([project.lon, project.lat]);
   // (footprint highlight removed at the user's request — highlightBuildingAt
   // and its layers are kept, just no longer triggered)
   // deferred: on a real click this handler runs *before* MapLibre's own
@@ -604,14 +608,6 @@ function openCard(popup, tip){
   // so no card ever appeared. One tick later, MapLibre has already
   // opened it (no-op here); for the ?lieu= deep link, this opens it.
   setTimeout(() => { if (!popup.isOpen()) popup.addTo(map); }, 0);
-}
-
-// single-match ?lieu= deep link from the index: zoom onto the project
-// and open its card
-function focusMarker(project, popup, tip){
-  if (map.getZoom() < FOCUS_ZOOM) map.flyTo({ center: [project.lon, project.lat], zoom: FOCUS_ZOOM, duration: 1100 });
-  else map.panTo([project.lon, project.lat]);
-  openCard(popup, tip);
 }
 
 // offset the card away from the marker regardless of which side MapLibre
@@ -673,7 +669,7 @@ PROJECTS.forEach((project) => {
     setTimeout(() => { if (!anyPopupOpen()) clearHighlight(); }, 0);
   });
 
-  el.addEventListener('click', () => openCard(popup, tip));
+  el.addEventListener('click', () => focusMarker(project, popup, tip));
 
   markers.push({ marker, project, popup, tip });
 });
