@@ -4,7 +4,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 // v6's ESM build has no default export (only named exports) — a
 // namespace import keeps every maplibregl.X reference below unchanged
 import * as maplibregl from 'maplibre-gl';
-import { addPencilTextures } from './map-textures.js?v=7';
+import { addPencilTextures } from './map-textures.js?v=8';
 
 const PROJECTS = window.PROJECTS || [];
 
@@ -321,7 +321,7 @@ map.on('style.load', () => {
   map.addLayer({
     id: 'building-pencil-line', type: 'line', source: 'openmaptiles', 'source-layer': 'building',
     minzoom: 14,
-    paint: { 'line-color': '#4a2a1c', 'line-opacity': 0.5, 'line-width': 0.5 },
+    paint: { 'line-color': '#a39f97', 'line-opacity': 0.75, 'line-width': 0.6 },
   }, 'building-top');
 
   // highlight layer for the cadastral footprint of whichever project's
