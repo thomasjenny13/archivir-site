@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 // v6's ESM build has no default export (only named exports) — a
 // namespace import keeps every maplibregl.X reference below unchanged
 import * as maplibregl from 'maplibre-gl';
+import { addPencilTextures } from './map-textures.js?v=5';
 
 const PROJECTS = window.PROJECTS || [];
 
@@ -256,24 +257,32 @@ const WHITE_ROAD_LAYERS = [
   'bridge-motorway-link', 'bridge-link', 'bridge-minor', 'bridge-secondary-tertiary',
   'bridge-trunk-primary', 'bridge-motorway',
 ];
-// "bright" tints its zoning categories with OSM-default candy colors —
-// hospitals pink, schools lavender, commercial reddish, industrial
-// yellow. None of that means anything on an architecture portfolio map
-// and it visibly clashes with the site's own warm/neutral palette, so
-// every one of those zone categories collapses into a single quiet
-// wash instead of keeping a rainbow of database categories. Buildings
-// go solid near-black, land and boundaries a neutral gray — nothing left
-// that isn't either the site's own ink/line tones or a legible
-// natural feature (water, greenery).
-const BUILDING_COLOR = '#1c1a17';
-const LAND_COLOR = '#e9e9e9';
-const ZONE_TINT = 'rgba(0, 0, 0, 0.05)';
-const BOUNDARY_COLOR = '#c4c4c4';
+// "bright" tints its zoning categories with OSM-default candy colors,
+// which mean nothing on an architecture portfolio map: they collapse
+// into one quiet wash. Everything else reads as a pencil drawing on
+// paper, with the textures from map-textures.js — graphite buildings,
+// blue-hatched water, green-hatched parks.
+const PAPER_COLOR = '#e6e6e3';
+const ROAD_COLOR = 'rgba(240, 240, 236, 0.72)';
+const WATER_LINE_COLOR = '#7f8fb5';
+const ZONE_TINT = 'rgba(40, 40, 38, 0.1)';
+const BOUNDARY_COLOR = '#a9a9a6';
+const WATER_LINE_LAYERS = [
+  'waterway_tunnel', 'waterway-other', 'waterway-other-intermittent',
+  'waterway-stream-canal', 'waterway-stream-canal-intermittent',
+  'waterway-river', 'waterway-river-intermittent',
+];
 const RECOLOR = {
-  'background': { 'background-color': LAND_COLOR },
-  'road_area_pier': { 'fill-color': LAND_COLOR },
-  'landcover-sand': { 'fill-color': LAND_COLOR },
-  'building': { 'fill-color': BUILDING_COLOR },
+  'background': { 'background-pattern': 'pencil-paper' },
+  'road_area_pier': { 'fill-color': PAPER_COLOR },
+  'landcover-sand': { 'fill-color': PAPER_COLOR },
+  'water': { 'fill-pattern': 'pencil-water' },
+  'water-intermittent': { 'fill-pattern': 'pencil-water' },
+  'park': { 'fill-pattern': 'pencil-park', 'fill-opacity': 0.9 },
+  'landcover-grass': { 'fill-pattern': 'pencil-park', 'fill-opacity': 0.9 },
+  'landcover-grass-park': { 'fill-pattern': 'pencil-park', 'fill-opacity': 0.9 },
+  'landcover-wood': { 'fill-pattern': 'pencil-wood', 'fill-opacity': 1 },
+  'building': { 'fill-pattern': 'pencil-building' },
   'landuse-residential': { 'fill-color': ZONE_TINT },
   'landuse-suburb': { 'fill-color': ZONE_TINT },
   'landuse-commercial': { 'fill-color': ZONE_TINT },
@@ -290,19 +299,30 @@ const HIGHLIGHT_SOURCE = 'project-highlight';
 function emptyFC(){ return { type: 'FeatureCollection', features: [] }; }
 
 map.on('style.load', () => {
+  addPencilTextures(map);
   HIDE_LAYERS.forEach((id) => { if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none'); });
   // "bright" fakes a 3D roof with a second copy of every building
   // ('building-top') shifted 2px up-left from z16 — in its own two
   // beiges that reads as relief, but with both painted solid black it
   // just looks like every building is drawn twice, slightly offset
   if (map.getLayer('building-top')) map.setLayoutProperty('building-top', 'visibility', 'none');
-  // casing + main line both forced white so a road reads as a single
-  // flat white stroke, not a colored line with a contrasting border
-  WHITE_ROAD_LAYERS.forEach((id) => { if (map.getLayer(id)) map.setPaintProperty(id, 'line-color', '#ffffff'); });
+  // casing + main line share one color so a road reads as a single
+  // pale stroke, not a colored line with a contrasting border; slightly
+  // see-through so the paper grain carries on under it
+  WHITE_ROAD_LAYERS.forEach((id) => { if (map.getLayer(id)) map.setPaintProperty(id, 'line-color', ROAD_COLOR); });
+  WATER_LINE_LAYERS.forEach((id) => { if (map.getLayer(id)) map.setPaintProperty(id, 'line-color', WATER_LINE_COLOR); });
   Object.entries(RECOLOR).forEach(([id, props]) => {
     if (!map.getLayer(id)) return;
     Object.entries(props).forEach(([prop, value]) => map.setPaintProperty(id, prop, value));
   });
+
+  // a pattern fill draws no outline of its own, and the pencil line
+  // around each building is what makes the footprints read as drawn
+  map.addLayer({
+    id: 'building-pencil-line', type: 'line', source: 'openmaptiles', 'source-layer': 'building',
+    minzoom: 14,
+    paint: { 'line-color': '#262624', 'line-opacity': 0.5, 'line-width': 0.5 },
+  }, 'building-top');
 
   // highlight layer for the cadastral footprint of whichever project's
   // popup is open — an empty source until a marker is clicked
