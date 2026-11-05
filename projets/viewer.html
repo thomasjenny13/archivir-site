@@ -827,6 +827,7 @@
     if (currentRig) {
       currentRig.cutBoundaryEdges.material.resolution.set(w * dpr, h * dpr);
       currentRig.innerEdges.material.resolution.set(w * dpr, h * dpr);
+      if (currentRig.sectionEdges) currentRig.sectionEdges.material.resolution.set(w * dpr, h * dpr);
       if (currentRig.glassEdges) currentRig.glassEdges.material.resolution.set(w * dpr, h * dpr);
     }
     // the mobile breakpoint in tintStyle() depends on window width, so
@@ -849,6 +850,10 @@
     currentRig.cutBoundaryEdges.material.linewidth = style.lineWidth;
     currentRig.innerEdges.material.color.set(style.edgeColor);
     currentRig.innerEdges.material.linewidth = style.lineWidth;
+    if (currentRig.sectionEdges) {
+      currentRig.sectionEdges.material.color.set(style.edgeColor);
+      currentRig.sectionEdges.material.linewidth = style.lineWidth;
+    }
     if (currentRig.glassEdges) {
       currentRig.glassEdges.material.color.set(style.edgeColor);
       currentRig.glassEdges.material.linewidth = style.lineWidth * GLASS_EDGE_SCALE;
@@ -877,6 +882,10 @@
     if (rig.innerEdges) {
       rig.innerEdges.material.color.set(style.edgeColor);
       rig.innerEdges.material.linewidth = style.lineWidth;
+    }
+    if (rig.sectionEdges) {
+      rig.sectionEdges.material.color.set(style.edgeColor);
+      rig.sectionEdges.material.linewidth = style.lineWidth;
     }
     if (rig.glassEdges) {
       rig.glassEdges.material.color.set(style.edgeColor);
@@ -1144,12 +1153,34 @@
     outlinePass.selectedObjects = on ? [rig.clippedOutlineMesh] : [rig.model];
     if (rig.cutBoundaryEdges) rig.cutBoundaryEdges.visible = on && !paintMode;
     if (rig.sectionCap) rig.sectionCap.visible = on;
+    if (rig.sectionEdges) {
+      rig.sectionEdges.material.clippingPlanes = planes;
+      rig.sectionEdges.visible = on;
+      rig.innerEdges.visible = !on;
+      rig.sectionHidden.forEach((mesh) => { mesh.visible = !on; });
+      rig.sectionOnly.forEach((mesh) => { mesh.visible = on; });
+    }
+  }
+  // a custom section view shows less than the whole model: close in on what's
+  // left, along the current viewing direction, and step back out afterwards
+  let wholeView = null;
+  function frameSection(rig, on) {
+    const scale = rig.group.scale.x;
+    if (on) wholeView = { distance: viewDistance, eyeY: viewEyeY, center: controls.target.clone() };
+    else if (!wholeView) return;
+    const target = on ? rig.sectionFit.center.clone().multiplyScalar(scale) : wholeView.center;
+    const distance = on ? rig.sectionFit.distance * scale : wholeView.distance;
+    const dir = camera.position.clone().sub(controls.target).normalize();
+    viewDistance = distance;
+    viewEyeY = on ? target.y : wholeView.eyeY;
+    flyTo(dir.multiplyScalar(distance).add(target), target);
   }
   cutToggle.addEventListener('click', () => {
     if (!currentRig) return;
     if (simulation && simulation.running) simulation.stop(); // the cut plane is fixed, the animated boat isn't
     sectionView = !sectionView;
     applySectionView(currentRig, sectionView);
+    if (currentRig.sectionFit) frameSection(currentRig, sectionView);
     cutToggle.classList.toggle('active', sectionView);
     requestRender();
   });
@@ -1387,7 +1418,7 @@
       return d;
     }
 
-    const inner = traceEdges(rig.innerEdges, true);
+    const inner = traceEdges(sectionView && rig.sectionEdges ? rig.sectionEdges : rig.innerEdges, true);
     const glass = traceEdges(rig.glassEdges, true);
     const cut = sectionView ? traceEdges(rig.cutBoundaryEdges, false) : '';
     const title = (PROJECTS[currentSlug] && PROJECTS[currentSlug].title || 'Archivir').replace(/[<&]/g, '');
@@ -1484,7 +1515,7 @@
     g.computeVertexNormals();
     return g;
   }
-  function loadRig(glbPath, clipNormal = DEFAULT_CLIP_NORMAL, extraGlbPath = null, excludeMeshes = null, terrainMeshes = null, edgelessMeshes = null, blockGroups = null, sectionMeshName = null) {
+  function loadRig(glbPath, clipNormal = DEFAULT_CLIP_NORMAL, extraGlbPath = null, excludeMeshes = null, terrainMeshes = null, edgelessMeshes = null, blockGroups = null, section = null) {
     return (async () => {
       const gltf = await loader.loadAsync(glbPath);
       const model = gltf.scene;
@@ -1511,12 +1542,20 @@
         model.traverse((child) => { if (excludeMeshes.includes(child.name)) toRemove.push(child); });
         toRemove.forEach((child) => child.parent && child.parent.remove(child));
       }
-      // a precomputed flat section (see sectionMesh in projects.js): taken out
-      // of the model so it never counts as a surface, shown only in section view
+      // custom section view (see section in projects.js): its extra meshes sit
+      // outside the glTF scene, so the index and map thumbnails never show them
       let sectionMesh = null;
-      if (sectionMeshName) {
-        model.traverse((child) => { if (child.isMesh && child.name === sectionMeshName) sectionMesh = child; });
-        if (sectionMesh) sectionMesh.parent.remove(sectionMesh);
+      const sectionOnly = [];
+      if (section) {
+        const detached = (name) => {
+          const i = gltf.parser.json.nodes.findIndex((n) => n.name === name);
+          return i < 0 ? null : gltf.parser.getDependency('node', i);
+        };
+        sectionMesh = await detached(section.cap);
+        for (const name of section.only || []) {
+          const mesh = await detached(name);
+          if (mesh) { model.add(mesh); sectionOnly.push(mesh); }
+        }
       }
       if (blockGroups) {
         // a small annex modeled as four walls with a roof set between them
@@ -1628,7 +1667,10 @@
         sectionCap.visible = false;
         group.add(sectionCap);
 
-        const clipGeoms = sectionMeshes.map((mesh) => positionOnlyGeometry(mesh));
+        const sectionHide = section && section.hide ? section.hide : [];
+        const sectionHidden = sectionMeshes.filter((mesh) => sectionHide.includes(mesh.name));
+        const sectionKept = sectionMeshes.filter((mesh) => !sectionHide.includes(mesh.name));
+        const clipGeoms = sectionKept.map((mesh) => positionOnlyGeometry(mesh));
         const mergedForClip = mergeGeometries(clipGeoms, false).toNonIndexed();
         const { geometry: clippedGeom, cutEdges } = clipGeometryByPlane(mergedForClip, clipPlane);
         const clippedOutlineMesh = new THREE.Mesh(
@@ -1651,7 +1693,7 @@
         // "Transparent plastic" meshes get their own thinner edge lines,
         // separate from the regular maquette edges
         const glassMeshes = sectionMeshes.filter((mesh) => mesh.material.name === 'Transparent plastic');
-        const solidMeshes = sectionMeshes.filter((mesh) => mesh.material.name !== 'Transparent plastic');
+        const solidMeshes = sectionMeshes.filter((mesh) => mesh.material.name !== 'Transparent plastic' && !sectionOnly.includes(mesh));
 
         // crease lines between faces meeting at more than `angle` degrees
         function edgePositions(meshes, angle) {
@@ -1779,12 +1821,25 @@
         const innerEdges = buildEdges(solidMeshes, 1);
         const glassEdges = buildEdges(glassMeshes, GLASS_EDGE_SCALE);
 
+        // what stays in a custom section view gets its own lines and framing
+        let sectionEdges = null, sectionFit = null;
+        if (section) {
+          sectionEdges = buildEdges(sectionKept, 1);
+          sectionEdges.visible = false;
+          const keptBox = new THREE.Box3();
+          sectionKept.forEach((mesh) => keptBox.expandByObject(mesh));
+          const keptSphere = keptBox.getBoundingSphere(new THREE.Sphere());
+          sectionFit = { center: keptSphere.center.clone(), distance: (keptSphere.radius / Math.sin(fov / 2)) * 1.2 };
+          sectionOnly.forEach((mesh) => { mesh.visible = false; });
+        }
+
         return {
           group, model, sectionMeshes, sectionCap, clippedOutlineMesh,
           cutBoundaryEdges, innerEdges, glassEdges, clipPlane,
           fitDistance, fitCenter: sphere.center.clone(),
           maxDim,
           edgesFor: (list) => buildEdges(list, 1),
+          sectionEdges, sectionFit, sectionOnly, sectionHidden,
           dispose() {
             scene.remove(group);
             group.traverse((obj) => {
@@ -1905,7 +1960,7 @@
     // a prize variant's own glb is just the added volumetry, not a full
     // scene — load it merged onto the project's base so the section cut,
     // edges and cap all read the combined base + extension as one piece
-    const rig = await loadRig(cfg.glb, cfg.clipNormal, cfg.variants[variantKey].glb, cfg.excludeMeshes, cfg.terrainMeshes, cfg.edgelessMeshes, cfg.blockGroups, cfg.sectionMesh);
+    const rig = await loadRig(cfg.glb, cfg.clipNormal, cfg.variants[variantKey].glb, cfg.excludeMeshes, cfg.terrainMeshes, cfg.edgelessMeshes, cfg.blockGroups, cfg.section);
     variantRigCache.set(key, rig);
     return rig;
   }
@@ -1982,7 +2037,7 @@
   async function getRig(slug){
     if (rigCache.has(slug)) return rigCache.get(slug);
     const cfg = PROJECTS[slug];
-    const rig = cfg.glb ? await loadRig(cfg.glb, cfg.clipNormal, null, cfg.excludeMeshes, cfg.terrainMeshes, cfg.edgelessMeshes, cfg.blockGroups, cfg.sectionMesh) : buildPlaceholderRig(cfg.clipNormal);
+    const rig = cfg.glb ? await loadRig(cfg.glb, cfg.clipNormal, null, cfg.excludeMeshes, cfg.terrainMeshes, cfg.edgelessMeshes, cfg.blockGroups, cfg.section) : buildPlaceholderRig(cfg.clipNormal);
     rigCache.set(slug, rig);
     return rig;
   }

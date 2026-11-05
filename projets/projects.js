@@ -5,8 +5,9 @@
 // Champs optionnels pour le référencement :
 //   text: '…'              quelques phrases sur l'ouvrage, affichées sous le crédit
 //                          et reprises comme description pour Google
-//   sectionMesh: 'Coupe'   maillage plat du .glb servant de remplissage à la vue en
-//                          coupe, pour un modèle aux volumes non fermés
+//   section: { cap, only, hide }  vue en coupe sur mesure : cap = section plate du .glb
+//                          (hors scène) servant de remplissage, only = maillages hors
+//                          scène affichés en coupe, hide = maillages masqués en coupe
 //   simulation: 'x/y.js'   module d'animation (chemin depuis projets/), ajoute son bouton
 //   og: 'tupi/apercu.jpg'  image d'aperçu des partages (chemin depuis projets/),
 //                          idéalement 1200×630 ; à défaut, le logo est utilisé
@@ -123,15 +124,20 @@ export const PROJECTS = {
     glb: 'copponex/moucheron/moucheron.glb',
     title: 'Moucheron — Archivir',
     creditHtml: '<strong>Moucheron</strong>Henri Copponex',
-    creditMeta: '1934 · Paris · Bateau · Projet',
+    creditMeta: '1934 · Genève (GE) · Bateau · Projet',
     text: 'Monotype de 15 m² dessiné par l’ingénieur Henri Copponex, plans datés de Paris, le 27 octobre 1934. Longueur 5,30 m, largeur 1,60 m, tirant d’eau 0,90 m, déplacement 620 kg. Maquette reconstruite d’après les plans publiés : précision de 2 à 3 cm pour la coque, de 10 à 20 cm pour le gréement.',
     hasPlans: false,
     // the hull runs along X: open on the broadside, close to the horizon,
     // so the keel and the sail plan read (the default view looks down the bow).
-    // The cut keeps the half carrying the sails, facing that same camera.
+    // The cut shows a half-hull, like a wall-mounted half model: solid hull,
+    // keel and rudder, closed deck, no rig (the section comes from coupe.py).
     viewDir: [0.6, 0.18, -1],
     clipNormal: [0, 0, 1],
-    sectionMesh: 'Coupe',
+    section: {
+      cap: 'Coupe',
+      only: ['Pont_plein'],
+      hide: ['Pont', 'Hiloire', 'Cockpit', 'Mat', 'Bome', 'Barre', 'Grand_voile', 'Foc', 'Greement_courant'],
+    },
     simulation: 'copponex/moucheron/gite.js',
   },
 };

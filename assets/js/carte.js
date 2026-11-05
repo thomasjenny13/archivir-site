@@ -16,7 +16,7 @@ window.PROJECTS = [
   { nom: "Plywood House", architecte: "Herzog & de Meuron", lieu: "Bottmingen (BL)", lat: 47.528976808370366, lon: 7.585112755354861, url: "ouvrages/plywood/", glb: "projets/herzog de meuron/plywood house/plywood.glb", categorie: "Habitation", type: "Nouvelle construction" },
   { nom: "Umbrella Pavilion", architecte: "charly jolliet architectes", lieu: "Fribourg (FR)", lat: 46.791417, lon: 7.157472, url: "ouvrages/umbrella/", glb: "projets/charly jolliet/umbrella pavilion/umbrella.glb", categorie: "Pavillon", type: "Nouvelle construction" },
   { nom: "Reuse the Convent", architecte: "Reuse Italy", lieu: "Bussi sul Tirino (Italie)", lat: 42.216029056030244, lon: 13.818218574277982, url: "ouvrages/convent/", glb: "projets/concours/reuse the convent/convent.glb", categorie: "Couvent", type: "Concours ouvert" },
-  { nom: "Moucheron", architecte: "Henri Copponex", lieu: "Paris (France)", lat: 48.8566, lon: 2.3522, url: "ouvrages/moucheron/", glb: "projets/copponex/moucheron/moucheron.glb", categorie: "Bateau", type: "Projet" },
+  { nom: "Moucheron", architecte: "Henri Copponex", lieu: "Genève (GE)", lat: 46.2132799, lon: 6.1702194, url: "ouvrages/moucheron/", glb: "projets/copponex/moucheron/moucheron.glb", categorie: "Bateau", type: "Projet" },
   // "Nouvelles églises" studio selection (Atelier Menzel & Esquivié,
   // JMA - HEIA Fribourg SA 2026), Ruhr valley reconversion candidates —
   // no glb yet, so no page to link to: the popup shows a photo when one
