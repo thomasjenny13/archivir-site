@@ -722,26 +722,26 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 
 .plans-overlay{
   position: fixed; inset: 0; z-index: 30;
-  background: #0A0908;
+  background: #0A0A0A;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   padding: 40px 24px;
 }
 .plans-overlay[hidden]{ display: none; }
-[data-theme="light"] .plans-overlay{ background: #FDFCFA; }
+[data-theme="light"] .plans-overlay{ background: #FDFDFD; }
 
 .plans-close{
-  position: absolute; top: 24px; right: 24px;
+  position: absolute; top: 68px; right: 24px;
   width: 36px; height: 36px;
   border-radius: 50%;
   border: 1px solid rgba(255,255,255,0.3);
   background: transparent;
-  color: #EDE9E2;
+  color: #EDEDED;
   font-size: 1rem;
   cursor: pointer;
 }
-.plans-close:hover{ border-color: #EDE9E2; }
-[data-theme="light"] .plans-close{ border-color: rgba(0,0,0,0.25); color: #2A2620; }
-[data-theme="light"] .plans-close:hover{ border-color: #2A2620; }
+.plans-close:hover{ border-color: #EDEDED; }
+[data-theme="light"] .plans-close{ border-color: rgba(0,0,0,0.25); color: #1F1F1F; }
+[data-theme="light"] .plans-close:hover{ border-color: #1F1F1F; }
 
 .plans-sheet{
   width: min(900px, 92vw);
@@ -920,7 +920,7 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
     white-space: normal;
   }
 
-  .plans-close{ top: 16px; right: 16px; width: 32px; height: 32px; }
+  .plans-close{ top: 56px; right: 16px; width: 32px; height: 32px; }
 }
 
 /* ---------- carte (carte OSM plein écran) ---------- */

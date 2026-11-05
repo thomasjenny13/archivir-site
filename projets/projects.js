@@ -127,7 +127,7 @@ export const PROJECTS = {
     creditHtml: '<strong>Moucheron</strong>Henri Copponex',
     creditMeta: '1934 · Genève (GE) · Bateau · Projet',
     text: 'Monotype de 15 m² dessiné par l’ingénieur Henri Copponex, plans datés de Paris, le 27 octobre 1934. Longueur 5,30 m, largeur 1,60 m, tirant d’eau 0,90 m, déplacement 620 kg. Maquette reconstruite d’après les plans publiés : précision de 2 à 3 cm pour la coque, de 10 à 20 cm pour le gréement.',
-    hasPlans: false,
+    hasPlans: true,
     // the hull runs along X: open on the broadside, close to the horizon,
     // so the keel and the sail plan read (the default view looks down the bow).
     // The cut shows a half-hull, like a wall-mounted half model: solid hull,
