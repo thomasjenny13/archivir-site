@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<script>document.documentElement.dataset.theme = localStorage.getItem('archivir-theme') || 'light';</script>
+<title>Archivir — Réglages de la carte</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.10.0/dist/maplibre-gl.css">
+<link rel="stylesheet" href="assets/css/style.css?v=51">
+<script type="importmap">
+{ "imports": { "maplibre-gl": "https://unpkg.com/maplibre-gl@6.10.0/dist/maplibre-gl.mjs" } }
+</script>
+<style>
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body { background: var(--bg); color: var(--ink); }
+  body::before { display: none; } /* the site's backdrop would veil the map */
+  .tuner { display: grid; grid-template-columns: 340px minmax(0, 1fr); height: 100%; }
+  .panel { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--ink); }
+  .panel-head { padding: 16px; border-bottom: 1px solid var(--ink); }
+  h1 { margin: 0; font: 700 1.25rem var(--title); text-transform: lowercase; }
+  .note { margin: 6px 0 12px; font: 400 0.75rem/1.45 var(--mono); }
+  .places, .actions { display: flex; flex-wrap: wrap; gap: 6px; }
+  button { height: 36px; padding: 0 10px; border: 1px solid var(--ink); border-radius: 0; background: var(--bg); color: var(--ink); font: 700 0.8rem var(--title); text-transform: lowercase; cursor: pointer; }
+  button:hover { background: var(--ink); color: var(--bg); }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .controls { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 16px 16px; }
+  fieldset { margin: 0; padding: 12px 0; border: 0; border-bottom: 1px solid color-mix(in srgb, var(--ink) 20%, transparent); }
+  .title { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font: 600 0.8rem var(--mono); }
+  .swatch { width: 16px; height: 16px; border: 1px solid var(--ink); }
+  .hex { margin-left: auto; font-weight: 400; }
+  .row { display: grid; grid-template-columns: 74px minmax(0, 1fr) 40px; align-items: center; gap: 8px; height: 26px; font: 400 0.72rem var(--mono); font-variant-numeric: tabular-nums; }
+  .row output { text-align: right; }
+  input[type=range] { width: 100%; margin: 0; accent-color: var(--ink); }
+  .panel-foot { display: grid; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--ink); }
+  textarea { width: 100%; height: 76px; box-sizing: border-box; border: 1px solid var(--ink); border-radius: 0; background: var(--bg); color: var(--ink); font: 400 0.68rem/1.4 var(--mono); resize: none; }
+  #map { min-width: 0; height: 100%; }
+  @media (max-width: 760px) {
+    .tuner { grid-template-columns: minmax(0, 1fr); grid-template-rows: 42% minmax(0, 1fr); }
+    #map { grid-row: 1; }
+    .panel { grid-row: 2; border-right: 0; border-top: 1px solid var(--ink); }
+    .note { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="tuner">
+  <section class="panel" aria-label="Réglages">
+    <div class="panel-head">
+      <h1>réglages de la carte</h1>
+      <p class="note">Les réglages restent sur ce navigateur et ne changent pas la vraie carte. Copie les valeurs et envoie-les à Claude pour les appliquer.</p>
+      <div class="places" id="places"></div>
+    </div>
+    <div class="controls" id="controls"></div>
+    <div class="panel-foot">
+      <textarea id="values" readonly aria-label="Valeurs à copier"></textarea>
+      <div class="actions">
+        <button type="button" id="copy">copier les valeurs</button>
+        <button type="button" id="reset">réinitialiser</button>
+      </div>
+    </div>
+  </section>
+  <div id="map"></div>
+</div>
+<script type="module">
+import * as maplibregl from 'maplibre-gl';
+import { applyMapStyle, paintMap, DEFAULT_PALETTE } from './assets/js/map-style.js?v=2';
+
+const STORE = 'archivir-map-palette';
+const COLORS = [
+  ['paper', 'Papier'], ['water', 'Eau'], ['waterLine', 'Rivières'], ['wood', 'Forêts'],
+  ['grass', 'Prairies'], ['park', 'Parcs'], ['zone', 'Zones urbaines'], ['road', 'Routes'],
+  ['boundary', 'Frontières'], ['building', 'Bâtiments'], ['buildingLine', 'Contour des bâtiments'],
+  ['reliefShadow', 'Ombre du relief'],
+];
+const AMOUNTS = [['relief', 'Relief'], ['zoneOpacity', 'Zones']];
+const PLACES = [
+  ['europe', [5.5, 45.2], 5.7], ['alpes', [8, 46.4], 8.2], ['toulouse', [1.444, 43.602], 14.6], ['bochum', [7.22, 51.48], 12],
+];
+
+function hexToHsl(hex){
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+  const l = (max + min) / 2;
+  if (!d) return [0, 0, Math.round(l * 100)];
+  const s = d / (1 - Math.abs(2 * l - 1));
+  const h = max === r ? ((g - b) / d + 6) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return [Math.round(h * 60), Math.round(s * 100), Math.round(l * 100)];
+}
+function hslToHex([h, s, l]){
+  const a = (s / 100) * Math.min(l / 100, 1 - l / 100);
+  const channel = (n) => {
+    const k = (n + h / 30) % 12;
+    const value = l / 100 - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+    return Math.round(value * 255).toString(16).padStart(2, '0');
+  };
+  return `#${channel(0)}${channel(8)}${channel(4)}`;
+}
+
+function load(){
+  try { return { ...DEFAULT_PALETTE, ...JSON.parse(localStorage.getItem(STORE) || '{}') }; }
+  catch { return { ...DEFAULT_PALETTE }; }
+}
+let palette = load();
+
+const map = new maplibregl.Map({
+  container: 'map',
+  style: 'https://tiles.openfreemap.org/styles/bright',
+  center: PLACES[0][1],
+  zoom: PLACES[0][2],
+  attributionControl: { compact: false },
+});
+window.tunerMap = map;
+let ready = false;
+map.on('style.load', () => { applyMapStyle(map, palette); ready = true; });
+
+let timer;
+function changed(){
+  document.getElementById('values').value = JSON.stringify(palette, null, 1);
+  try { localStorage.setItem(STORE, JSON.stringify(palette)); } catch { /* the sliders still work */ }
+  clearTimeout(timer);
+  timer = setTimeout(() => { if (ready) paintMap(map, palette); }, 120);
+}
+
+function slider(parent, id, label, min, max, step, value, format, onInput){
+  const row = document.createElement('label');
+  row.className = 'row';
+  row.innerHTML = `<span>${label}</span><input type="range" id="${id}" min="${min}" max="${max}" step="${step}"><output></output>`;
+  const input = row.querySelector('input');
+  const output = row.querySelector('output');
+  input.value = value;
+  output.textContent = format(value);
+  input.addEventListener('input', () => { output.textContent = format(+input.value); onInput(+input.value); });
+  parent.append(row);
+}
+
+function build(){
+  const controls = document.getElementById('controls');
+  controls.textContent = '';
+  COLORS.forEach(([key, label]) => {
+    const group = document.createElement('fieldset');
+    group.innerHTML = `<div class="title"><span class="swatch"></span>${label}<span class="hex"></span></div>`;
+    const swatch = group.querySelector('.swatch');
+    const hex = group.querySelector('.hex');
+    const hsl = hexToHsl(palette[key]);
+    const show = () => { swatch.style.background = palette[key]; hex.textContent = palette[key]; };
+    show();
+    [['Teinte', 360, (v) => `${v}°`], ['Saturation', 100, (v) => `${v}%`], ['Luminosité', 100, (v) => `${v}%`]].forEach(([name, max, format], i) => {
+      slider(group, `${key}-${i}`, name, 0, max, 1, hsl[i], format, (v) => {
+        hsl[i] = v;
+        palette[key] = hslToHex(hsl);
+        show();
+        changed();
+      });
+    });
+    controls.append(group);
+  });
+  const group = document.createElement('fieldset');
+  group.innerHTML = '<div class="title">Intensités</div>';
+  AMOUNTS.forEach(([key, label]) => {
+    slider(group, key, label, 0, 1, 0.01, palette[key], (v) => v.toFixed(2), (v) => { palette[key] = v; changed(); });
+  });
+  controls.append(group);
+}
+
+PLACES.forEach(([name, center, zoom]) => {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.textContent = name;
+  button.addEventListener('click', () => map.jumpTo({ center, zoom }));
+  document.getElementById('places').append(button);
+});
+document.getElementById('reset').addEventListener('click', () => {
+  palette = { ...DEFAULT_PALETTE };
+  build();
+  changed();
+});
+document.getElementById('copy').addEventListener('click', (event) => {
+  const values = document.getElementById('values');
+  const button = event.currentTarget;
+  navigator.clipboard.writeText(values.value)
+    .then(() => { button.textContent = 'copié'; setTimeout(() => { button.textContent = 'copier les valeurs'; }, 1500); })
+    .catch(() => values.select());
+});
+
+build();
+changed();
+</script>
+</body>
+</html>

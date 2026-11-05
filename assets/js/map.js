@@ -4,7 +4,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 // v6's ESM build has no default export (only named exports) — a
 // namespace import keeps every maplibregl.X reference below unchanged
 import * as maplibregl from 'maplibre-gl';
-import { addPencilTextures } from './map-textures.js?v=13';
+import { applyMapStyle, DEFAULT_PALETTE } from './map-style.js?v=2';
 
 const PROJECTS = window.PROJECTS || [];
 
@@ -223,112 +223,11 @@ window.addEventListener('storage', (e) => {
   applyFilters();
 });
 
-// strip "bright" down to just city names on a plain white-roads base —
-// no POI icons, no route-number shields, no street/water names, no
-// admin-region or country labels. Layer ids are OpenMapTiles' own,
-// read straight off the fetched style (openfreemap.org/…/bright).
-const HIDE_LAYERS = [
-  // POI / shop / transit / airport icons
-  'poi_r20', 'poi_r7', 'poi_r1', 'poi_transit', 'airport',
-  // route-number shields (A9, "9", …)
-  'highway-shield-non-us', 'highway-shield-us-interstate', 'road_shield_us',
-  // street and path name labels
-  'highway-name-path', 'highway-name-minor', 'highway-name-major',
-  // ferry routes
-  'ferry',
-  // dashed footpaths and underground rail
-  'tunnel-path', 'highway-path', 'bridge-path-casing', 'bridge-path', 'tunnel-railway',
-  // one-way arrows
-  'road_oneway', 'road_oneway_opposite',
-  // river/lake names
-  'waterway_line_label', 'water_name_point_label', 'water_name_line_label',
-  // every place label except city/town/village
-  'label_other', 'label_state', 'label_country_1', 'label_country_2', 'label_country_3',
-];
-const WHITE_ROAD_LAYERS = [
-  'tunnel-service-track-casing', 'tunnel-motorway-link-casing', 'tunnel-minor-casing',
-  'tunnel-link-casing', 'tunnel-secondary-tertiary-casing', 'tunnel-trunk-primary-casing',
-  'tunnel-motorway-casing', 'tunnel-motorway-link', 'tunnel-service-track', 'tunnel-link',
-  'tunnel-minor', 'tunnel-secondary-tertiary', 'tunnel-trunk-primary', 'tunnel-motorway',
-  'highway-motorway-link-casing', 'highway-link-casing', 'highway-minor-casing',
-  'highway-secondary-tertiary-casing', 'highway-primary-casing', 'highway-trunk-casing',
-  'highway-motorway-casing', 'highway-motorway-link', 'highway-link', 'highway-minor',
-  'highway-secondary-tertiary', 'highway-primary', 'highway-trunk', 'highway-motorway',
-  'bridge-motorway-link-casing', 'bridge-link-casing', 'bridge-secondary-tertiary-casing',
-  'bridge-trunk-primary-casing', 'bridge-motorway-casing', 'bridge-minor-casing',
-  'bridge-motorway-link', 'bridge-link', 'bridge-minor', 'bridge-secondary-tertiary',
-  'bridge-trunk-primary', 'bridge-motorway',
-];
-// "bright" tints its zoning categories with OSM-default candy colors,
-// which mean nothing on an architecture portfolio map: they collapse
-// into one quiet wash. Greenery is flat color on a grainy paper, water
-// a pale stone, buildings dark and photocopy-like (map-textures.js).
-const PAPER_COLOR = '#f8f5ee';
-// opaque, because OSM stacks these polygons on top of each other: a
-// see-through fill would show every overlap as a darker hard-edged shape
-const PARK_COLOR = '#e0e8b4';
-const WOOD_COLOR = '#b9cd82';
-const GRASS_COLOR = '#cbdb98';
-const ROAD_COLOR = 'rgba(255, 252, 244, 0.85)';
-const WATER_LINE_COLOR = '#6f9896';
-const ZONE_TINT = 'rgba(205, 115, 60, 0.18)';
-const BOUNDARY_COLOR = '#8c6f55';
-const WATER_LINE_LAYERS = [
-  'waterway_tunnel', 'waterway-other', 'waterway-other-intermittent',
-  'waterway-stream-canal', 'waterway-stream-canal-intermittent',
-  'waterway-river', 'waterway-river-intermittent',
-];
-const RECOLOR = {
-  'background': { 'background-pattern': 'pencil-paper' },
-  'road_area_pier': { 'fill-color': PAPER_COLOR },
-  'landcover-sand': { 'fill-color': PAPER_COLOR },
-  'water': { 'fill-pattern': 'pencil-water' },
-  'water-intermittent': { 'fill-pattern': 'pencil-water', 'fill-opacity': 1 },
-  'park': { 'fill-color': PARK_COLOR, 'fill-opacity': 1 },
-  'landcover-grass': { 'fill-color': GRASS_COLOR, 'fill-opacity': 1 },
-  'landcover-grass-park': { 'fill-color': GRASS_COLOR, 'fill-opacity': 1 },
-  'landcover-wood': { 'fill-color': WOOD_COLOR, 'fill-opacity': 1, 'fill-outline-color': WOOD_COLOR },
-  'building': { 'fill-pattern': 'pencil-building' },
-  'landuse-residential': { 'fill-color': ZONE_TINT },
-  'landuse-suburb': { 'fill-color': ZONE_TINT },
-  'landuse-commercial': { 'fill-color': ZONE_TINT },
-  'landuse-industrial': { 'fill-color': ZONE_TINT },
-  'landuse-cemetery': { 'fill-color': ZONE_TINT },
-  'landuse-hospital': { 'fill-color': ZONE_TINT },
-  'landuse-school': { 'fill-color': ZONE_TINT },
-  'landuse-railway': { 'fill-color': ZONE_TINT },
-  'boundary_2': { 'line-color': BOUNDARY_COLOR },
-  'boundary_3': { 'line-color': BOUNDARY_COLOR },
-  'boundary_disputed': { 'line-color': BOUNDARY_COLOR },
-};
 const HIGHLIGHT_SOURCE = 'project-highlight';
 function emptyFC(){ return { type: 'FeatureCollection', features: [] }; }
 
 map.on('style.load', () => {
-  addPencilTextures(map);
-  HIDE_LAYERS.forEach((id) => { if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none'); });
-  // "bright" fakes a 3D roof with a second copy of every building
-  // ('building-top') shifted 2px up-left from z16 — in its own two
-  // beiges that reads as relief, but with both painted solid black it
-  // just looks like every building is drawn twice, slightly offset
-  if (map.getLayer('building-top')) map.setLayoutProperty('building-top', 'visibility', 'none');
-  // casing + main line share one color so a road reads as a single
-  // pale stroke, not a colored line with a contrasting border; slightly
-  // see-through so the paper grain carries on under it
-  WHITE_ROAD_LAYERS.forEach((id) => { if (map.getLayer(id)) map.setPaintProperty(id, 'line-color', ROAD_COLOR); });
-  WATER_LINE_LAYERS.forEach((id) => { if (map.getLayer(id)) map.setPaintProperty(id, 'line-color', WATER_LINE_COLOR); });
-  Object.entries(RECOLOR).forEach(([id, props]) => {
-    if (!map.getLayer(id)) return;
-    Object.entries(props).forEach(([prop, value]) => map.setPaintProperty(id, prop, value));
-  });
-
-  // a pattern fill draws no outline of its own, and the pencil line
-  // around each building is what makes the footprints read as drawn
-  map.addLayer({
-    id: 'building-pencil-line', type: 'line', source: 'openmaptiles', 'source-layer': 'building',
-    minzoom: 14,
-    paint: { 'line-color': '#a39f97', 'line-opacity': 0.75, 'line-width': 0.6 },
-  }, 'building-top');
+  applyMapStyle(map, DEFAULT_PALETTE);
 
   // highlight layer for the cadastral footprint of whichever project's
   // popup is open — an empty source until a marker is clicked

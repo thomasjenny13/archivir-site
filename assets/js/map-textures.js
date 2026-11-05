@@ -73,6 +73,12 @@ function mottle(ctx, size, rand, o){
   }
 }
 
+function mix(hex, target, amount){
+  const channel = (i) => parseInt(hex.slice(i, i + 2), 16);
+  const rgb = [1, 3, 5].map((i) => Math.round(channel(i) + (target - channel(i)) * amount));
+  return (alpha) => `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`;
+}
+
 function texture(size, seed, draw){
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = size;
@@ -91,32 +97,40 @@ const PAPER = 512;
 const WATER = 512;
 
 const TEXTURES = {
-  paper: { pixelRatio: 2, make: () => texture(PAPER, 11, (ctx, rand) => {
-    ctx.fillStyle = '#f8f5ee';
+  paper: { pixelRatio: 2, make: (color) => texture(PAPER, 11, (ctx, rand) => {
+    ctx.fillStyle = color;
     ctx.fillRect(0, 0, PAPER, PAPER);
     // only the tooth: strokes or stains would repeat visibly
     grain(ctx, PAPER, rand, 15);
   }) },
   // pale stone: flat from afar, soft clouds and fine grain up close
-  water: { pixelRatio: 1, make: () => texture(WATER, 23, (ctx, rand) => {
-    ctx.fillStyle = '#a6c1c0';
+  water: { pixelRatio: 1, make: (color) => texture(WATER, 23, (ctx, rand) => {
+    const dark = mix(color, 0, 0.3);
+    const light = mix(color, 255, 0.35);
+    ctx.fillStyle = color;
     ctx.fillRect(0, 0, WATER, WATER);
-    mottle(ctx, WATER, rand, { count: 26, radius: [50, 150], color: 'rgba(110, 140, 138, 0.1)', transparent: 'rgba(110, 140, 138, 0)' });
-    mottle(ctx, WATER, rand, { count: 22, radius: [40, 130], color: 'rgba(205, 222, 220, 0.14)', transparent: 'rgba(205, 222, 220, 0)' });
+    mottle(ctx, WATER, rand, { count: 26, radius: [50, 150], color: dark(0.1), transparent: dark(0) });
+    mottle(ctx, WATER, rand, { count: 22, radius: [40, 130], color: light(0.14), transparent: light(0) });
     grain(ctx, WATER, rand, 9);
   }) },
   // photocopied poché: near-black, grainy, faint vertical formwork
-  building: { pixelRatio: 1, make: () => texture(TILE, 53, (ctx, rand) => {
-    ctx.fillStyle = '#34312f';
+  building: { pixelRatio: 1, make: (color) => texture(TILE, 53, (ctx, rand) => {
+    ctx.fillStyle = color;
     ctx.fillRect(0, 0, TILE, TILE);
-    strokes(ctx, TILE, rand, { count: 150, angle: 1.57, wobble: 0.03, length: [20, 90], width: [0.5, 1.2], alpha: [0.2, 0.5], color: '#141211' });
+    strokes(ctx, TILE, rand, { count: 150, angle: 1.57, wobble: 0.03, length: [20, 90], width: [0.5, 1.2], alpha: [0.2, 0.5], color: mix(color, 0, 0.6)(1) });
     grain(ctx, TILE, rand, 34);
   }) },
 };
 
-export function addPencilTextures(map){
+const drawn = new Map();
+
+// draws each texture in its palette color, skipping those already in it
+export function setTextures(map, palette){
   Object.entries(TEXTURES).forEach(([name, { pixelRatio, make }]) => {
     const id = `pencil-${name}`;
-    if (!map.hasImage(id)) map.addImage(id, make(), { pixelRatio });
+    if (drawn.get(id) === palette[name] && map.hasImage(id)) return;
+    drawn.set(id, palette[name]);
+    if (map.hasImage(id)) map.updateImage(id, make(palette[name]));
+    else map.addImage(id, make(palette[name]), { pixelRatio });
   });
 }
