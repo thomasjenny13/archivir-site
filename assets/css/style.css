@@ -959,7 +959,8 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   padding: 0;
 }
 [data-theme="light"] .maplibregl-popup-content{ background: var(--bg); }
-.map-tip-wrap .maplibregl-popup-content{ padding: 8px 10px; font-family: var(--mono); }
+/* fixed width: long names wrap, so the preview always stays vertical */
+.map-tip-wrap .maplibregl-popup-content{ width: 148px; box-sizing: border-box; padding: 8px 10px; font-family: var(--mono); overflow-wrap: break-word; }
 .map-tip-wrap{ pointer-events: none; }
 .map-tip-thumb{
   display: block;
