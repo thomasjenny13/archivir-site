@@ -958,6 +958,7 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
   box-shadow: 0 12px 30px rgba(0,0,0,0.25);
   padding: 0;
 }
+[data-theme="light"] .maplibregl-popup-content{ background: var(--bg); }
 .map-tip-wrap .maplibregl-popup-content{ padding: 8px 10px; font-family: var(--mono); }
 .map-tip-title{ display: block; font-family: var(--title); font-size: 0.82rem; font-weight: 600; color: var(--ink); }
 .map-tip-arch{ display: block; font-size: 0.68rem; color: var(--ink-soft); margin-top: 2px; }
