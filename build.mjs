@@ -63,7 +63,13 @@ function page(slug, cfg) {
     `<meta property="og:description" content="${attr(description)}">`,
     `<meta property="og:url" content="${url}">`,
     `<meta property="og:image" content="${image}">`,
+    // les aperçus par ouvrage (champ og) sont en 1200×630 ; le logo n'a pas de taille annoncée
+    ...(cfg.og ? ['<meta property="og:image:width" content="1200">', '<meta property="og:image:height" content="630">'] : []),
+    `<meta property="og:image:alt" content="${attr(name)}">`,
     '<meta name="twitter:card" content="summary_large_image">',
+    `<meta name="twitter:title" content="${attr(cfg.title)}">`,
+    `<meta name="twitter:description" content="${attr(description)}">`,
+    `<meta name="twitter:image" content="${image}">`,
     `<script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, '\\u003c')}</script>`,
   ].join('\n');
   const credit = cfg.creditHtml

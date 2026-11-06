@@ -15,6 +15,7 @@
 export const PROJECTS = {
   pavillon: {
     glb: 'pavillon cueno_aldo rossi/pavillon.glb',
+    og: 'pavillon cueno_aldo rossi/apercu.jpg',
     title: 'Monument de la Résistance — Archivir',
     creditHtml: '<strong>Monument de la Résistance</strong>Aldo Rossi',
     creditMeta: '1962 · Coni · Mémoriel · Concours',
@@ -22,6 +23,7 @@ export const PROJECTS = {
   },
   tupi: {
     glb: 'tupi/tupi.glb',
+    og: 'tupi/apercu.jpg',
     title: 'Tupi — Archivir',
     creditHtml: '<a class="credit-link" href="https://www.mijong.ch/projects/tupi-sion/" target="_blank" rel="noopener noreferrer"><strong>Tupi</strong></a><a class="credit-author" href="https://www.mijong.ch/" target="_blank" rel="noopener noreferrer">mijong architecture design</a>',
     creditMeta: '2019 · Sion (VS) · Santé · <a class="credit-author" href="tupi/Campus PÔLE SANTE - Rapport du jury - Sion (2019).pdf" target="_blank" rel="noopener noreferrer">Concours</a>',
@@ -29,6 +31,7 @@ export const PROJECTS = {
   },
   haus: {
     glb: 'jan kinsbergen/haus am see/has.glb',
+    og: 'jan kinsbergen/haus am see/apercu.jpg',
     title: 'Haus am See — Archivir',
     creditHtml: '<strong>Haus am See</strong><a class="credit-author" href="https://jankinsbergen.ch/" target="_blank" rel="noopener noreferrer">Jan Kinsbergen</a>',
     creditMeta: '2017 · Wollerau (SZ)',
@@ -36,6 +39,7 @@ export const PROJECTS = {
   },
   oberaletsch: {
     glb: 'concours/oberaletsch/base.glb',
+    og: 'concours/oberaletsch/apercu.jpg',
     // the site model's terrain block — outline only, see terrainOutlinePositions
     terrainMeshes: ['Geometry214'],
     // slab buried flush with the terrain — its outline drew a stray line
@@ -77,6 +81,7 @@ export const PROJECTS = {
   },
   casernebernex: {
     glb: 'concours/caserne bernex/blend.glb',
+    og: 'concours/caserne bernex/apercu.jpg',
     title: 'Caserne de Bernex — Archivir',
     creditHtml: '<strong>Caserne de Bernex</strong><a class="credit-author" href="https://www.bunq.ch/" target="_blank" rel="noopener noreferrer">bunq</a>',
     creditMeta: '2011 · Bernex (GE) · Équipement public · Concours',
@@ -89,6 +94,7 @@ export const PROJECTS = {
   },
   hansaallee: {
     glb: 'herzog de meuron/atelier hansaallee/atelier.glb',
+    og: 'herzog de meuron/atelier hansaallee/apercu.jpg',
     title: 'Atelier Hansaallee 94 — Archivir',
     creditHtml: '<strong>Atelier Hansaallee 94</strong><a class="credit-author" href="https://www.herzogdemeuron.com/" target="_blank" rel="noopener noreferrer">Herzog &amp; de Meuron</a>',
     creditMeta: '2015 · Düsseldorf (Allemagne) · Atelier · Nouvelle construction',
@@ -96,6 +102,7 @@ export const PROJECTS = {
   },
   plywood: {
     glb: 'herzog de meuron/plywood house/plywood.glb',
+    og: 'herzog de meuron/plywood house/apercu.jpg',
     title: 'Plywood House — Archivir',
     creditHtml: '<a class="credit-link" href="https://www.herzogdemeuron.com/projects/027-plywood-house/" target="_blank" rel="noopener noreferrer"><strong>Plywood House</strong></a><a class="credit-author" href="https://www.herzogdemeuron.com/" target="_blank" rel="noopener noreferrer">Herzog &amp; de Meuron</a>',
     creditMeta: '1985 · Bottmingen (BL) · Habitation · Nouvelle construction',
@@ -106,6 +113,7 @@ export const PROJECTS = {
   },
   umbrella: {
     glb: 'charly jolliet/umbrella pavilion/umbrella.glb',
+    og: 'charly jolliet/umbrella pavilion/apercu.jpg',
     title: 'Umbrella Pavilion — Archivir',
     creditHtml: '<a class="credit-link" href="https://charlyjolliet.ch/projects/umbrella-pavillon/" target="_blank" rel="noopener noreferrer"><strong>Umbrella Pavilion</strong></a><a class="credit-author" href="https://charlyjolliet.ch/" target="_blank" rel="noopener noreferrer">charly jolliet architectes</a>',
     creditMeta: '2020–2022 · Fribourg (FR) · Pavillon · Nouvelle construction',
@@ -113,6 +121,7 @@ export const PROJECTS = {
   },
   convent: {
     glb: 'concours/reuse the convent/convent.glb',
+    og: 'concours/reuse the convent/apercu.jpg',
     // the site's toposolid — outline only, like Oberaletsch
     terrainMeshes: ['Toposolid'],
     title: 'Reuse the Convent — Archivir',
@@ -123,6 +132,7 @@ export const PROJECTS = {
   },
   moucheron: {
     glb: 'copponex/moucheron/moucheron.glb',
+    og: 'copponex/moucheron/apercu.jpg',
     title: 'Moucheron — Archivir',
     creditHtml: '<strong>Moucheron</strong>Henri Copponex',
     creditMeta: '1934 · Genève (GE) · Bateau · Projet',
