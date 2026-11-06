@@ -4,15 +4,15 @@ import * as maplibregl from 'maplibre-gl';
 import { setTextures } from './map-textures.js?v=14';
 
 export const DEFAULT_PALETTE = {
-  paper: '#f2f0e9',
+  paper: '#f1f0eb',
   water: '#b6d1d8',
-  wood: '#cfd6b8',
-  farmland: '#efead7',
-  grass: '#ebe8d6',
-  park: '#f4f6ea',
+  wood: '#cdd4bc',
+  farmland: '#edecdf',
+  grass: '#e9eadc',
+  park: '#eff2e6',
   zone: '#8e5e3e',
   zoneOpacity: 0.13,
-  road: '#fffcf4',
+  road: '#fcfbf7',
   boundary: '#d7ccc1',
   building: '#34312f',
   buildingLine: '#a39f97',
