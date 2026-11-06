@@ -7,7 +7,7 @@ export let active = null;   // instance montée, utile pour piloter tick() en te
 
 const P = { mass: 620, g: 9.81, rho: 1.2, area: 15, GM: 0.62, lever: 3.4, inertia: 450, damping: 1000 };
 // selon l'angle au vent : coefficient de force latérale, ouverture de la bôme et du foc (degrés)
-const TAB = { awa: [0, 28, 40, 55, 90, 120, 150, 180],
+const TAB = { awa: [0, 35, 45, 55, 90, 120, 150, 180],
               ch:  [0, 0.15, 1.0, 0.95, 0.70, 0.50, 0.32, 0.20],
               boom:[0, 0, 7, 16, 38, 55, 70, 80],
               jib: [0, 0, 5, 11, 22, 32, 38, 40] };
@@ -17,7 +17,7 @@ const lerpTab = (key, a) => {
   const f = Math.min(1, Math.max(0, (a - A[i]) / (A[i + 1] - A[i])));
   return TAB[key][i] + (TAB[key][i + 1] - TAB[key][i]) * f;
 };
-const allure = (a) => a < 28 ? 'vent debout' : a < 50 ? 'près' : a < 75 ? 'bon plein' : a < 105 ? 'travers' : a < 135 ? 'largue' : a < 165 ? 'grand largue' : 'vent arrière';
+const allure = (a) => a < 45 ? 'Vent debout' : a < 55 ? 'Près serré' : a < 65 ? 'Bon plein' : a < 80 ? 'Petit largue' : a < 100 ? 'Travers' : a < 120 ? 'Largue' : a < 170 ? 'Grand largue' : 'Vent arrière';
 const RM = (phi) => P.mass * P.g * P.GM * Math.sin(phi) * (1 + 0.35 * Math.sin(phi) ** 2);
 const HM = (v, ch, phi) => 0.5 * P.rho * v * v * P.area * ch * P.lever * Math.cos(phi) ** 2;
 const wave = (x, z, t, amp) => amp * (0.55 * Math.sin(0.55 * x + 0.9 * t) + 0.35 * Math.sin(0.8 * z - 0.7 * t + 1.3) + 0.18 * Math.sin(1.7 * (x + z) + 1.6 * t));
@@ -98,15 +98,15 @@ export function mount({ THREE, scene, ground, getRig, requestRender, exitSection
   panel.innerHTML = `
     <div class="sim-row"><div><label for="sim-wind">Vent</label><output id="sim-windv"></output></div>
       <input id="sim-wind" type="range" min="0" max="25" step="0.5" value="12"></div>
-    <div class="sim-row"><span>Cap</span>${DIAL}</div>`;
+    <div class="sim-row"><div><span>Cap</span><output id="sim-capv"></output></div>${DIAL}</div>`;
   document.body.append(button, panel);
   // les flèches et les gestes sur le panneau règlent les curseurs, sans changer d'ouvrage
   ['keydown', 'touchstart', 'touchmove', 'touchend', 'pointerdown', 'wheel'].forEach((type) =>
     panel.addEventListener(type, (e) => e.stopPropagation()));
   const $ = (id) => panel.querySelector('#' + id);
-  const state = { wind: 12, cap: 40 };
+  const state = { wind: 12, cap: 50 };
   const showWind = () => { $('sim-windv').textContent = `${state.wind.toLocaleString('fr-CH')} nœuds`; };
-  // le cap n'est pas affiché, seulement annoncé aux lecteurs d'écran
+  // seul le nom de l'allure s'affiche ; l'angle est annoncé aux lecteurs d'écran
   const capText = () => {
     const a = Math.round(Math.abs(state.cap));
     return a === 0 || a === 180 ? `${a}° · ${allure(a)}` : `${a}° ${state.cap < 0 ? 'bâbord' : 'tribord'} · ${allure(a)}`;
@@ -123,6 +123,7 @@ export function mount({ THREE, scene, ground, getRig, requestRender, exitSection
     $('sim-boat').setAttribute('transform', `rotate(${-state.cap} 66 66)`);
     dial.setAttribute('aria-valuenow', Math.round(state.cap));
     dial.setAttribute('aria-valuetext', capText());
+    $('sim-capv').textContent = allure(Math.abs(state.cap));
   };
   const pointerAngle = (e) => {
     const r = dial.getBoundingClientRect();
@@ -232,10 +233,25 @@ export function mount({ THREE, scene, ground, getRig, requestRender, exitSection
     };
     const seeds = Array.from({ length: N }, () => newSeed({ u: Math.random() }));
 
+    // voiles molles : positions d'origine, pour les déformer sans vent puis les rendre intactes
+    const soft = (mesh, lines, a, b) => {
+      const pos = mesh.geometry.attributes.position, nor = mesh.geometry.attributes.normal;
+      const lineBuf = lines.geometry.attributes.instanceStart.data;
+      return {
+        mesh, lines, a, axis: b.clone().sub(a).normalize(),
+        pos0: pos.array.slice(), nor0: nor ? nor.array.slice() : null,
+        lineBuf, line0: lineBuf.array.slice(),
+      };
+    };
+    const softSails = [
+      Object.assign(soft(meshes.Grand_voile, parts.boom.lines, mastA, mastB), { amp: 0.2, reach: 3.1, base: 1.09, top: 8.22 }),
+      Object.assign(soft(meshes.Foc, parts.jib.lines, stayA, stayB), { amp: 0.16, reach: 1.7, base: 0.5, top: 6.15 }),
+    ];
+
     rig.group.add(boat);
     boat.add(rig.model);
     rig.group.scale.setScalar(scale);
-    built = { rig, off, boat, meshes, parts, allLines, stay, mask, water, streaks, streakGeo, streakPos, seeds, newSeed, radius, center: V(0, off.y, 0) };
+    built = { rig, off, boat, meshes, parts, allLines, stay, mask, water, streaks, streakGeo, streakPos, seeds, newSeed, radius, softSails, center: V(0, off.y, 0) };
     return built;
   }
 
@@ -261,6 +277,47 @@ export function mount({ THREE, scene, ground, getRig, requestRender, exitSection
     pose(part.lines, part.p.clone().add(built.off), q);
     part.lines.scale.z = scaleZ;
   }
+  // Sans vent, la toile pend en plis : rien près du guindant, tenu au mât ou à l'étai,
+  // de plus en plus vers la chute. Les traits suivent la même déformation que la surface.
+  const fold = (x, y, sail, slack, cz, out) => {
+    const dx = x - sail.a.x, dy = y - sail.a.y;
+    const u = Math.min(1, Math.abs(dx * sail.axis.y - dy * sail.axis.x) / sail.reach);
+    const v = Math.min(1, Math.max(0, (y - sail.base) / (sail.top - sail.base)));
+    const hold = u * Math.sqrt(Math.sin(Math.PI * v));   // nul au mât, au point de drisse et sur la bôme
+    out[0] = slack * sail.amp * hold * (0.6 * Math.sin(5.5 * y + 1.1 * t) + 0.4 * Math.sin(3.2 * x - 0.7 * t + y)) / cz;
+    out[1] = -slack * 0.1 * hold;
+  };
+  const delta = [0, 0];
+  function deformSail(sail, slack, cz) {
+    const off = built.off;
+    const p = sail.mesh.geometry.attributes.position, a = p.array, a0 = sail.pos0;
+    for (let i = 0; i < a.length; i += 3) {
+      fold(a0[i], a0[i + 1], sail, slack, cz, delta);
+      a[i + 1] = a0[i + 1] + delta[1];
+      a[i + 2] = a0[i + 2] + delta[0];
+    }
+    p.needsUpdate = true;
+    sail.mesh.geometry.computeVertexNormals();
+    const l = sail.lineBuf.array, l0 = sail.line0;
+    for (let i = 0; i < l.length; i += 3) {
+      const x = l0[i] - off.x, y = l0[i + 1] - off.y;
+      // le même jeu de traits porte aussi la bôme, sous la bordure : elle reste rigide car v y vaut 0
+      fold(x, y, sail, slack, cz, delta);
+      l[i + 1] = l0[i + 1] + delta[1];
+      l[i + 2] = l0[i + 2] + delta[0];
+    }
+    sail.lineBuf.needsUpdate = true;
+  }
+  function restoreSail(sail) {
+    const g = sail.mesh.geometry;
+    g.attributes.position.array.set(sail.pos0);
+    g.attributes.position.needsUpdate = true;
+    if (sail.nor0) { g.attributes.normal.array.set(sail.nor0); g.attributes.normal.needsUpdate = true; }
+    sail.lineBuf.array.set(sail.line0);
+    sail.lineBuf.needsUpdate = true;
+  }
+  let sailsSoft = false;
+
   const euler = new THREE.Euler(0, 0, 0, 'YXZ');
   const boatQ = new THREE.Quaternion();
 
@@ -293,6 +350,8 @@ export function mount({ THREE, scene, ground, getRig, requestRender, exitSection
     Object.values(built.parts).forEach((part) => {
       part.meshes.forEach((m) => { m.position.set(0, 0, 0); m.quaternion.identity(); m.scale.z = 1; });
     });
+    built.softSails.forEach(restoreSail);
+    sailsSoft = false;
     built.boat.position.set(0, 0, 0);
     built.boat.quaternion.identity();
     show(false);
@@ -336,18 +395,24 @@ export function mount({ THREE, scene, ground, getRig, requestRender, exitSection
     // prenne par derrière : elle traverse alors d'un coup, c'est l'empannage.
     if (sailSide === null) sailSide = jibSide = lee;
     const byLee = 180 - awaD;
+    // de 3 nœuds à 0, la toile perd sa tension
+    const calm = Math.min(1, Math.max(0, 1 - state.wind / 3));
+    const slack = calm * calm * (3 - 2 * calm);
     if (awaD < 90) {
       sailSide = lee;
       jibSide = lee;
     } else {
       if (lee !== jibSide && byLee > JIB_GYBE) jibSide = lee;   // abrité par la grand-voile, le foc passe d'abord
-      if (lee !== sailSide && byLee > MAIN_GYBE) {
+      if (lee !== sailSide && byLee > MAIN_GYBE && slack < 0.5) {   // sans vent, rien ne pousse la voile : pas d'empannage
         sailSide = lee;
         gybing = true;
         boomSpeed = 0;
       }
     }
-    const boomGoal = sailSide * lerpTab('boom', awaD);
+    // écoutes sans tension : la bôme et le foc ballottent au gré du roulis
+    const looseBoom = 9 * Math.sin(t * 0.4) + THREE.MathUtils.radToDeg(phi) * 0.5;
+    const looseJib = 13 * Math.sin(t * 0.33 + 1);
+    const boomGoal = (1 - slack) * sailSide * lerpTab('boom', awaD) + slack * looseBoom;
     if (gybing) {
       // poussée par le vent, la bôme accélère vers l'autre bord et s'arrête net au bout de l'écoute
       const w = 1.6 + v * 0.1;   // environ 0,7 s de bord à bord
@@ -362,7 +427,8 @@ export function mount({ THREE, scene, ground, getRig, requestRender, exitSection
     } else {
       boom += (boomGoal - boom) * Math.min(1, dt * 1.5);
     }
-    jib += (jibSide * lerpTab('jib', awaD) - jib) * Math.min(1, dt * (Math.abs(jibSide * lerpTab('jib', awaD) - jib) > 15 && awaD >= 90 ? 4 : 1.5));
+    const jibGoal = (1 - slack) * jibSide * lerpTab('jib', awaD) + slack * looseJib;
+    jib += (jibGoal - jib) * Math.min(1, dt * (Math.abs(jibGoal - jib) > 15 && awaD >= 90 ? 4 : 1.5));
 
     for (let i = 0; i < 4; i++) {
       const h = dt / 4;
@@ -371,8 +437,16 @@ export function mount({ THREE, scene, ground, getRig, requestRender, exitSection
     }
 
     camber += (sailSide - camber) * Math.min(1, dt * (gybing ? 10 : 3));
-    const cz = Math.abs(camber) < 0.05 ? 0.05 * Math.sign(camber || 1) : camber;
-    const flap = awaD < 32 ? (1 - awaD / 32) * 6 * Math.sin(t * 9) : 0;
+    const full = Math.abs(camber) < 0.05 ? 0.05 * Math.sign(camber || 1) : camber;
+    const cz = full * (1 - slack * 0.8);   // sans vent, le creux disparaît
+    if (slack > 0.001) {
+      b.softSails.forEach((sail) => deformSail(sail, slack, cz));
+      sailsSoft = true;
+    } else if (sailsSoft) {
+      b.softSails.forEach(restoreSail);
+      sailsSoft = false;
+    }
+    const flap = (1 - slack) * (awaD < 40 ? (1 - awaD / 40) * 6 * Math.sin(t * 9) : 0);
     const rad = THREE.MathUtils.degToRad;
     setPart(b.parts.boom, -rad(boom + flap), cz);
     setPart(b.parts.jib, -rad(jib + flap * 1.5), cz);
