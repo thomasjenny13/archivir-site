@@ -47,6 +47,9 @@ export const PROJECTS = {
     // slab buried flush with the terrain — its outline drew a stray line
     // across the ground between the hut and the path; surface kept
     edgelessMeshes: ['Geometry213'],
+    // only the hut and the prize volumes are filled when cut; everything
+    // else around them reads as a sheet, like the terrain — outline only
+    noCapMeshes: ['Geometry213', 'maisonnette_nord', 'maisonnette_sud_est', 'muret_sud_ouest', 'muret_sud', 'muret_sud_est', 'muret_est', 'baignoire_bloc', 'annexe_ouest_1', 'annexe_ouest_2', 'annexe_ouest_3', 'mur_courbe_1', 'mur_courbe_2', 'mur_courbe_3', 'mur_courbe_4'],
     // annexes, low walls, curved walls and trough are baked into base.glb as
     // simple blocks whose base follows the terrain (cut at the ground); the
     // terrain sheet is cut away under the hut and under every block

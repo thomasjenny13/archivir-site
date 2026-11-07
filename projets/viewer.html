@@ -1309,7 +1309,7 @@ try { document.documentElement.dataset.theme = (!EMBED && localStorage.getItem('
     g.computeVertexNormals();
     return g;
   }
-  function loadRig(glbPath, clipNormal = DEFAULT_CLIP_NORMAL, extraGlbPath = null, excludeMeshes = null, terrainMeshes = null, edgelessMeshes = null, blockGroups = null, section = null) {
+  function loadRig(glbPath, clipNormal = DEFAULT_CLIP_NORMAL, extraGlbPath = null, excludeMeshes = null, terrainMeshes = null, edgelessMeshes = null, blockGroups = null, section = null, noCapMeshes = null) {
     return (async () => {
       const gltf = await loader.loadAsync(glbPath);
       const model = gltf.scene;
@@ -1474,7 +1474,7 @@ try { document.documentElement.dataset.theme = (!EMBED && localStorage.getItem('
 
         const sectionCap = sectionMesh
           ? precomputedSectionCap(sectionMesh, model, clipPlane, maxDim * 0.0002, 0xdcbc85)
-          : buildSectionCap(sectionMeshes.filter((mesh) => !isOpenTerrain(mesh)), clipPlane, maxDim * 2.2, 0xb4864f);
+          : buildSectionCap(sectionMeshes.filter((mesh) => !isOpenTerrain(mesh) && !(noCapMeshes && noCapMeshes.includes(mesh.name))), clipPlane, maxDim * 2.2, 0xb4864f);
         sectionCap.visible = false;
         group.add(sectionCap);
 
@@ -1781,7 +1781,7 @@ try { document.documentElement.dataset.theme = (!EMBED && localStorage.getItem('
     // project demolishes) through its own excludeMeshes
     const v = cfg.variants[variantKey];
     const exclude = [...(cfg.excludeMeshes || []), ...(v.excludeMeshes || [])];
-    const rig = await loadRig(cfg.glb, cfg.clipNormal, v.glb, exclude, cfg.terrainMeshes, cfg.edgelessMeshes, cfg.blockGroups, cfg.section);
+    const rig = await loadRig(cfg.glb, cfg.clipNormal, v.glb, exclude, cfg.terrainMeshes, cfg.edgelessMeshes, cfg.blockGroups, cfg.section, cfg.noCapMeshes);
     variantRigCache.set(key, rig);
     return rig;
   }
@@ -1858,7 +1858,7 @@ try { document.documentElement.dataset.theme = (!EMBED && localStorage.getItem('
   async function getRig(slug){
     if (rigCache.has(slug)) return rigCache.get(slug);
     const cfg = PROJECTS[slug];
-    const rig = cfg.glb ? await loadRig(cfg.glb, cfg.clipNormal, null, cfg.excludeMeshes, cfg.terrainMeshes, cfg.edgelessMeshes, cfg.blockGroups, cfg.section) : buildPlaceholderRig(cfg.clipNormal);
+    const rig = cfg.glb ? await loadRig(cfg.glb, cfg.clipNormal, null, cfg.excludeMeshes, cfg.terrainMeshes, cfg.edgelessMeshes, cfg.blockGroups, cfg.section, cfg.noCapMeshes) : buildPlaceholderRig(cfg.clipNormal);
     rigCache.set(slug, rig);
     return rig;
   }
