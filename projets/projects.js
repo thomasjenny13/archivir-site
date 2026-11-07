@@ -39,8 +39,10 @@ export const PROJECTS = {
     // the site model's terrain, as a single ground sheet (no block sides) —
     // outline only, see terrainOutlinePositions
     terrainMeshes: ['Geometry214'],
-    // the existing hut itself is reduced to a simple gabled prism (Geometry243,
-    // like the prize volumes) — its walls, floors, beams and openings are gone;
+    // the existing hut itself is reduced to a simple gabled volume (Geometry243,
+    // like the prize volumes), cut by the terrain: flat base at −2.56 under the
+    // lower floor (south of y −2.4), resting on the ground north of it —
+    // its walls, floors, beams and openings are gone;
     // annexes, low walls, terrace and trough around it are kept
     // slab buried flush with the terrain — its outline drew a stray line
     // across the ground between the hut and the path; surface kept
