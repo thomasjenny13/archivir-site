@@ -69,9 +69,9 @@ export const PROJECTS = {
     // "base" variant so the two never load twice.
     variants: {
       base:  { glb: 'concours/oberaletsch/base.glb', label: 'Existant' },
-      prix1: { label: '1er prix', creditHtml: '<strong>Aile d’Épervier</strong>GayMenzel Sàrl · Monthey' },
+      prix1: { glb: 'concours/oberaletsch/gaymenzel.glb', label: '1er prix', creditHtml: '<strong>Aile d’Épervier</strong>GayMenzel Sàrl · Monthey' },
       prix2: { glb: 'concours/oberaletsch/mijong.glb', label: '2e prix', creditHtml: '<strong>LUA</strong>mijong architecture design · Sion' },
-      prix3: { label: '3e prix', creditHtml: '<strong>Tandem</strong>Studio V9 · Bienne' },
+      prix3: { glb: 'concours/oberaletsch/studiov9.glb', label: '3e prix', creditHtml: '<strong>Tandem</strong>Studio V9 · Bienne' },
     },
     variantOrder: ['base', 'prix1', 'prix2', 'prix3'],
   },
