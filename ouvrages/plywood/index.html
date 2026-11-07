@@ -70,9 +70,6 @@ try { document.documentElement.dataset.theme = (!EMBED && localStorage.getItem('
   </nav>
 
   <button id="cut-toggle" class="cut-fab" aria-label="Vue en coupe">◐</button>
-  <button id="axo-toggle" class="view-fab axo-fab" aria-label="Vue axonométrique" title="Vue axonométrique">
-    <svg viewBox="0 0 16 16" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"><path d="M8 1.5 14 5v6l-6 3.5L2 11V5z"/><path d="M2 5l6 3.5L14 5M8 8.5v6"/></svg>
-  </button>
   <button id="paint-toggle" class="view-fab paint-fab" aria-label="Rendu peinture céramique" title="Rendu peinture céramique">
     <svg viewBox="0 0 16 16" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.8 1.8 7.2 8.6"/><path d="M7.4 8.2c-1.6-.4-3.1.6-3.3 2.1-.2 1.4-.9 2.3-2.3 2.6 2.3 1.6 5.5 1.1 6.4-1.4.4-1.1.2-2.4-.8-3.3z"/></svg>
   </button>
@@ -1250,13 +1247,16 @@ try { document.documentElement.dataset.theme = (!EMBED && localStorage.getItem('
       ? mask.fragmentShader.replace(/perspectiveDepthToViewZ/g, 'orthographicDepthToViewZ')
       : mask.fragmentShader.replace(/orthographicDepthToViewZ/g, 'perspectiveDepthToViewZ');
     mask.needsUpdate = true;
-    axoToggle.classList.toggle('active', on);
-    const label = on ? 'Vue en perspective' : 'Vue axonométrique';
-    axoToggle.setAttribute('aria-label', label);
-    axoToggle.title = label;
+    if (axoToggle) {
+      axoToggle.classList.toggle('active', on);
+      const label = on ? 'Vue en perspective' : 'Vue axonométrique';
+      axoToggle.setAttribute('aria-label', label);
+      axoToggle.title = label;
+    }
     requestRender();
   }
-  axoToggle.addEventListener('click', () => setAxoView(!axoView));
+  // the axonometric toggle button was removed from the page (perspective only);
+  // setAxoView is kept for a possible return but is no longer wired to anything
   const paintToggle = document.getElementById('paint-toggle');
   paintToggle.classList.toggle('active', paintMode);
   paintToggle.addEventListener('click', () => setPaintMode(!paintMode));
