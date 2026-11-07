@@ -51,6 +51,9 @@ export const PROJECTS = {
       ['Geometry211', 'Geometry204'], // long wall + its in-line left head
       ['Geometry209', 'Geometry210', 'Geometry239'],
       ['Geometry238'],
+      // the trough (a detailed library object): its rounded basin drew a
+      // tangle of crease lines at maquette scale — shown as a plain block
+      ['baignoire'],
     ],
     title: 'Oberaletschhütte — Archivir',
     creditHtml: '<strong>Oberaletschhütte</strong>Transformation et extension — SAC section Chasseral',
