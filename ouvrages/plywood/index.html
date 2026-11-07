@@ -2021,7 +2021,13 @@ try { document.documentElement.dataset.theme = (!EMBED && localStorage.getItem('
 
   // ---------- initial load ----------
   const initialSlug = slugFromUrl();
-  switchProject(PROJECTS[initialSlug] ? initialSlug : ORDER[0], { animate: false });
+  // ?variante=prix1 opens a competition page straight on that prize
+  // (links from the index); ignored if the project has no such variant
+  const initialVariant = new URLSearchParams(location.search).get('variante');
+  switchProject(PROJECTS[initialSlug] ? initialSlug : ORDER[0], { animate: false }).then(() => {
+    const cfg = PROJECTS[currentSlug];
+    if (initialVariant && cfg && cfg.variants && cfg.variants[initialVariant]) switchVariant(currentSlug, initialVariant);
+  });
   syncRendererSize();
 
   window.addEventListener('resize', () => {
