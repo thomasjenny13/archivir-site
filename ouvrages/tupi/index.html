@@ -4,7 +4,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<script>document.documentElement.dataset.theme = localStorage.getItem('archivir-theme') || 'light';</script>
+<script>
+// ?embed : version épurée pour intégration en iframe sur un site tiers (viewer seul, sans nav archivir)
+var EMBED = new URLSearchParams(location.search).has('embed');
+if (EMBED) document.documentElement.classList.add('embed');
+try { document.documentElement.dataset.theme = (!EMBED && localStorage.getItem('archivir-theme')) || 'light'; } catch (e) { document.documentElement.dataset.theme = 'light'; }
+</script>
 <script>if (!/\/ouvrages\//.test(location.pathname)) { var p = new URLSearchParams(location.search).get('p'); location.replace('/ouvrages/' + (p ? encodeURIComponent(p) + '/' : '')); }</script>
 <title>Tupi — Archivir</title>
 <meta name="description" content="Tupi — mijong architecture design (2019 · Sion (VS) · Santé · Concours). Maquette 3D interactive à explorer sur Archivir.">
@@ -22,7 +27,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lexend:wght@800&family=Syne:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/style.css?v=52">
+<link rel="stylesheet" href="../assets/css/style.css?v=53">
 <script type="importmap">
 {
   "imports": {
@@ -50,6 +55,8 @@
 </header>
 <a id="nav-prev" class="nav-arrow nav-arrow-left" href="#" aria-label="Projet précédent">←</a>
 <a id="nav-next" class="nav-arrow nav-arrow-right" href="#" aria-label="Projet suivant">→</a>
+<a id="embed-badge" class="embed-badge" href="/ouvrages/" target="_blank" rel="noopener">archivir.ch ↗</a>
+<script>document.getElementById('embed-badge').href = location.pathname;</script>
 
 <main class="viewer-page">
   <div id="viewer-canvas" class="full-model"></div>
@@ -2197,6 +2204,7 @@
   const ROLL_STEP_MS = 130;
   const SETTLE_MS = 750;
   function requestSteps(direction, count){
+    if (EMBED) return; // en iframe, on reste sur l'ouvrage intégré
     pendingSteps = Math.min(pendingSteps + count, ORDER.length - 1);
     rollDirection = direction;
     if (rolling) return;

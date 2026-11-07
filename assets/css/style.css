@@ -1130,3 +1130,20 @@ html[data-theme="dark"] .maplibregl-ctrl-attrib-button{ filter: invert(1); }
 /* index : cellules Auteur / Type de mandat cliquables pour filtrer */
 .index-table td.cell-filter{ cursor: pointer; }
 .index-table td.cell-filter:hover{ color: var(--rose-gold); }
+
+/* ---------- mode embed (?embed) : viewer seul, pour une iframe sur un site tiers ---------- */
+.embed-badge{ display: none; }
+.embed .site-banner,
+.embed .nav-arrow,
+.embed .viewer-credit{ display: none; }
+.embed .embed-badge{
+  display: block;
+  position: fixed; top: 12px; left: 12px; z-index: 40;
+  padding: 5px 10px;
+  font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.06em;
+  color: var(--ink-soft); text-decoration: none;
+  border: 1px solid var(--line); border-radius: 999px;
+  background: color-mix(in srgb, var(--bg-2) 75%, transparent);
+  backdrop-filter: blur(6px);
+}
+.embed .embed-badge:hover{ border-color: var(--rose-gold-deep); color: var(--rose-gold); }
