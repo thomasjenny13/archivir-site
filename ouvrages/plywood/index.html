@@ -1992,7 +1992,11 @@ try { document.documentElement.dataset.theme = (!EMBED && localStorage.getItem('
     // a prize variant's own glb is just the added volumetry, not a full
     // scene — load it merged onto the project's base so the section cut,
     // edges and cap all read the combined base + extension as one piece
-    const rig = await loadRig(cfg.glb, cfg.clipNormal, cfg.variants[variantKey].glb, cfg.excludeMeshes, cfg.terrainMeshes, cfg.edgelessMeshes, cfg.blockGroups, cfg.section);
+    // a variant can also take pieces of the base away (e.g. annexes its
+    // project demolishes) through its own excludeMeshes
+    const v = cfg.variants[variantKey];
+    const exclude = [...(cfg.excludeMeshes || []), ...(v.excludeMeshes || [])];
+    const rig = await loadRig(cfg.glb, cfg.clipNormal, v.glb, exclude, cfg.terrainMeshes, cfg.edgelessMeshes, cfg.blockGroups, cfg.section);
     variantRigCache.set(key, rig);
     return rig;
   }
