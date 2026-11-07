@@ -1757,10 +1757,16 @@ try { document.documentElement.dataset.theme = (!EMBED && localStorage.getItem('
             }
           }
           const VERTICAL = 0.01; // |normal.y| below this = a cut side
+          // on a block (terrain with cut sides) the rims are shared edges, so
+          // an open edge on the ground is just a crack left by the export
+          // (e.g. where an annex wall was subtracted) — drawing it showed
+          // stray strokes on the ground. Open sheets keep their borders.
+          const isBlock = normals.some((n) => n && Math.abs(n.y) < VERTICAL);
           const out = [];
           edges.forEach(({ a, b, faces }) => {
             let keep = faces.length !== 2; // open border / non-manifold
-            if (!keep) {
+            if (keep && isBlock && faces.length === 1) keep = Math.abs(normals[faces[0]].y) < VERTICAL;
+            if (!keep && faces.length === 2) {
               const n1 = normals[faces[0]], n2 = normals[faces[1]];
               const v1 = Math.abs(n1.y) < VERTICAL, v2 = Math.abs(n2.y) < VERTICAL;
               // a rim separates a cut side from the ground or the base —
