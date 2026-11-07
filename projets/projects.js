@@ -36,7 +36,8 @@ export const PROJECTS = {
   },
   oberaletsch: {
     glb: 'concours/oberaletsch/base.glb',
-    // the site model's terrain block — outline only, see terrainOutlinePositions
+    // the site model's terrain, as a single ground sheet (no block sides) —
+    // outline only, see terrainOutlinePositions
     terrainMeshes: ['Geometry214'],
     // slab buried flush with the terrain — its outline drew a stray line
     // across the ground between the hut and the path; surface kept

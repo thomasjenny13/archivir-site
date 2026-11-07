@@ -1464,12 +1464,29 @@ try { document.documentElement.dataset.theme = (!EMBED && localStorage.getItem('
         });
 
         model.updateMatrixWorld(true);
+        // a terrain given as a single ground sheet (no cut sides) can't take
+        // part in the stencil cap, which needs closed volumes — it would
+        // flood the cut with cap colour; the sheet's cut still gets its line
+        function isOpenTerrain(mesh) {
+          if (!terrainMeshes || !terrainMeshes.includes(mesh.name)) return false;
+          const g = mesh.geometry, pos = g.attributes.position, idx = g.index;
+          const n = idx ? idx.count : pos.count;
+          const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3();
+          for (let i = 0; i < n; i += 3) {
+            a.fromBufferAttribute(pos, idx ? idx.getX(i) : i);
+            b.fromBufferAttribute(pos, idx ? idx.getX(i + 1) : i + 1);
+            c.fromBufferAttribute(pos, idx ? idx.getX(i + 2) : i + 2);
+            const nn = new THREE.Vector3().crossVectors(b.sub(a), c.sub(a));
+            if (nn.lengthSq() > 0 && Math.abs(nn.normalize().y) < 0.01) return false;
+          }
+          return true;
+        }
         const sectionMeshes = [];
         model.traverse((child) => { if (child.isMesh) sectionMeshes.push(child); });
 
         const sectionCap = sectionMesh
           ? precomputedSectionCap(sectionMesh, model, clipPlane, maxDim * 0.0002, 0xdcbc85)
-          : buildSectionCap(sectionMeshes, clipPlane, maxDim * 2.2, 0xb4864f);
+          : buildSectionCap(sectionMeshes.filter((mesh) => !isOpenTerrain(mesh)), clipPlane, maxDim * 2.2, 0xb4864f);
         sectionCap.visible = false;
         group.add(sectionCap);
 
