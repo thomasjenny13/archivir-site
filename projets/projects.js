@@ -39,8 +39,9 @@ export const PROJECTS = {
     // the site model's terrain, as a single ground sheet (no block sides) —
     // outline only, see terrainOutlinePositions
     terrainMeshes: ['Geometry214'],
-    // base.glb is purged to the bare minimum: the existing hut's volume
-    // (Geometry243) and the terrain sheet — no walls, annexes or furniture
+    // base.glb is purged to the bare minimum: the existing hut as a simple
+    // gabled prism with a flat base (Geometry243, like the prize volumes)
+    // and the terrain sheet — no walls, annexes or furniture
     title: 'Oberaletschhütte — Archivir',
     creditHtml: '<strong>Oberaletschhütte</strong>Transformation et extension — SAC section Chasseral',
     creditMeta: '2024 · Belalp (VS) · Refuge de montagne · Concours',
