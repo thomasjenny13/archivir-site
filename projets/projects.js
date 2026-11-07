@@ -72,7 +72,8 @@ export const PROJECTS = {
       // GayMenzel démolit les deux maisonnettes (nord et sud-est) : retirées du modèle de base pour cette variante
       prix1: { glb: 'concours/oberaletsch/gaymenzel.glb', excludeMeshes: ['Geometry225', 'Geometry226', 'Geometry231', 'Geometry232', 'Geometry233', 'Geometry242', 'Geometry134', 'Geometry139_1', 'Geometry215', 'Geometry227', 'Geometry228', 'Geometry229', 'Geometry230'], label: '1er prix', creditHtml: '<strong>Aile d’Épervier</strong>GayMenzel Sàrl · Monthey' },
       prix2: { glb: 'concours/oberaletsch/mijong.glb', label: '2e prix', creditHtml: '<strong>LUA</strong>mijong architecture design · Sion' },
-      prix3: { glb: 'concours/oberaletsch/studiov9.glb', label: '3e prix', creditHtml: '<strong>Tandem</strong>Studio V9 · Bienne' },
+      // Tandem remplace l'annexe ouest : ses murs contre le pignon sont retirés
+      prix3: { glb: 'concours/oberaletsch/studiov9.glb', excludeMeshes: ['Geometry208', 'Geometry223', 'Geometry224'], label: '3e prix', creditHtml: '<strong>Tandem</strong>Studio V9 · Bienne' },
     },
     variantOrder: ['base', 'prix1', 'prix2', 'prix3'],
   },
