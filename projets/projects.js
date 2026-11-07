@@ -47,20 +47,9 @@ export const PROJECTS = {
     // slab buried flush with the terrain — its outline drew a stray line
     // across the ground between the hut and the path; surface kept
     edgelessMeshes: ['Geometry213'],
-    // the two small annexes (walls + inset roof) and the path's low wall
-    // shown as solid blocks
-    blockGroups: [
-      ['Geometry225', 'Geometry226', 'Geometry232', 'Geometry233', 'Geometry231'],
-      ['Geometry227', 'Geometry228', 'Geometry229', 'Geometry230', 'Geometry215'],
-      // the path's low wall, one block per straight piece (a single
-      // envelope would fill the bend with a wedge)
-      ['Geometry211', 'Geometry204'], // long wall + its in-line left head
-      ['Geometry209', 'Geometry210', 'Geometry239'],
-      ['Geometry238'],
-      // the trough (a detailed library object): its rounded basin drew a
-      // tangle of crease lines at maquette scale — shown as a plain block
-      ['baignoire'],
-    ],
+    // annexes, low walls, curved walls and trough are baked into base.glb as
+    // simple blocks whose base follows the terrain (cut at the ground); the
+    // terrain sheet is cut away under the hut and under every block
     title: 'Oberaletschhütte — Archivir',
     creditHtml: '<strong>Oberaletschhütte</strong>Transformation et extension — SAC section Chasseral',
     creditMeta: '2024 · Belalp (VS) · Refuge de montagne · Concours',
@@ -79,10 +68,10 @@ export const PROJECTS = {
     variants: {
       base:  { glb: 'concours/oberaletsch/base.glb', label: 'Existant' },
       // GayMenzel démolit les deux maisonnettes (nord et sud-est) : retirées du modèle de base pour cette variante
-      prix1: { glb: 'concours/oberaletsch/gaymenzel.glb', excludeMeshes: ['Geometry225', 'Geometry226', 'Geometry231', 'Geometry232', 'Geometry233', 'Geometry242', 'Geometry134', 'Geometry139_1', 'Geometry215', 'Geometry227', 'Geometry228', 'Geometry229', 'Geometry230'], label: '1er prix', creditHtml: '<strong>Aile d’Épervier</strong>GayMenzel Sàrl · Monthey' },
+      prix1: { glb: 'concours/oberaletsch/gaymenzel.glb', excludeMeshes: ['maisonnette_nord', 'maisonnette_sud_est'], label: '1er prix', creditHtml: '<strong>Aile d’Épervier</strong>GayMenzel Sàrl · Monthey' },
       prix2: { glb: 'concours/oberaletsch/mijong.glb', label: '2e prix', creditHtml: '<strong>LUA</strong>mijong architecture design · Sion' },
       // Tandem remplace l'annexe ouest : ses murs contre le pignon sont retirés
-      prix3: { glb: 'concours/oberaletsch/studiov9.glb', excludeMeshes: ['Geometry208', 'Geometry223', 'Geometry224'], label: '3e prix', creditHtml: '<strong>Tandem</strong>Studio V9 · Bienne' },
+      prix3: { glb: 'concours/oberaletsch/studiov9.glb', excludeMeshes: ['annexe_ouest_1', 'annexe_ouest_2', 'annexe_ouest_3'], label: '3e prix', creditHtml: '<strong>Tandem</strong>Studio V9 · Bienne' },
     },
     variantOrder: ['base', 'prix1', 'prix2', 'prix3'],
   },
