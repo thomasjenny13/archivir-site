@@ -143,6 +143,8 @@ export const PROJECTS = {
     // keel and rudder, closed deck, no rig (the section comes from coupe.py).
     viewDir: [0.6, 0.18, -1],
     clipNormal: [0, 0, 1],
+    // compass: bow (jib end, x = 0) to the north, stern (rudder, x = 5.3) to the south
+    north: [-1, 0],
     section: {
       cap: 'Coupe',
       only: ['Pont_plein'],
