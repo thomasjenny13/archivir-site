@@ -1548,12 +1548,13 @@ try { document.documentElement.dataset.theme = (!EMBED && localStorage.getItem('
           const pos = welded.attributes.position;
           const index = welded.index.array;
           const va = new THREE.Vector3(), vb = new THREE.Vector3(), vc = new THREE.Vector3();
-          const normals = [];
+          const normals = [], areas = [];
           for (let i = 0; i < index.length; i += 3) {
             va.fromBufferAttribute(pos, index[i]);
             vb.fromBufferAttribute(pos, index[i + 1]);
             vc.fromBufferAttribute(pos, index[i + 2]);
             const n = new THREE.Vector3().crossVectors(vb.sub(va), vc.sub(va));
+            areas.push(n.length() / 2);
             normals.push(n.lengthSq() > 0 ? n.normalize() : null);
           }
           const edges = new Map();
@@ -1572,7 +1573,11 @@ try { document.documentElement.dataset.theme = (!EMBED && localStorage.getItem('
           // an open edge on the ground is just a crack left by the export
           // (e.g. where an annex wall was subtracted) — drawing it showed
           // stray strokes on the ground. Open sheets keep their borders.
-          const isBlock = normals.some((n) => n && Math.abs(n.y) < VERTICAL);
+          // judged by area like isOpenTerrain: a single sliver standing on edge
+          // must not turn a sheet into a block (that dropped its outline)
+          let totalArea = 0, verticalArea = 0;
+          normals.forEach((n, f) => { if (!n) return; totalArea += areas[f]; if (Math.abs(n.y) < VERTICAL) verticalArea += areas[f]; });
+          const isBlock = verticalArea > totalArea * 0.02;
           const out = [];
           edges.forEach(({ a, b, faces }) => {
             let keep = faces.length !== 2; // open border / non-manifold
