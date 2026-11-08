@@ -89,6 +89,12 @@ export const PROJECTS = {
     // recentered building) — including it in the bounding box was
     // wrecking the camera framing and hiding the ground shadow
     excludeMeshes: ['Geometry7'],
+    // the building's façades face the diagonals (n-o on the Route de
+    // Pré-Marais, n-e on the yard, s-e, s-o on the Chemin des Suzettes):
+    // true north measured from the model, compass turned 45° so each
+    // button looks straight at one façade
+    north: [-0.145, -0.989],
+    compassDiagonal: true,
   },
   hansaallee: {
     glb: 'herzog de meuron/atelier hansaallee/atelier.glb',

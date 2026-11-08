@@ -15,7 +15,7 @@ try { document.documentElement.dataset.theme = (!EMBED && localStorage.getItem('
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lexend:wght@800&family=Syne:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/style.css?v=53">
+<link rel="stylesheet" href="../assets/css/style.css?v=54">
 <script type="importmap">
 {
   "imports": {
@@ -51,10 +51,10 @@ try { document.documentElement.dataset.theme = (!EMBED && localStorage.getItem('
   <p id="viewer-pending" class="viewer-pending" hidden>Maquette 3D à venir</p>
 
   <nav class="compass" aria-label="Vues préréglées">
-    <button class="compass-pt compass-n" data-view="north" aria-label="Vue depuis le nord" title="Nord">N</button>
-    <button class="compass-pt compass-e" data-view="east" aria-label="Vue depuis l'est" title="Est">E</button>
-    <button class="compass-pt compass-s" data-view="south" aria-label="Vue depuis le sud" title="Sud">S</button>
-    <button class="compass-pt compass-o" data-view="west" aria-label="Vue depuis l'ouest" title="Ouest">O</button>
+    <button class="compass-pt compass-n" data-view="north" aria-label="Vue depuis le nord" title="Nord"><span>N</span></button>
+    <button class="compass-pt compass-e" data-view="east" aria-label="Vue depuis l'est" title="Est"><span>E</span></button>
+    <button class="compass-pt compass-s" data-view="south" aria-label="Vue depuis le sud" title="Sud"><span>S</span></button>
+    <button class="compass-pt compass-o" data-view="west" aria-label="Vue depuis l'ouest" title="Ouest"><span>O</span></button>
   </nav>
 
   <button id="cut-toggle" class="cut-fab" aria-label="Vue en coupe">◐</button>
@@ -1109,10 +1109,31 @@ try { document.documentElement.dataset.theme = (!EMBED && localStorage.getItem('
   }
   function flySide(rotQuarter){
     const n = northDir();
-    // rotate the north vector clockwise (seen from above) by quarter turns: N, E, S, O
-    let x = n.x, z = n.y;
-    for (let i = 0; i < rotQuarter; i++) { const t = x; x = -z; z = t; }
+    // clockwise (seen from above) from north by quarter turns: N, E, S, O —
+    // or, on a diagonal compass, from north-west: NO, NE, SE, SO
+    const cfg = currentSlug && PROJECTS[currentSlug];
+    const a = (rotQuarter * 90 - (cfg && cfg.compassDiagonal ? 45 : 0)) * Math.PI / 180;
+    const x = n.x * Math.cos(a) - n.y * Math.sin(a), z = n.x * Math.sin(a) + n.y * Math.cos(a);
     flyTo(new THREE.Vector3(x * viewDistance, viewEyeY, z * viewDistance), new THREE.Vector3(0, viewEyeY, 0));
+  }
+  // labels follow the project: N / E / S / O, or NO / NE / SE / SO with the
+  // dial turned 45° for a building whose façades face the diagonals
+  const COMPASS_LABELS = {
+    straight: [['N', 'Vue depuis le nord', 'Nord'], ['E', "Vue depuis l'est", 'Est'], ['S', 'Vue depuis le sud', 'Sud'], ['O', "Vue depuis l'ouest", 'Ouest']],
+    diagonal: [['NO', 'Façade nord-ouest', 'Nord-ouest'], ['NE', 'Façade nord-est', 'Nord-est'], ['SE', 'Façade sud-est', 'Sud-est'], ['SO', 'Façade sud-ouest', 'Sud-ouest']],
+  };
+  function applyCompass(slug){
+    const diag = !!(PROJECTS[slug] && PROJECTS[slug].compassDiagonal);
+    const dial = document.querySelector('.compass');
+    if (!dial) return;
+    dial.classList.toggle('diagonal', diag);
+    ['north', 'east', 'south', 'west'].forEach((v, i) => {
+      const btn = dial.querySelector('[data-view="' + v + '"]');
+      const [label, aria, title] = COMPASS_LABELS[diag ? 'diagonal' : 'straight'][i];
+      btn.querySelector('span').textContent = label;
+      btn.setAttribute('aria-label', aria);
+      btn.title = title;
+    });
   }
   const VIEW_PRESETS = {
     north: () => flySide(0),
@@ -1731,6 +1752,7 @@ try { document.documentElement.dataset.theme = (!EMBED && localStorage.getItem('
 
   // ---------- UI updates per project ----------
   function applyProjectUI(slug) {
+    applyCompass(slug);
     const cfg = PROJECTS[slug];
     updateSimulation(slug);
     document.title = cfg.title;

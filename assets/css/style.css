@@ -504,6 +504,11 @@ a:focus-visible{ outline: 1px solid var(--blue); outline-offset: 4px; }
 .compass-e{ clip-path: polygon(50% 50%, 100% 0%, 100% 100%); align-items: center; justify-content: flex-end; padding-right: 7px; }
 .compass-s{ clip-path: polygon(50% 50%, 100% 100%, 0% 100%); align-items: flex-end; justify-content: center; padding-bottom: 7px; }
 .compass-o{ clip-path: polygon(50% 50%, 0% 100%, 0% 0%); align-items: center; justify-content: flex-start; padding-left: 7px; }
+.compass-pt span{ display: inline-block; }
+/* diagonal compass (façades facing NO/NE/SE/SO): the dial turns 45° so its
+   four quadrants sit on the diagonals; the labels turn back to stay level */
+.compass.diagonal{ transform: rotate(-45deg); }
+.compass.diagonal .compass-pt span{ transform: rotate(45deg); }
 
 .cut-fab{
   position: fixed; bottom: 28px; right: 28px; z-index: 5;
