@@ -51,10 +51,10 @@ try { document.documentElement.dataset.theme = (!EMBED && localStorage.getItem('
   <p id="viewer-pending" class="viewer-pending" hidden>Maquette 3D à venir</p>
 
   <nav class="compass" aria-label="Vues préréglées">
-    <button class="compass-pt compass-n" data-view="north" aria-label="Vue de face">F</button>
-    <button class="compass-pt compass-e" data-view="east" aria-label="Vue de droite">R</button>
-    <button class="compass-pt compass-s" data-view="south" aria-label="Vue arrière">B</button>
-    <button class="compass-pt compass-o" data-view="west" aria-label="Vue de gauche">L</button>
+    <button class="compass-pt compass-n" data-view="north" aria-label="Vue depuis le nord" title="Nord">N</button>
+    <button class="compass-pt compass-e" data-view="east" aria-label="Vue depuis l'est" title="Est">E</button>
+    <button class="compass-pt compass-s" data-view="south" aria-label="Vue depuis le sud" title="Sud">S</button>
+    <button class="compass-pt compass-o" data-view="west" aria-label="Vue depuis l'ouest" title="Ouest">O</button>
   </nav>
 
   <button id="cut-toggle" class="cut-fab" aria-label="Vue en coupe">◐</button>
@@ -1099,11 +1099,26 @@ try { document.documentElement.dataset.theme = (!EMBED && localStorage.getItem('
     flightStart = performance.now();
     flying = true;
   }
+  // compass presets are geographic: each button flies the camera to that side
+  // of the model, looking back at it. North defaults to −Z (an ArchiCAD/Blender
+  // model with north along +Y, exported Y-up); a project can override it with
+  // `north: [x, z]` in projects.js
+  function northDir(){
+    const n = (currentSlug && PROJECTS[currentSlug] && PROJECTS[currentSlug].north) || [0, -1];
+    return new THREE.Vector2(n[0], n[1]).normalize();
+  }
+  function flySide(rotQuarter){
+    const n = northDir();
+    // rotate the north vector clockwise (seen from above) by quarter turns: N, E, S, O
+    let x = n.x, z = n.y;
+    for (let i = 0; i < rotQuarter; i++) { const t = x; x = -z; z = t; }
+    flyTo(new THREE.Vector3(x * viewDistance, viewEyeY, z * viewDistance), new THREE.Vector3(0, viewEyeY, 0));
+  }
   const VIEW_PRESETS = {
-    north: () => flyTo(new THREE.Vector3(viewDistance, viewEyeY, 0), new THREE.Vector3(0, viewEyeY, 0)),
-    south: () => flyTo(new THREE.Vector3(-viewDistance, viewEyeY, 0), new THREE.Vector3(0, viewEyeY, 0)),
-    east:  () => flyTo(new THREE.Vector3(0, viewEyeY, viewDistance), new THREE.Vector3(0, viewEyeY, 0)),
-    west:  () => flyTo(new THREE.Vector3(0, viewEyeY, -viewDistance), new THREE.Vector3(0, viewEyeY, 0)),
+    north: () => flySide(0),
+    east:  () => flySide(1),
+    south: () => flySide(2),
+    west:  () => flySide(3),
   };
   document.querySelectorAll('[data-view]').forEach((btn) => {
     btn.addEventListener('click', () => VIEW_PRESETS[btn.dataset.view]());
