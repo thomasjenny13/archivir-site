@@ -19,6 +19,8 @@ export const PROJECTS = {
     creditHtml: '<strong>Monument de la Résistance</strong>Aldo Rossi',
     creditMeta: '1962 · Coni · Mémoriel · Concours',
     hasPlans: true,
+    // compass: the stair rises from the open face at x = −5 — that face is south
+    north: [1, 0],
   },
   tupi: {
     glb: 'tupi/tupi.glb',
