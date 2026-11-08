@@ -51,10 +51,10 @@ try { document.documentElement.dataset.theme = (!EMBED && localStorage.getItem('
   <p id="viewer-pending" class="viewer-pending" hidden>Maquette 3D à venir</p>
 
   <nav class="compass" aria-label="Vues préréglées">
-    <button class="compass-pt compass-n" data-view="north" aria-label="Vue de face">F</button>
-    <button class="compass-pt compass-e" data-view="east" aria-label="Vue de droite">R</button>
-    <button class="compass-pt compass-s" data-view="south" aria-label="Vue arrière">B</button>
-    <button class="compass-pt compass-o" data-view="west" aria-label="Vue de gauche">L</button>
+    <button class="compass-pt compass-n" data-view="north" aria-label="Vue depuis le nord">N</button>
+    <button class="compass-pt compass-e" data-view="east" aria-label="Vue depuis l’est">E</button>
+    <button class="compass-pt compass-s" data-view="south" aria-label="Vue depuis le sud">S</button>
+    <button class="compass-pt compass-o" data-view="west" aria-label="Vue depuis l’ouest">O</button>
   </nav>
 
   <button id="cut-toggle" class="cut-fab" aria-label="Vue en coupe">◐</button>
@@ -1099,11 +1099,15 @@ try { document.documentElement.dataset.theme = (!EMBED && localStorage.getItem('
     flightStart = performance.now();
     flying = true;
   }
+  // cardinal views: the .glb files are exported Y-up from Z-up CAD, so plan
+  // north (CAD +Y) is −Z here and east is +X (checked on Oberaletsch:
+  // maisonnette_nord at z < 0, annexes ouest at x < 0). Each button puts the
+  // camera on that side, looking at the façade that faces it.
   const VIEW_PRESETS = {
-    north: () => flyTo(new THREE.Vector3(viewDistance, viewEyeY, 0), new THREE.Vector3(0, viewEyeY, 0)),
-    south: () => flyTo(new THREE.Vector3(-viewDistance, viewEyeY, 0), new THREE.Vector3(0, viewEyeY, 0)),
-    east:  () => flyTo(new THREE.Vector3(0, viewEyeY, viewDistance), new THREE.Vector3(0, viewEyeY, 0)),
-    west:  () => flyTo(new THREE.Vector3(0, viewEyeY, -viewDistance), new THREE.Vector3(0, viewEyeY, 0)),
+    north: () => flyTo(new THREE.Vector3(0, viewEyeY, -viewDistance), new THREE.Vector3(0, viewEyeY, 0)),
+    south: () => flyTo(new THREE.Vector3(0, viewEyeY, viewDistance), new THREE.Vector3(0, viewEyeY, 0)),
+    east:  () => flyTo(new THREE.Vector3(viewDistance, viewEyeY, 0), new THREE.Vector3(0, viewEyeY, 0)),
+    west:  () => flyTo(new THREE.Vector3(-viewDistance, viewEyeY, 0), new THREE.Vector3(0, viewEyeY, 0)),
   };
   document.querySelectorAll('[data-view]').forEach((btn) => {
     btn.addEventListener('click', () => VIEW_PRESETS[btn.dataset.view]());
