@@ -1127,7 +1127,12 @@ try { document.documentElement.dataset.theme = (!EMBED && localStorage.getItem('
     const a = (rotQuarter * 90 - (cfg && cfg.compassDiagonal ? 45 : 0)) * Math.PI / 180;
     const x = n.x * Math.cos(a) - n.y * Math.sin(a), z = n.x * Math.sin(a) + n.y * Math.cos(a);
     flyTo(new THREE.Vector3(x * viewDistance, viewEyeY, z * viewDistance), new THREE.Vector3(0, viewEyeY, 0));
+    // a compass view is an elevation: show it orthographic, and drop back to
+    // perspective as soon as the visitor turns the model (zoom/pan keep it)
+    presetDir.set(-x, 0, -z).normalize();
+    setAxoView(true);
   }
+  const presetDir = new THREE.Vector3();
   // labels follow the project: N / E / S / O, or NO / NE / SE / SO with the
   // dial turned 45° for a building whose façades face the diagonals
   const COMPASS_LABELS = {
@@ -1291,6 +1296,11 @@ try { document.documentElement.dataset.theme = (!EMBED && localStorage.getItem('
     }
     requestRender();
   }
+  controls.addEventListener('change', () => {
+    if (!axoView || flying) return;
+    const dir = controls.target.clone().sub(camera.position).normalize();
+    if (dir.angleTo(presetDir) > 0.02) setAxoView(false);
+  });
   // the axonometric toggle button was removed from the page (perspective only);
   // setAxoView is kept for a possible return but is no longer wired to anything
   const paintToggle = document.getElementById('paint-toggle');
@@ -1765,6 +1775,7 @@ try { document.documentElement.dataset.theme = (!EMBED && localStorage.getItem('
   // ---------- UI updates per project ----------
   function applyProjectUI(slug) {
     applyCompass(slug);
+    if (axoView) setAxoView(false);
     const cfg = PROJECTS[slug];
     updateSimulation(slug);
     document.title = cfg.title;
